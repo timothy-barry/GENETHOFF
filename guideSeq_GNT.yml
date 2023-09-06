@@ -11,8 +11,6 @@ I2: "Undetermined_S0_L001_I2_001.fastq.gz"
 type: "guideseq" # either guideseq or iguideseq
 
 
-
-
 ## filtering options
 minLength : 20
 

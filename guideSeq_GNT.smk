@@ -82,6 +82,7 @@ rule demultiplex_orientation:
         rm 00-demultiplexing/*unknown*
     """
 
+# remove leading and trailing ODN sequences
 rule trim_reads:
     input: R1="00-demultiplexing/{NAME}_R1.{ORIENTATION}.fastq.gz", R2="00-demultiplexing/{NAME}_R2.{ORIENTATION}.fastq.gz"
     output: R1="01-trimming/{NAME}_R1.{ORIENTATION}.trimmed.fastq.gz", R2="01-trimming/{NAME}_R2.{ORIENTATION}.trimmed.fastq.gz"
@@ -96,7 +97,7 @@ rule trim_reads:
         cutadapt -j {threads} -A "^{params.R2_leading};max_error_rate=0...{params.R2_trailing};min_overlap=6;max_error_rate=0.1" -a {params.R1_trailing} -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log}
         """
 
-
+# make a size selection before mapping
 rule filter_reads:
     input: R1=rules.trim_reads.output.R1, R2=rules.trim_reads.output.R2
     output:  R1="02-filtering/{NAME}_R1.{ORIENTATION}.trimmed.filtered.fastq.gz", R2="02-filtering/{NAME}_R2.{ORIENTATION}.trimmed.filtered.fastq.gz",
@@ -105,12 +106,12 @@ rule filter_reads:
     log: "02-filtering/{NAME}_{ORIENTATION}.filter.log"
     params: length=config["minLength"]
     conda: "tools"
-    message: "remove pairs if one mate is hsorter than x bp"
+    message: "remove pairs if one mate is shorter than x bp"
     shell: """
         cutadapt -j {threads} --pair-filter=any --minimum-length {params.length} --too-short-output {output.R1short} --too-short-paired-output  {output.R2short} --output {output.R1} --paired-output {output.R2} {input.R1} {input.R2} > {log}
         """
 
-
+# build the reference genome index and chromosom size file
 rule build_index:
     input: config["reference_genome"]+".fa"
     output:  index=config["reference_genome"]+".1.bt2", fai=config["reference_genome"]+"fa.fai"
@@ -121,6 +122,7 @@ rule build_index:
         cut -f1,2 {config[reference_genome]}.fa.fai
     """
 
+# map reads on the reference genome as pairs
 rule alignOnGenome:
     input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2, index = rules.build_index.output.index
     output: sam=temp("03-align/{NAME}_{ORIENTATION}.sam")
@@ -133,6 +135,7 @@ rule alignOnGenome:
         bowtie2 -p {threads} --no-unal -X 1000  --no-mixed --no-discordant --un-conc-gz 03-align/{wildcards.NAME}_R%.{wildcards.ORIENTATION}.trimmed.unmapped.fastq.gz   -x {config[reference_genome]} -1 {input.R1} -2 {input.R2} -S {output.sam} 2> {log}
     """
 
+# sort alignments by names (required for BEDPE conversion) and position (for viewing)
 rule sort_aligned:
     input: sam=rules.alignOnGenome.output.sam
     output: bamPos="03-align/{NAME}_{ORIENTATION}.bam",  bamName="03-align/{NAME}_{ORIENTATION}.sortedName.bam"
@@ -146,6 +149,10 @@ rule sort_aligned:
         samtools sort -n -@ {threads} {input.sam} > {output.bamName}
     """
 
+# convert BAM file to BEDPE and identify insertion point, read length
+#filter alignment with MAPQ score > threshold in config file
+# aggregate reads per fragment size and genomic coordinates
+# add a cluster ID to group close IS (distance defined in the config file) 
 rule call_IS:
     input: rules.sort_aligned.output.bamName
     output: tmp="04-IScalling/{NAME}_{ORIENTATION}.pebed", 
@@ -153,7 +160,7 @@ rule call_IS:
     threads: 1
     conda: "tools"
     log:
-    params:window=config["ISbinWindow"],minMAPQ=config["minMAPQ"]
+    params: window=config["ISbinWindow"], minMAPQ=config["minMAPQ"]
     shell: """
         bedtools bamtobed -bedpe -mate1 -i  {input} > {output.tmp}
 
@@ -161,6 +168,8 @@ rule call_IS:
         awk 'BEGIN{{OFS="\\t";FS="\\t"}} $8>{params.minMAPQ} {{if($10=="+") print $1,$5,$5,$7,$8,$10,$3-$5; else print $1,$6-1,$6-1,$7,$8,$10,$6-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k7,7n | bedtools groupby -g 1,2,3,6,7 -c 4 -o count_distinct | awk 'BEGIN{{OFS="\\t";FS="\\t"}} {{print $1,$2,$3,"ID_"NR,0,$4,$5,$6}}' | bedtools cluster -i - -d {params.window} -s  > {output.frag}
         """
 
+
+# Extract gene coordinates from GTF annotation file
 rule makeAnnotationDB:
     input: config["annotation_gtf"]+".gtf"
     output: config["annotation_gtf"]+".genesOnly.gtf"
@@ -169,7 +178,7 @@ rule makeAnnotationDB:
          awk '$0~"#" || $3 == "gene" {{print $0}}' {input} > {output}
         """
 
-
+# annotate IS using the gene coordinates 
 rule annotate_cutSites:
     input: cutsites=rules.call_IS.output.frag, annotation=rules.makeAnnotationDB.output
     output: "04-IScalling/{NAME}_{ORIENTATION}.readsPerFragmentPerIS_annotated.bed"
