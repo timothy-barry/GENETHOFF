@@ -16,11 +16,15 @@ with open(config["sampleInfo_path"],'r') as file:
 print(samples_list)
 
 
+if not os.path.isfile("guideSeq_GNT.yml"):
+    raise SystemExit("\n  No config file found in current directory \n")
+
+
 ##########################################################
 ##########################################################
 
 rule target:
-    input: expand("04-IScalling/{sample}_{orientation}.readsPerFragmentPerIS_annotated.bed", sample=samples_list, orientation=["POS","NEG"])
+    input: expand("05-OFFtargets/{sample}_{orientation}.ISslop.fa", sample=samples_list, orientation=["POS","NEG"])
 
 
 # Merge index1 and 2 in a new fastq file I3. Easier for demultiplexing.
@@ -114,12 +118,13 @@ rule filter_reads:
 # build the reference genome index and chromosom size file
 rule build_index:
     input: config["reference_genome"]+".fa"
-    output:  index=config["reference_genome"]+".1.bt2", fai=config["reference_genome"]+"fa.fai"
+    output:  index=config["reference_genome"]+".1.bt2", fai=config["reference_genome"]+".fa.fai", chrSize=config["reference_genome"]+".size.genome"
     threads: 6
+    conda: "tools"
     shell: """
-        bowtie-build --threads {threads} {input} {output.prefix}
+        bowtie2-build --threads {threads} {input} {config[reference_genome]}
         samtools faidx {input}
-        cut -f1,2 {config[reference_genome]}.fa.fai
+        cut -f1,2 {output.fai} > {output.chrSize}
     """
 
 # map reads on the reference genome as pairs
@@ -150,7 +155,7 @@ rule sort_aligned:
     """
 
 # convert BAM file to BEDPE and identify insertion point, read length
-#filter alignment with MAPQ score > threshold in config file
+# filter alignment with MAPQ score > threshold in config file
 # aggregate reads per fragment size and genomic coordinates
 # add a cluster ID to group close IS (distance defined in the config file) 
 rule call_IS:
@@ -160,12 +165,14 @@ rule call_IS:
     threads: 1
     conda: "tools"
     log:
-    params: window=config["ISbinWindow"], minMAPQ=config["minMAPQ"]
+    params: window=config["ISbinWindow"], minMAPQ=config["minMAPQ"],minReadsPerFragment=config["minReadsPerFrag"]
     shell: """
         bedtools bamtobed -bedpe -mate1 -i  {input} > {output.tmp}
 
+        # read R2 contains the genome/ODN junction
         # count number of reads per fragment-size and per IS (pos and strand)
-        awk 'BEGIN{{OFS="\\t";FS="\\t"}} $8>{params.minMAPQ} {{if($10=="+") print $1,$5,$5,$7,$8,$10,$3-$5; else print $1,$6-1,$6-1,$7,$8,$10,$6-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k7,7n | bedtools groupby -g 1,2,3,6,7 -c 4 -o count_distinct | awk 'BEGIN{{OFS="\\t";FS="\\t"}} {{print $1,$2,$3,"ID_"NR,0,$4,$5,$6}}' | bedtools cluster -i - -d {params.window} -s  > {output.frag}
+
+        awk 'BEGIN{{OFS="\\t";FS="\\t"}} $8>{params.minMAPQ} {{if($10=="+") print $1,$5,$5,$7,$8,$10,$3-$5; else print $1,$6-1,$6-1,$7,$8,$10,$6-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k7,7n | bedtools groupby -g 1,2,3,6,7 -c 4 -o count_distinct |  awk '$6>{params.minReadsPerFragment}' |  bedtools groupby -g 1,2,3,4 -c 5,6,5,6  -o count_distinct,sum,collapse,collapse  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} {{print $1,$2,$3,"ID_"NR,0,$4,$5,$6,$7,$8}}'| bedtools cluster -d {params.window}  > {output.frag}
         """
 
 
@@ -188,5 +195,18 @@ rule annotate_cutSites:
     threads: 1 
     shell: """
         bedtools intersect -a {input.cutsites} -b {input.annotation} -loj > {output}
+        """
+
+rule getFastaSeqAroundClusters:
+    input: IS=rules.call_IS.output.frag, ref=config["reference_genome"]+".fa", genomeSize=rules.build_index.output.chrSize
+    output: clusters="05-OFFtargets/{NAME}_{ORIENTATION}.clusters.bed", fa= "05-OFFtargets/{NAME}_{ORIENTATION}.ISslop.fa"
+    conda: "tools"
+    threads: 1
+    params: slop=config["slopSize"],minFragPerCluster=config["minFragPerCluster"]
+    shell: """
+        ## group IS by cluster
+        bedtools groupby -g 1,11 -c 2,3,2,7,8 -o min,max,count_distinct,sum,sum -i {input.IS} | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>{params.minFragPerCluster} {{print $1,$3,$4,$2,"0",$5,$6,$7}}' > {output.clusters}
+
+        bedtools sort -i {output.clusters} | bedtools slop -b {params.slop} -g {input.genomeSize} | bedtools getfasta -nameOnly -fi {input.ref}  -bed - > {output.fa}
         """
 

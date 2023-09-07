@@ -20,10 +20,13 @@ reference_genome: "/media/DATA/omics_references/human/gencode/GRCh38/GRCh38.prim
 annotation_gtf: "/media/DATA/omics_references/human/gencode/GRCh38/gencode.v43.primary_assembly.basic.annotation"
 
 ## post alignment
+minReadsPerFrag: 2
 ISbinWindow: 5
 minMAPQ: 10
+minFragPerCluster: 1
 
-
+# fasta window size (bp) around IS (both sides of IS)
+slopSize: 30
 
 
 
