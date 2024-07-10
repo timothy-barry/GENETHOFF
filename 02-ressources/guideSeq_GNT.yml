@@ -8,7 +8,7 @@ R2: "/home/gcorre/projets/omics/iguideSeq/iGUIDE/raw_datas/margaux_5/Undetermine
 I1: "/home/gcorre/projets/omics/iguideSeq/iGUIDE/raw_datas/margaux_5/Undetermined_S0_L001_I1_001.fastq.gz"
 I2: "/home/gcorre/projets/omics/iguideSeq/iGUIDE/raw_datas/margaux_5/Undetermined_S0_L001_I2_001.fastq.gz"
 
-UMI_length_3': 8
+UMI_length_3prime: 8
 ## filtering options
 minLength : 20
 

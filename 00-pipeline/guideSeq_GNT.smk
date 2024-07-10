@@ -18,14 +18,15 @@ validate(samples, "samples.schema.yaml")
 
 
 #print(samples)
-
+## RUN the pipeline in the project folder.
 ## snakemake -s ../00-pipeline/guideSeq_GNT.smk -k -j 24 --use-conda 
 
 ##########################################################
 ##########################################################
 
 rule target:
-    input: ["05-Report/{sample}.rdata".format(sample=sample) for sample in samples["sampleName"]]
+    input: "05-Report/summary.tsv"
+    #["05-Report/{sample}.tsv".format(sample=sample) for sample in samples["sampleName"]]
 
 
 # Merge index1 and 2 in a new fastq file I3. Easier for demultiplexing.
@@ -33,13 +34,13 @@ rule merge_indexes:
     input: I1=config["I1"] , I2=config["I2"]
     output: I3="I3.fastq.gz"
     shell: """
-        python merge_I1_I2.py {input.I1} {input.I2} {output}
+        python ../00-pipeline/merge_I1_I2.py {input.I1} {input.I2} {output}
         """
 
 # make a barcode file with I1 & I2 sequences for demultiplexing.
 rule make_indexes_fasta:
     input: 
-    output: "demultiplexing_barcodes.fa"
+    output: temp("demultiplexing_barcodes.fa")
     run: 
         with open("demultiplexing_barcodes.fa", 'w') as fasta_file:
             for index, row in samples.iterrows():
@@ -55,7 +56,7 @@ rule demultiplex_library:
      R1=["00-demultiplexing/{sample}_R1.fastq.gz".format(sample=sample) for sample in samples["sampleName"]],
      R2=["00-demultiplexing/{sample}_R2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]],
      I3=["00-demultiplexing/{sample}_I3.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]
-    conda: "env_tools.yml"
+    conda: "../01-envs/env_tools.yml"
     log: R1= "00-demultiplexing/demultiplexing_R1.log", R2= "00-demultiplexing/demultiplexing_R2.log"
     threads: 12
     shell: """
@@ -71,11 +72,11 @@ rule add_UMI:
      R2="00-demultiplexing/{sample}_R2.UMI.fastq.gz" ,
      I3="00-demultiplexing/{sample}_I3.UMI.fastq.gz"
     threads:12
-    conda: "env_tools.yml"
-    params: suffix_length=8 ## bp in 3' of index to considere as UMI
+    conda: "../01-envs/env_tools.yml"
+    params: suffix_length={config["UMI_length_3prime"]} ## bp in 3' of index to considere as UMI
     shell: """
-        cutadapt -j {threads} -u -8 --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R1} {input.I3} {input.R1}
-        cutadapt -j {threads} -u -8 --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2}
+        cutadapt -j {threads} -u -{params.suffix_length} --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R1} {input.I3} {input.R1}
+        cutadapt -j {threads} -u -{params.suffix_length} --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2}
         """
 
 # remove ODN and discard reads without ODN
@@ -85,7 +86,7 @@ rule trim_ODN:
      R2="01-trimming/{sample}_R2.UMI.ODN.fastq.gz"
     threads: 12
     log:"01-trimming/{sample}.odn.log"
-    conda: "env_tools.yml"
+    conda: "../01-envs/env_tools.yml"
     message: "removing ODN sequence, discard reads without ODN sequence"
     params: R2_leading=lambda wildcards: config[samples["type"][wildcards.sample]][samples["orientation"][wildcards.sample]]["R2_leading"]
     shell: """
@@ -100,7 +101,7 @@ rule trim_reads:
      R2="01-trimming/{sample}_R2.UMI.ODN.trimmed.fastq.gz"
     threads: 12
     log: "01-trimming/{sample}.trailing.log"
-    conda: "env_tools.yml"
+    conda: "../01-envs/env_tools.yml"
     message: "trimming ODN and adaptor sequences in reads"
     params: R2_leading=lambda wildcards: config[samples["type"][wildcards.sample]][samples["orientation"][wildcards.sample]]["R2_leading"], 
      R2_trailing=lambda wildcards: config[samples["type"][wildcards.sample]][samples["orientation"][wildcards.sample]]["R2_trailing"],
@@ -119,7 +120,7 @@ rule filter_reads:
     threads: 12
     log: "02-filtering/{sample}.filter.log"
     params: length=config["minLength"]
-    conda: "env_tools.yml"
+    conda: "../01-envs/env_tools.yml"
     message: "remove pairs if one mate is shorter than x bp"
     shell: """
         cutadapt -j {threads} --pair-filter=any --minimum-length {params.length} --too-short-output {output.R1short} --too-short-paired-output  {output.R2short} --output {output.R1} --paired-output {output.R2} {input.R1} {input.R2} > {log}
@@ -132,7 +133,7 @@ rule alignOnGenome:
     output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam")
     threads: 6
     log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
-    conda: "env_tools.yml"
+    conda: "../01-envs/env_tools.yml"
     message: "Aligning PE reads on genome"
     params: n=config["reportedAlignments"], index=config["genome"]["index"]
     shell: """
@@ -146,7 +147,7 @@ rule sort_aligned:
     output: bamPos="03-align/{sample}.UMI.ODN.trimmed.filtered.bam",  bamName="03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.bam"
     threads: 6
     log:
-    conda: "env_tools.yml"
+    conda: "../01-envs/env_tools.yml"
     message: "Sort reads by name"
     shell: """
         samtools sort -@ {threads} {input.sam} > {output.bamPos}
@@ -165,7 +166,7 @@ rule call_IS:
      frag="04-IScalling/{sample}.readsPerFragmentPerIS.bed",
      collapse="04-IScalling/{sample}.collapsefragPerISCluster.bed"
     threads: 1
-    conda: "env_tools.yml"
+    conda: "../01-envs/env_tools.yml"
     log:
     params: window=config["ISbinWindow"], minMAPQ=config["minMAPQ"],minReadsPerFragment=config["minReadsPerFrag"]
     shell: """
@@ -189,7 +190,7 @@ rule get_chrom_length:
     input: config["genome"]["fasta"]
     output: config["genome"]["fasta"]+".fai"
     threads: 1
-    conda: "env_tools.yml"
+    conda: "../01-envs/env_tools.yml"
     params: index=config["genome"]["fasta"]
     shell: """
         samtools faidx {params.index}
@@ -199,7 +200,7 @@ rule get_fasta_around_is:
     input: bed=rules.call_IS.output.collapse, chr_length=rules.get_chrom_length.output
     output: cluster="04-IScalling/{sample}.cluster_slop.bed", fa="04-IScalling/{sample}.cluster_slop.fa"
     threads: 1
-    conda: "env_tools.yml"
+    conda: "../01-envs/env_tools.yml"
     log:
     params: fasta=config["genome"]["fasta"], slop_size=config["slopSize"]
     shell: """
@@ -211,7 +212,7 @@ rule get_fasta_around_is:
 rule get_stats_fq:
     input: rules.demultiplex_library.output.R1, rules.add_UMI.output.R1, rules.trim_ODN.output.R1, rules.trim_reads.output.R1, rules.filter_reads.output.R1
     output: "05-Report/{sample}.stat"
-    conda: 'env_tools.yml'
+    conda: '../01-envs/env_tools.yml'
     threads: 6
     shell: """
         seqkit stat -j {threads} -a -T {input} > {output}
@@ -220,7 +221,7 @@ rule get_stats_fq:
 rule report_data:
     input: fasta=rules.get_fasta_around_is.output.fa, cluster=rules.get_fasta_around_is.output.cluster, bed=rules.call_IS.output.collapse, statfq=rules.get_stats_fq.output,statal=rules.alignOnGenome.log
     output: "05-Report/{sample}.rdata"
-    conda: "env_R4.3.2.yml"
+    conda: "../01-envs/env_R4.3.2.yml"
     log:
     threads: 1
     params: gRNA_seq=lambda wildcards:samples["gRNA_sequence"][wildcards.sample], gRNA_name=lambda wildcards:samples["gRNA_name"][wildcards.sample]
@@ -228,7 +229,15 @@ rule report_data:
         Rscript ../00-pipeline/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name} {output}
         """
 
-
+rule annotate_sites:
+    input: ["05-Report/{sample}.rdata".format(sample=sample) for sample in samples["sampleName"]]
+    output: "05-Report/summary.tsv"
+    conda: "../01-envs/env_R4.3.2.yml"
+    threads: 1
+    params:
+    shell: """
+        Rscript ../00-pipeline/annotate_cuting_sites.R 
+        """
 
 
 onsuccess:
