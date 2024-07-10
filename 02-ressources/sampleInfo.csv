@@ -1,0 +1,10 @@
+﻿sampleName;Cell_Type;Genome;gRNA_name;orientation;replicate;gRNA_sequence;Cas;PAM_sequence;PAM_Loc;PAM_Tol;Cut_Offset;Insert_size;type;index1;index2
+g53_a_Cas_NNN_K562;K562;human;g53_a;negative;;GCATCATCCTGGTACCAGGA;Cas;NNN;3p;1;-4;34;guideseq;CGTACTAG;CTCTCTAT
+g20_a_Cas_NNN_K562;K562;human;g20_a;negative;;TTTATCACAGGCTCCAGGAA;Cas;NNN;3p;1;-4;34;guideseq;AGGCAGAA;TATCCTCT
+g16_Cas_NNN_K562;K562;human;g16;negative;;CAGATAACTGGGCCAACCAT ;Cas;NNN;3p;1;-4;34;guideseq;TCCTGAGC;AGAGTAGA
+g12_Cas_NNN_K562;K562;human;g12;negative;;TTGTAATCAGCAGTACCATT;Cas;NNN;3p;1;-4;34;guideseq;GGACTCCT;GTAAGGAG
+epe18.2_Cas_NNN_K562;K562;human;epe18.2;negative;;GTATCCTCTTGGGGGCCCCT;Cas;NNN;3p;1;-4;34;guideseq;TAGGCATG;ACTGCATA
+epe10.5_Cas_NGG_K562;K562;human;epe10.5;negative;;GTTTGCCTTGTCAAGGCTAT;Cas;NGG;3p;1;-4;34;guideseq;CTCTCTAC;AAGGAGTA
+g20_b_Cas_NGG_K562;K562;human;g20_b;negative;;TTTATCACAGGCTCCAGGAA;Cas;NGG;3p;1;-4;34;guideseq;CAGAGAGG;CAGAGCTA
+g53_b_Cas_NGG_K562;K562;human;g53_b;negative;;GCATCATCCTGGTACCAGGA;Cas;NGG;3p;1;-4;34;guideseq;TAAGGCGA;CATAGTGA
+EBS_Cas_NGG_hDMD;hDMD;human;EBS;negative;;TCTTCCGGAACAAAGTTGCT;Cas;NGG;3p;1;-4;34;guideseq;CAGAGAGG;CTAAGCCT
