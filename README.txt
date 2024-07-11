@@ -34,7 +34,10 @@ guideseq (or another name)
         |-sampleInfo.csv
 
 
-run the pipeline:
-snakemake -s ../00-pipeline/guideSeq_GNT.smk -k -j 12 --use-conda -n
+To run the pipeline:
+ - copy & edit guideSeq_GNT.yml to projetXXXXXX
+ - copy and edit sampleInfo.csv to projetXXXXXX
+ - cd to projetXXXXXX
+ - snakemake -s ../00-pipeline/guideSeq_GNT.smk -k -j 12 --use-conda --conda-front-end mamba --conda-prefix ../01-envs -n
 
-snakemake -s ../00-pipeline/guideSeq_GNT.smk -k -j 12 --use-conda -n
+Conda will create environments in 01-envs
