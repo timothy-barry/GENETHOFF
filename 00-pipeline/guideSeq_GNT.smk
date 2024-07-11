@@ -126,7 +126,6 @@ rule filter_reads:
         cutadapt -j {threads} --pair-filter=any --minimum-length {params.length} --too-short-output {output.R1short} --too-short-paired-output  {output.R2short} --output {output.R1} --paired-output {output.R2} {input.R1} {input.R2} > {log}
         """
 
-
 # map reads on the reference genome as pairs
 rule alignOnGenome:
     input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2
