@@ -173,14 +173,11 @@ rule call_IS:
 
         # read R2 contains the genome/ODN junction (use $10 of PE bed = mate 2)
         # count number of reads per UMI and per IS (pos and strand separated)
-        # chr,start,end,strand,UMI,Nreads, clusterID
 
         #echo -e "#chromosome\tstart\tend\tUMI\tstrand\tNreads\tmedianMAPQ\tclusterID" > {output.frag}
-        awk 'BEGIN{{OFS="\\t";FS="\\t"}} $8>={params.minMAPQ} {{if($10=="+") print $1,$5,$5,$7,substr($7,length($7)-7,8),$8,$10,$3-$5; else print $1,$6-1,$6-1,$7,substr($7,length($7)-7,8),$8,$10,$6-$2}}' {output.tmp} |  sort -k1,1 -k2,3n -k5,5 -k7,7  | bedtools groupby -g 1,2,3,5,7 -c 4,6 -o count_distinct,median | bedtools cluster -d {params.window}  > {output.frag}
+        awk 'BEGIN{{OFS="\\t";FS="\\t"}} ($8>={params.minMAPQ}) && ($1 == $4) {{if($10=="+") print $4,$5,$5,$7,substr($7,length($7)-7,8),$8,$10,$3-$5; else print $4,$6-1,$6-1,$7,substr($7,length($7)-7,8),$8,$10,$6-$2}}' {output.tmp} |  sort -k1,1 -k2,3n -k5,5 -k7,7  | bedtools groupby -g 1,2,3,5,7 -c 4,6 -o count_distinct,median | bedtools cluster -d {params.window}  > {output.frag}
         
-        # aggregate frags and reads per IS
-        # chr start end ID score strand #UMI #reads UMI_collapsed readsCound_collapsed clusterID
-
+        # aggregate UMI per IS
         #echo -e "#chromosome\tstart\tend\tIS_ID\tMedianMAPQ\tstrand\tN_UMI\tNreads\tUMI_list\tReadPerUMI\tclusterID" > {output.collapse}
         awk '$6>{params.minReadsPerFragment}' {output.frag} | sort -k1,1 -k2,2n -k3,3n -k8,8n -k5,5 | bedtools groupby -g 1,2,3,5,8 -c 4,6,4,6,7  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} {{print $1,$2,$3,"ID_"NR,$10,$4,$6,$7,$8,$9,$5}}' > {output.collapse}
         """

@@ -1,9 +1,9 @@
 
-library(tidyverse)
-library(GenomicRanges)
-library(annotatr)
-library(biomaRt)
-library(writexl)
+library(tidyverse,quietly = T, verbose = F)
+library(GenomicRanges,quietly = T, verbose = F)
+library(annotatr,quietly = T, verbose = F)
+library(biomaRt,quietly = T, verbose = F)
+library(writexl,quietly = T, verbose = F)
 
 
 args <- commandArgs(trailingOnly = T)
