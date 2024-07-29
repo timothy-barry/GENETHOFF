@@ -32,7 +32,7 @@ rule target:
 # Merge index1 and 2 in a new fastq file I3. Easier for demultiplexing.
 rule merge_indexes:
     input: I1=config["I1"] , I2=config["I2"]
-    output: I3="I3.fastq.gz"
+    output: I3=temp("I3.fastq.gz")
     shell: """
         python ../00-pipeline/merge_I1_I2.py {input.I1} {input.I2} {output}
         """
@@ -68,9 +68,9 @@ rule demultiplex_library:
         
 rule add_UMI:
     input: R1="00-demultiplexing/{sample}_R1.fastq.gz", R2="00-demultiplexing/{sample}_R2.fastq.gz",I3="00-demultiplexing/{sample}_I3.fastq.gz"
-    output: R1="00-demultiplexing/{sample}_R1.UMI.fastq.gz",
-     R2="00-demultiplexing/{sample}_R2.UMI.fastq.gz" ,
-     I3="00-demultiplexing/{sample}_I3.UMI.fastq.gz"
+    output: R1=temp("00-demultiplexing/{sample}_R1.UMI.fastq.gz"),
+     R2=temp("00-demultiplexing/{sample}_R2.UMI.fastq.gz") ,
+     I3=temp("00-demultiplexing/{sample}_I3.UMI.fastq.gz")
     threads:12
     conda: "../01-envs/env_tools.yml"
     params: suffix_length={config["UMI_length_3prime"]} ## bp in 3' of index to considere as UMI
@@ -82,8 +82,8 @@ rule add_UMI:
 # remove ODN and discard reads without ODN
 rule trim_ODN:
     input: R1=rules.add_UMI.output.R1, R2=rules.add_UMI.output.R2
-    output: R1="01-trimming/{sample}_R1.UMI.ODN.fastq.gz",
-     R2="01-trimming/{sample}_R2.UMI.ODN.fastq.gz"
+    output: R1=temp("01-trimming/{sample}_R1.UMI.ODN.fastq.gz"),
+     R2=temp("01-trimming/{sample}_R2.UMI.ODN.fastq.gz")
     threads: 12
     log:"01-trimming/{sample}.odn.log"
     conda: "../01-envs/env_tools.yml"
@@ -97,8 +97,8 @@ rule trim_ODN:
 # remove leading and trailing ODN sequences
 rule trim_reads:
     input: R1=rules.trim_ODN.output.R1, R2=rules.trim_ODN.output.R2
-    output: R1="01-trimming/{sample}_R1.UMI.ODN.trimmed.fastq.gz", 
-     R2="01-trimming/{sample}_R2.UMI.ODN.trimmed.fastq.gz"
+    output: R1=temp("01-trimming/{sample}_R1.UMI.ODN.trimmed.fastq.gz"), 
+     R2=temp("01-trimming/{sample}_R2.UMI.ODN.trimmed.fastq.gz")
     threads: 12
     log: "01-trimming/{sample}.trailing.log"
     conda: "../01-envs/env_tools.yml"
@@ -116,7 +116,7 @@ rule trim_reads:
 rule filter_reads:
     input: R1=rules.trim_reads.output.R1, R2=rules.trim_reads.output.R2
     output:  R1="02-filtering/{sample}_R1.UMI.ODN.trimmed.filtered.fastq.gz", R2="02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.fastq.gz",
-     R1short="02-filtering/{sample}_R1.UMI.ODN.trimmed.tooshort.fastq.gz", R2short="02-filtering/{sample}_R2.UMI.ODN.trimmed.tooshort.fastq.gz"
+     R1short=temp("02-filtering/{sample}_R1.UMI.ODN.trimmed.tooshort.fastq.gz"), R2short=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.tooshort.fastq.gz")
     threads: 12
     log: "02-filtering/{sample}.filter.log"
     params: length=config["minLength"]
@@ -142,7 +142,7 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
 elif (config["aligner"]  == "bwa" or config["aligner"]  == "Bwa") :
     rule alignOnGenome:
         input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2
-        output: sam="03-align/{sample}.UMI.ODN.trimmed.filtered.sam", unfilterdsam="03-align/{sample}.UMI.ODN.trimmed.unfiltered.sam"
+        output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"), unfilterdsam=temp("03-align/{sample}.UMI.ODN.trimmed.unfiltered.sam")
         threads: 6
         log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
         conda: "tools"
@@ -158,7 +158,7 @@ elif (config["aligner"]  == "bwa" or config["aligner"]  == "Bwa") :
 # sort alignments by names (required for BEDPE conversion) and position (for viewing)
 rule sort_aligned:
     input: sam=rules.alignOnGenome.output.sam
-    output: bamPos="03-align/{sample}.UMI.ODN.trimmed.filtered.bam",  bamName="03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.bam"
+    output: bamPos="03-align/{sample}.UMI.ODN.trimmed.filtered.bam",  bamName=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.bam")
     threads: 6
     log:
     conda: "../01-envs/env_tools.yml"
@@ -176,7 +176,7 @@ rule sort_aligned:
 # add a cluster ID to group close IS (distance defined in the config file) 
 rule call_IS:
     input: rules.sort_aligned.output.bamName
-    output: tmp="04-IScalling/{sample}.pebed", 
+    output: tmp=temp("04-IScalling/{sample}.pebed"), 
      frag="04-IScalling/{sample}.readsPerFragmentPerIS.bed",
      collapse="04-IScalling/{sample}.collapsefragPerISCluster.bed"
     threads: 1
@@ -209,7 +209,7 @@ rule get_chrom_length:
 
 rule get_fasta_around_is:
     input: bed=rules.call_IS.output.collapse, chr_length=rules.get_chrom_length.output
-    output: cluster="04-IScalling/{sample}.cluster_slop.bed", fa="04-IScalling/{sample}.cluster_slop.fa"
+    output: cluster=temp("04-IScalling/{sample}.cluster_slop.bed"), fa=temp("04-IScalling/{sample}.cluster_slop.fa")
     threads: 1
     conda: "../01-envs/env_tools.yml"
     log:
