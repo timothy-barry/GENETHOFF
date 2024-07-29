@@ -127,17 +127,32 @@ rule filter_reads:
         """
 
 # map reads on the reference genome as pairs
-rule alignOnGenome:
-    input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2
-    output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam")
-    threads: 6
-    log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
-    conda: "../01-envs/env_tools.yml"
-    message: "Aligning PE reads on genome"
-    params: n=config["reportedAlignments"], index=config["genome"]["index"]
-    shell: """
-        bowtie2 -p {threads} --no-unal -X 1500 --dovetail --no-mixed --no-discordant --un-conc-gz 03-align/{wildcards.sample}_R%.UMI.ODN.trimmed.unmapped.fastq.gz   -x {params.index} -1 {input.R1} -2 {input.R2} -S {output.sam} 2> {log}
-    """
+if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
+    rule alignOnGenome:
+        input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2
+        output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam")
+        threads: 6
+        log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
+        conda: "env_tools.yml"
+        message: "Aligning PE reads on genome with Bowtie2"
+        params: n=config["reportedAlignments"], index=config["genome"]["index"]
+        shell: """
+            bowtie2 -p {threads} --no-unal -X 1500 --dovetail --no-mixed --no-discordant --un-conc-gz 03-align/{wildcards.sample}_R%.UMI.ODN.trimmed.unmapped.fastq.gz   -x {params.index} -1 {input.R1} -2 {input.R2} -S {output.sam} 2> {log}
+        """
+elif (config["aligner"]  == "bwa" or config["aligner"]  == "Bwa") :
+    rule alignOnGenome:
+        input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2
+        output: sam="03-align/{sample}.UMI.ODN.trimmed.filtered.sam", unfilterdsam="03-align/{sample}.UMI.ODN.trimmed.unfiltered.sam"
+        threads: 6
+        log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
+        conda: "tools"
+        message: "Aligning PE reads on genome with BWA mem"
+        params: n=config["reportedAlignments"], index=config["genome"]["index"]
+        shell: """
+            #bwa mem -t {threads} {params.index} {input.R1} {input.R2} > {output.sam} 2> {log}
+            bwa mem -t {threads} {params.index} {input.R1} {input.R2} > {output.unfilterdsam} 2> {log}
+            samtools view -F 0x4 -F 0x8 -F 0x100 -F 0x800 -f 0x2 -b {output.unfilterdsam} > {output.sam}
+        """
 
 
 # sort alignments by names (required for BEDPE conversion) and position (for viewing)
