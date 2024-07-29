@@ -11,6 +11,9 @@ I2: "/home/gcorre/projets/omics/iguideSeq/iGUIDE/raw_datas/margaux_5/Undetermine
 UMI_length_3prime: 8
 ## filtering options
 minLength : 20
+## Aligner to use 
+aligner : bwa
+#aligner : bowtie2
 
 ## bowtie2 alignment options
 reportedAlignments: 1
