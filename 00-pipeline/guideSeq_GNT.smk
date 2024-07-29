@@ -19,7 +19,7 @@ validate(samples, "samples.schema.yaml")
 
 #print(samples)
 ## RUN the pipeline in the project folder.
-## snakemake -s ../00-pipeline/guideSeq_GNT.smk -k -j 24 --use-conda 
+## snakemake -s ../00-pipeline/guideSeq_GNT.smk -k -j 12 --use-conda --conda-front-end mamba --conda-prefix ../01-envs -n
 
 ##########################################################
 ##########################################################
