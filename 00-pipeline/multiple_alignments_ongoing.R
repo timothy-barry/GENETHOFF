@@ -14,7 +14,6 @@ args <- commandArgs(trailingOnly = T)
 
 library(tidyverse,quietly = T, verbose = F)
 library(Biostrings,quietly = T,verbose = F)
-library(pwalign)
 
 # for debugging
 #args <- c("debug/simulated3.cluster_slop.fa","debug/simulated3.cluster_slop.bed","debug/simulated3.collapsefragPerISCluster.bed","CTAGGTATGTTATCTGAAAGT","")
@@ -52,14 +51,11 @@ bed_collapsedUMI <- read.delim(args[3],
                                              "clusterID"))
 
 grna <- DNAString(args[4])
-gRNA_name <- args[5]
 
-grna@metadata$name <- gRNA_name
+pam = DNAString("NNN")
+pam_length = nchar(pam)
 
-pam <- DNAString(args[6])
-pam_length <- nchar(pam)
-
-offset <- args[7]
+offset = 4
 
 
 ## Calculate pairwise alignments between insertion site sequence and gRNA sequence in forward and reverse orientation
@@ -85,8 +81,8 @@ align_stat <- data.frame(position = names(fasta),
 align_stat <- align_stat %>%
   filter(watson_edit <= 6 | crick_edit <= 6) %>%
   mutate(grna_orientation = case_when(watson_score > crick_score ~ "watson",
-                                      watson_score < crick_score  ~ "crick",
-                                      TRUE ~ NA))
+                                      watson_score < crick_score  ~"crick",
+                                      TRUE ~NA))
 
 ## WATSON strand analysis
 

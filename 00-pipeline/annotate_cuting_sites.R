@@ -7,6 +7,7 @@ library(writexl,quietly = T, verbose = F)
 
 
 args <- commandArgs(trailingOnly = T)
+gtf <- args[1]
 
 files <- list.files(path = "05-Report/",pattern = "rdata", recursive = T, full.names = T)
 
@@ -15,7 +16,8 @@ names(files) <- str_remove(basename(files),pattern = ".rdata")
 results <- lapply(files, function(x){
   load(x)
   cluster_annnotated %>% arrange(desc(N_UMI_cluster)) %>% 
-    mutate(gRNA = as.character(grna)) %>%
+    mutate(gRNA = as.character(grna),
+           gRNA_name = grna@metadata$name) %>%
     filter(str_starts(chromosome,"chr"))
 })
 
@@ -25,34 +27,42 @@ results_df <- bind_rows(results,.id = "library")
 
 # build annotation from bioMart -----------------------------------------------------------------
 
-ensembl <- useEnsembl(biomart = 'genes', 
-                      dataset = 'hsapiens_gene_ensembl',
-                      version = 112)
+#ensembl <- useEnsembl(biomart = 'genes', 
+#                      dataset = 'hsapiens_gene_ensembl',
+#                      version = 112)
 
 
 # listEnsemblArchives()
- attributes = listAttributes(ensembl)
+# attributes = listAttributes(ensembl)
 # attributes
 
 
-features = attributes[c(204,205,213,214,215,220,29,62,78),1]
+#features = attributes[c(204,205,213,214,215,220,29,62,78),1]
 
-mart <- getBM(attributes = features,
-              mart = ensembl)
-
-
-
-mart = mart %>% 
-  mutate(strand = case_when(strand == "1" ~ "+",
-                            TRUE ~ "-"),
-         chromosome_name = case_when(chromosome_name %in% c(1:100,"X","Y")~ paste("chr",chromosome_name,sep=""),
-                                     chromosome_name == "MT" ~ "chrM",
-                                     TRUE ~ chromosome_name)) %>% 
-  filter(str_starts(chromosome_name, "chr"))
+#mart <- getBM(attributes = features,
+#              mart = ensembl)
 
 
 
-mart_gr <- makeGRangesFromDataFrame(df = mart , seqnames.field = "chromosome_name",start.field = "start_position",end.field = "end_position",keep.extra.columns = T,ignore.strand = F,strand.field = "strand")
+#mart = mart %>% 
+#  mutate(strand = case_when(strand == "1" ~ "+",
+#                            TRUE ~ "-"),
+#         chromosome_name = case_when(chromosome_name %in% c(1:100,"X","Y")~ paste("chr",chromosome_name,sep=""),
+#                                     chromosome_name == "MT" ~ "chrM",
+#                                     TRUE ~ chromosome_name)) %>% 
+#  filter(str_starts(chromosome_name, "chr"))
+
+
+
+#mart_gr <- makeGRangesFromDataFrame(df = mart , seqnames.field = "chromosome_name",start.field = "start_position",end.field = "end_position",keep.extra.columns = T,ignore.strand = F,strand.field = "strand")
+
+
+
+# build annotation from gtf file
+library(rtracklayer)
+mart_gr <- import(gtf)
+mart_gr <- mart_gr[mart_gr$type =="gene"]
+
 
 
 # convert insertions to gRanges -----------------------------------------------------
@@ -86,10 +96,9 @@ results_granges_df <- data.frame(results_granges_annot)
 results_granges_df_annot <- results_granges_df %>% 
   distinct() %>% 
   group_by(across(c(library,seqnames:gRNA ))) %>%
-  summarise(geneID=toString(annot.entrezgene_id),
-            gene_ensemblID = toString(annot.ensembl_gene_id),
-            Symbol = toString(annot.hgnc_symbol),
-            gene_type = toString(annot.gene_biotype)) %>%
+  summarise(gene_ensemblID = toString(annot.gene_id),
+            Symbol = toString(annot.gene_name),
+            gene_type = toString(annot.gene_type)) %>%
   arrange(desc(N_UMI_cluster))
 
 

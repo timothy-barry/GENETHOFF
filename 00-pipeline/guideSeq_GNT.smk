@@ -33,6 +33,7 @@ rule target:
 rule merge_indexes:
     input: I1=config["I1"] , I2=config["I2"]
     output: I3=temp("I3.fastq.gz")
+    conda: "../01-envs/env_tools.yml"
     shell: """
         python ../00-pipeline/merge_I1_I2.py {input.I1} {input.I2} {output}
         """
@@ -133,7 +134,7 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
         output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam")
         threads: 6
         log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
-        conda: "env_tools.yml"
+        conda: "../01-envs/env_tools.yml"
         message: "Aligning PE reads on genome with Bowtie2"
         params: n=config["reportedAlignments"], index=config["genome"]["index"]
         shell: """
@@ -145,7 +146,7 @@ elif (config["aligner"]  == "bwa" or config["aligner"]  == "Bwa") :
         output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"), unfilterdsam=temp("03-align/{sample}.UMI.ODN.trimmed.unfiltered.sam")
         threads: 6
         log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
-        conda: "tools"
+        conda: "../01-envs/env_tools.yml"
         message: "Aligning PE reads on genome with BWA mem"
         params: n=config["reportedAlignments"], index=config["genome"]["index"]
         shell: """
@@ -235,9 +236,12 @@ rule report_data:
     conda: "../01-envs/env_R4.3.2.yml"
     log:
     threads: 1
-    params: gRNA_seq=lambda wildcards:samples["gRNA_sequence"][wildcards.sample], gRNA_name=lambda wildcards:samples["gRNA_name"][wildcards.sample]
+    params: gRNA_seq=lambda wildcards:samples["gRNA_sequence"][wildcards.sample], 
+     gRNA_name=lambda wildcards:samples["gRNA_name"][wildcards.sample],
+     PAM=lambda wildcards:samples["PAM_sequence"][wildcards.sample],
+     offset=lambda wildcards:samples["Cut_Offset"][wildcards.sample]
     shell : """
-        Rscript ../00-pipeline/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name} {output}
+        Rscript ../00-pipeline/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {output}
         """
 
 rule annotate_sites:
@@ -245,9 +249,9 @@ rule annotate_sites:
     output: "05-Report/summary.tsv"
     conda: "../01-envs/env_R4.3.2.yml"
     threads: 1
-    params:
+    params: gtf=config["genome"]["annotation"]
     shell: """
-        Rscript ../00-pipeline/annotate_cuting_sites.R 
+        Rscript ../00-pipeline/annotate_cuting_sites.R {params.gtf}
         """
 
 

@@ -33,7 +33,6 @@ minFragPerCluster: 0 # 0 to keep all IS
 slopSize: 40
 
 
-
 guideseq:
   positive:
     R1_trailing : "GTTTAATTGAGTTGTCATATGT"
@@ -43,7 +42,6 @@ guideseq:
     R1_trailing : "ATACCGTTATTAACATATGACAACTCAA"
     R2_leading : "TTGAGTTGTCATATGTTAATAACGGTAT"
     R2_trailing : "AGATCGGAAGAGCGTCGTGT"
-
 
 
 iguideseq:
