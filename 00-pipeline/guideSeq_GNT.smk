@@ -233,7 +233,7 @@ rule get_stats_fq:
 rule report_data:
     input: fasta=rules.get_fasta_around_is.output.fa, cluster=rules.get_fasta_around_is.output.cluster, bed=rules.call_IS.output.collapse, statfq=rules.get_stats_fq.output,statal=rules.alignOnGenome.log
     output: "05-Report/{sample}.rdata"
-    conda: "../01-envs/env_R4.3.2.yml"
+    conda: "../01-envs/env_R4.4.1.yml"
     log:
     threads: 1
     params: gRNA_seq=lambda wildcards:samples["gRNA_sequence"][wildcards.sample], 
@@ -247,7 +247,7 @@ rule report_data:
 rule annotate_sites:
     input: ["05-Report/{sample}.rdata".format(sample=sample) for sample in samples["sampleName"]]
     output: "05-Report/summary.tsv"
-    conda: "../01-envs/env_R4.3.2.yml"
+    conda: "../01-envs/env_R4.4.1.yml"
     threads: 1
     params: gtf=config["genome"]["annotation"]
     shell: """
