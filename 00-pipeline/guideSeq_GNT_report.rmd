@@ -1,0 +1,159 @@
+---
+title: "GuideSeq report"
+author: "Corre Guillaume"
+date: "`r Sys.Date()`"
+output: 
+    rmdformats::readthedown:
+    highlight: kate
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(verbose = F)
+```
+
+
+```{r,error=F,message=FALSE,warning=FALSE,echo=FALSE}
+# Libraries
+
+library(tidyverse,quietly = T,warn.conflicts = F,verbose = F)
+library(kableExtra,quietly = T,warn.conflicts = F,verbose = F)
+library(yaml,quietly = T,warn.conflicts = F,verbose = F)
+
+libraries_count <- length(tables_html)
+
+```
+
+# Description of libraries
+
+```{r,echo=F}
+kbl(sampleInfo %>% select(-starts_with("index"),-starts_with("PAM"),-Cut_Offset,-Insert_size)) %>%
+        kable_classic_2(full_width = T,html_font = "helvetica") %>% 
+        kable_styling(bootstrap_options = c("condensed","hover","stripped"),
+                      font_size = 10,
+                      fixed_thead = T)
+```
+
+# Statistics of reads processing
+
+Reads were processes according to the following steps :
+
+-   Reads were demultiplexed using *cutadapt*.
+
+-   Presence of the ODN sequence at the 5' end of the R2 reads was checked.
+
+-   I5 and I7 adaptors were trimmed of present
+
+-   Reads shorter than `r config$minLength` bp were discarded (any of the pair).
+
+```{r, echo = F}
+kbl(stats) %>%
+        kable_classic_2(full_width = T,html_font = "helvetica") %>% 
+        kable_styling(bootstrap_options = c("condensed","hover","stripped"),
+                      font_size = 10,
+                      fixed_thead = T)
+```
+
+# Statistics of read alignment
+
+## Genome mapping
+
+Reads passing the QC were aligned on the reference genome :
+
+-   Aligner : `r config$aligner`
+
+-   Reference genome : `r basename(config$genome$human$fasta)`
+
+-   Min Insert length : `r config$minFragLength`
+
+-   Max Insert length : `r config$maxFragLength`
+
+## Cutting sites calling
+
+Cut sites were identified from the alignment position of R2 reads.
+
+-   Reads aligning to the exact same position were aggregated if they share the same UMI sequence.
+
+    -   Positions/UMI combinations with more than `r config$minReadsPerFrag` reads were considered for next step.
+
+-   Positions were clustered together if the distance between them was lower than `r config$ISbinWindow`.
+
+    -    Clusters with more than `r config$minUMIPerCluster` UMIs were considered for next step.
+
+## Clusters classification
+
+
+
+```{r,echo=F,warning=FALSE, message=FALSE,error=FALSE}
+alignment_table <- lapply(tables_off,data.frame) %>%
+  bind_rows(.id="library")
+
+names(alignment_table) <- c('library','link')
+
+alignment_table <- alignment_table %>%  mutate(Alignments = cell_spec("link", "html", new_tab=T,link = paste("./report-files/",basename(link),sep = ""))) %>% select(-link)
+
+
+
+kbl(stats_summary %>% left_join(alignment_table),escape = F,) %>%
+        kable_classic_2(full_width = T,html_font = "helvetica") %>% 
+        add_header_above(c(" " = 4, "Clusters" = 5)) %>% 
+        kable_styling(bootstrap_options = c("condensed","hover","stripped"),
+                      font_size = 10,
+                      fixed_thead = T)
+```
+
+
+# Graphical representations
+
+## Number of clusters per chromosome - colored by crRNA match
+```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*4,fig.align='center',fig.format='png', echo=FALSE}
+fig3
+```
+
+## Number of UMI per chromosome - colored by crRNA match
+```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*4,fig.align='center',fig.format='png', echo=FALSE}
+fig3b
+```
+
+
+## Number of clusters per chromosome - colored by prediction status
+```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*4,fig.align='center',fig.format='png', echo=FALSE}
+fig4
+```
+
+## Number of UMI per chromosome - colored by prediction status
+```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*4,fig.align='center',fig.format='png', echo=FALSE}
+fig4b
+```
+
+## Log-rank - log-abundance curve
+Red dots correspond to clusters with 0 Edits in the crRNA and PAM sequences.  
+Top3 most abundant clusters (UMI counts) are labeled.   
+
+```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*3,fig.align='center',fig.format='png', echo=FALSE}
+fig5
+```
+
+## Distribution of cut sites around on-Target sites 
+```{r,fig.width=12,fig.height=ceiling(libraries_count/3)*2,fig.align='center',fig.format='png', echo=FALSE}
+fig7
+```
+
+
+
+
+## Distribution of the number of edits in the crRNA
+```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*2,fig.align='center',fig.format='png', echo=FALSE}
+fig6
+```
+
+## Distribution of the number of edits in the PAM sequence
+```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*2,fig.align='center',fig.format='png', echo=FALSE}
+fig6b
+```
+
+
+
+
+

@@ -13,3 +13,4 @@ dependencies:
   - samtools
   - seqkit
   - bowtie2
+  - openjdk

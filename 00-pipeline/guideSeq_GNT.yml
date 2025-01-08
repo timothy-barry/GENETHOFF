@@ -1,0 +1,99 @@
+
+author: "Guillaume CORRE, PhD"
+organism: "GENETHON"
+
+
+
+## Library informations
+sampleInfo_path: "sampleInfo.csv"
+
+R1: "/media/Data/common/guideseq_gnt_dev/margaux_5/Undetermined_S0_L001_R1_001.fastq.gz"
+R2: "/media/Data/common/guideseq_gnt_dev/margaux_5/Undetermined_S0_L001_R2_001.fastq.gz"
+I1: "/media/Data/common/guideseq_gnt_dev/margaux_5/Undetermined_S0_L001_I1_001.fastq.gz"
+I2: "/media/Data/common/guideseq_gnt_dev/margaux_5/Undetermined_S0_L001_I2_001.fastq.gz"
+
+
+################################################
+UMI_length_3prime: 8  # length of UMI, used to extract UMI from I2 3'-end (usually 8bp of barcode + 8bp of UMI)
+################################################
+
+################################################
+minLength : 25 ## Minimal read length after trimming, before alignment
+################################################
+
+################################################
+aligner : bowtie2   ## Aligner to use (bowtie2 or bwa)
+################################################
+
+################################################
+SWoffFinder:
+  path: "/opt/SWOffinder" ## Path to SWoffinder (https://github.com/OrensteinLab/SWOffinder)
+  maxE: 6                 #Max edits allowed (integer).
+  maxM: 6                 #Max mismatches allowed without bulges (integer).
+  maxMB: 8                #Max mismatches allowed with bulges (integer).
+  maxB: 3                 #Max bulges allowed (integer).
+  window_size: 100
+################################################
+
+################################################
+## path to references
+genome:
+  human:
+    fasta: "/media/References/Human/Genecode/GRch38/Sequences/GRCh38.primary_assembly.genome.fa"
+    index: "/media/References/Human/Genecode/GRch38/Indexes/Bowtie2/GRCh38.primary_assembly.genome" # path to index created during the run if not existing yet
+    annotation: "/media/References/Human/Genecode/GRch38/Annotations/gencode.v46.annotation.gtf.gz"
+################################################
+
+
+
+################################################
+## Alignement and post alignment
+minFragLength: 100         # Minimal fragment length after alignment
+maxFragLength: 1500        # Maximal fragment length after alignment 
+reportedAlignments: 1      # number of alignments to report (1= best if multiple hits)
+minMAPQ: 1                 # Min MAPQ score to keep alignments -> beware of multihits that have a MAPQ close to 1. Value greater than 1 will discard Offtargets if exact same sequence.
+ISbinWindow: 100           # window size to cluster ODN insertion sites
+minReadsPerFrag: 0         # 0 to keep all fragments, otherwise min number of ODN insertion sites per cluster
+minUMIPerCluster: 0       # 0 to keep all IS, otherwise min number of UMI in cluster
+slopSize: 50               # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)
+################################################
+
+
+################################################
+## Off targets calling
+minEdits: 6    # minimal number of edits for an alignment between crRNA (without PAM) & cluster sequence to be considered
+minScore: 1    # minimal candidate score; a +1 score is given for each condition below :
+                # there are more than 1 cuting positions in a cluster 
+                # there are 2 orientations of reads (means that the ODN integrated in both orientations)
+                # Number of edits is lower than 6
+                # there are more than 3 UMI is the cluster
+                # The crRNA sequence is detected
+
+################################################
+
+
+################################################
+# Sequences for the trimming steps
+
+guideseq:
+  positive:
+    R1_trailing : "GTTTAATTGAGTTGTCATATGT"
+    R2_leading : "ACATATGACAACTCAATTAAAC"
+    R2_trailing : "AGATCGGAAGAGCGTCGTGT"
+  negative:
+    R1_trailing : "ATACCGTTATTAACATATGACAACTCAA"
+    R2_leading : "TTGAGTTGTCATATGTTAATAACGGTAT"
+    R2_trailing : "AGATCGGAAGAGCGTCGTGT"
+
+
+
+iguideseq:
+  positive:
+    R2_leading : "ACATATGACAACTCAATTAAACGCGAGC"
+    R2_trailing : "AGATCGGAAGAGCGTCGTGT"
+    R1_trailing : "GCTCGCGTTTAATTGAGTTGTCATATGT"
+  negative:
+    R1_trailing : "TCGCGTATACCGTTATTAACATATGACAACTCAA"
+    R2_leading : "TTGAGTTGTCATATGTTAATAACGGTATACGCGA"
+    R2_trailing : "AGATCGGAAGAGCGTCGTGT"
+################################################

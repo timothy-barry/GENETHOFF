@@ -22,6 +22,7 @@ dependencies:
   - bioconductor-biomart
   - bioconductor-biostrings
   - bioconductor-data-packages
+  - bioconductor-decipher
   - bioconductor-delayedarray
   - bioconductor-deseq2
   - bioconductor-dexseq
@@ -164,6 +165,7 @@ dependencies:
   - r-gargle
   - r-generics
   - r-ggplot2
+  - r-ggrepel
   - r-glue
   - r-googledrive
   - r-googlesheets4
@@ -178,6 +180,7 @@ dependencies:
   - r-isoband
   - r-jquerylib
   - r-jsonlite
+  - r-kableextra
   - r-knitr
   - r-labeling
   - r-lambda.r
@@ -221,6 +224,7 @@ dependencies:
   - r-rjson
   - r-rlang
   - r-rmarkdown
+  - r-rmdformats
   - r-rsqlite
   - r-rstudioapi
   - r-rvest
