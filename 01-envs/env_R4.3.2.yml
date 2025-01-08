@@ -177,6 +177,7 @@ dependencies:
   - r-httr
   - r-hwriter
   - r-ids
+  - r-igraph
   - r-isoband
   - r-jquerylib
   - r-jsonlite
@@ -233,6 +234,7 @@ dependencies:
   - r-selectr
   - r-snow
   - r-statmod
+  - r-stringdist
   - r-stringi
   - r-stringr
   - r-survival

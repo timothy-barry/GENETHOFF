@@ -167,8 +167,7 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
         log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
         conda: "../01-envs/env_tools.yml"
         message: "Aligning PE reads on genome with Bowtie2"
-        params: n=config["reportedAlignments"], 
-         index=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["index"],
+        params: index=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["index"],
          minFragLength=config["minFragLength"],
          maxFragLength=config["maxFragLength"]
         shell: """
@@ -184,7 +183,7 @@ elif (config["aligner"]  == "bwa" or config["aligner"]  == "Bwa") :
         log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
         conda: "../01-envs/env_tools.yml"
         message: "Aligning PE reads on genome with BWA mem"
-        params: n=config["reportedAlignments"], index=config["genome"][lambda wildcards:samples["Genome"][wildcards.sample]]["index"]
+        params:  index=config["genome"][lambda wildcards:samples["Genome"][wildcards.sample]]["index"]
         shell: """
             #bwa mem -t {threads} {params.index} {input.R1} {input.R2} > {output.sam} 2> {log}
             bwa mem -t {threads} {params.index} {input.R1} {input.R2} > {output.unfilterdsam} 2> {log}
@@ -192,6 +191,27 @@ elif (config["aligner"]  == "bwa" or config["aligner"]  == "Bwa") :
         """
 
 
+rule get_multihits_reads:
+    input: sam=rules.alignOnGenome.output.sam
+    output: list="03-align/{sample}_multi.txt", bam_unique="03-align/{sample}.UMI.ODN.trimmed.filtered.unique.bam", bam_multi="03-align/{sample}.UMI.ODN.trimmed.filtered.multi.bam"
+    threads: 2
+    conda: "../01-envs/env_tools.yml"
+    shell: """
+        samtools view -@ {threads} {input} | awk '
+            function abs(v) {{return v < 0 ? -v : v}}
+            {{
+                as=""; xs=""
+                for(i=12; i<=13; i++) {{
+                    if($i ~ /^AS:i:/) as=substr($i,6)
+                    if($i ~ /^XS:i:/) xs=substr($i,6)
+                }}
+                if(xs!="") {{
+                    if(abs(xs)== abs(as)) {{
+                         print $1
+                        }}
+                    }}
+            }}' > {output.list}
+    """
 
 
 # sort alignments by names (required for BEDPE conversion) and position (for viewing)
@@ -216,14 +236,16 @@ rule sort_aligned:
 rule call_IS:
     input: rules.sort_aligned.output.bamName
     output: tmp=temp("04-IScalling/{sample}.pebed"), 
-     frag="04-IScalling/{sample}.readsPerFragmentPerIS.bed",
-     collapse="04-IScalling/{sample}.collapsefragPerISCluster.bed"
+     umi="04-IScalling/{sample}.reads_per_UMI_per_IS.bed"
     threads: 1
     conda: "../01-envs/env_tools.yml"
     log:
-    params: window=config["ISbinWindow"], minMAPQ=config["minMAPQ"],minReadsPerFragment=config["minReadsPerFrag"],minUMIPerCluster=config["minUMIPerCluster"]
+    params:  minMAPQ=config["minMAPQ"], UMI=config["UMI_pattern"]
     shell: """
-        bedtools bamtobed -bedpe -mate1 -i  {input} > {output.tmp}
+    
+        UMI_length=$(expr length {config[UMI]})
+
+        bedtools bamtobed -bedpe -mate1 -i {input} > {output.tmp}
         
         # read R2 contains the genome/ODN junction (use $10 of PE bed = mate 2)
         
@@ -231,15 +253,38 @@ rule call_IS:
         # count number of reads per UMI and per IS (pos and strand separated)
         ##################################################################
 
-        awk 'BEGIN{{OFS="\\t";FS="\\t"}} ($8>={params.minMAPQ}) && ($1 == $4) {{if($10=="+") print $4,$5,$5,$7,substr($7,length($7)-7,8),$8,$10,$3-$5; else print $4,$6-1,$6-1,$7,substr($7,length($7)-7,8),$8,$10,$6-$2}}' {output.tmp} |  sort -k1,1 -k2,3n -k5,5 -k7,7  | bedtools groupby -g 1,2,3,5,7 -c 4,6 -o count_distinct,median | bedtools cluster -d {params.window}  > {output.frag}
+        awk -v umi="$UMI_length" 'BEGIN{{OFS="\\t";FS="\\t"}} ($8>={params.minMAPQ}) && ($1 == $4) {{if($10=="+") print $4,$5,$5,$7,substr($7,length($7)-umi+1,umi),$8,$10,$3-$5; else print $4,$6-1,$6-1,$7,substr($7,length($7)-umi+1,umi),$8,$10,$6-$2}}' {output.tmp} |  sort -k1,1 -k2,3n -k5,5 -k7,7  | bedtools groupby -g 1,2,3,5,7 -c 4,6 -o count_distinct,median > {output.umi}
+        
+        """
+
+rule correct_UMI:
+    input: bed=rules.call_IS.output.umi
+    output: "04-IScalling/{sample}.reads_per_UMI_per_IS_corrected.bed"
+    conda: "../01-envs/env_R4.3.2.yml"
+    threads: 2
+    params: hamming=config["hamming_distance"], filter = config["UMI_filter"],  UMI=config["UMI_pattern"]
+    shell: """
+        Rscript ../00-pipeline/correct_umi.r {input} {params.UMI} {params.filter} {params.hamming} {output}
+        """
+    
+        
+
+rule Collapse_UMI_IS:
+    input: rules.correct_UMI.output
+    output: collapse="04-IScalling/{sample}.UMIs_per_IS_in_Cluster.bed"
+    threads: 1
+    conda: "../01-envs/env_tools.yml"
+    log:
+    params: window=config["ISbinWindow"], minMAPQ=config["minMAPQ"],minReadsPerUMI=config["minReadsPerUMI"],minUMIPerIS=config["minUMIPerIS"]
+    shell: """
         
         ##################################################################
         # aggregate UMI per IS
         ##################################################################
-        awk '$6>{params.minReadsPerFragment}' {output.frag} | sort -k1,1 -k2,2n -k3,3n -k8,8n -k5,5 | bedtools groupby -g 1,2,3,5,8 -c 4,6,4,6,7  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>{params.minUMIPerCluster} {{print $1,$2,$3,"ID_"NR,$10,$4,$6,$7,$8,$9,$5}}' > {output.collapse}
-        """
-
         
+        awk 'NR>1 && $6>{params.minReadsPerUMI}' {output.frag} | sort -k1,1 -k2,2n -k3,3n -k5,5 | bedtools groupby -g 1,2,3,5 -c 4,6,4,6,7  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>{params.minUMIPerIS}' |  sort -k1,1 -k2,2n -k3,3n -k5,5 | bedtools cluster -d {params.window} > {output.collapse}
+        """
+    
 
 
 
@@ -255,7 +300,7 @@ rule get_chrom_length:
 
         
 rule get_fasta_around_is:
-    input: bed=rules.call_IS.output.collapse, chr_length=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["fasta"]+".fai"
+    input: bed=rules.Collapse_UMI_IS.output.collapse, chr_length=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["fasta"]+".fai"
     output: cluster=temp("04-IScalling/{sample}.cluster_slop.bed"), fa=temp("04-IScalling/{sample}.cluster_slop.fa")
     threads: 1
     conda: "../01-envs/env_tools.yml"
@@ -305,7 +350,7 @@ rule predict_offtarget_SWOffinder:
 
 
 rule report_data:
-    input: fasta=rules.get_fasta_around_is.output.fa, cluster=rules.get_fasta_around_is.output.cluster, bed=rules.call_IS.output.collapse, statfq=rules.get_stats_fq.output,statal=rules.alignOnGenome.log
+    input: fasta=rules.get_fasta_around_is.output.fa, cluster=rules.get_fasta_around_is.output.cluster, bed=rules.Collapse_UMI_IS.output.collapse, statfq=rules.get_stats_fq.output,statal=rules.alignOnGenome.log
     output: "05-Report/{sample}.rdata"
     conda: "../01-envs/env_R4.3.2.yml"
     log:
