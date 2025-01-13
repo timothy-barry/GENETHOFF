@@ -8,10 +8,10 @@ args <- commandArgs(trailingOnly = T)
 
 
 load(args[1])
-
+config_path=args[2]
 
 rmarkdown::render(input = "../00-pipeline/guideSeq_GNT_report.rmd", 
                   output_format = "readthedown", 
-                  output_dir = dirname(args[2]),
-                  output_file = basename(args[2]),
+                  output_dir = dirname(args[3]),
+                  output_file = basename(args[3]),
                   clean = T)

@@ -19,10 +19,16 @@ args <- commandArgs(trailingOnly = T)
 library(tidyverse,quietly = T, verbose = F,warn.conflicts = F)
 library(Biostrings,quietly = T,verbose = F, warn.conflicts = F)
 library(DECIPHER,quietly = T,warn.conflicts = F,verbose = F)
-#library(pwalign)
+
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("pwalign")
+
+library(pwalign)
 
 # for debugging
-# args <- c("EBS_Cas_NGG_hDMD.cluster_slop.fa","EBS_Cas_NGG_hDMD.cluster_slop.bed","EBS_Cas_NGG_hDMD.collapsefragPerISCluster.bed","TCTTCCGGAACAAAGTTGCT","ebs","NNN",4)
+ #args <- c("04-IScalling/EBS_Cas_NGG_hDMD.cluster_slop.fa","04-IScalling/EBS_Cas_NGG_hDMD.cluster_slop.bed","04-IScalling/EBS_Cas_NGG_hDMD.UMIs_Per_IS_in_Cluster.bed","TCTTCCGGAACAAAGTTGCT","ebs","NNN",4,6)
 # args <- c("ngRNA11_5NGG_pos-A5.cluster_slop.fa","ngRNA11_5NGG_pos-A5.cluster_slop.bed","ngRNA11_5NGG_pos-A5.collapsefragPerISCluster.bed","GGCTAGGGATGAAGAATAAA","EBS","NGG",-4,"test.data")
 
 
@@ -69,14 +75,17 @@ pam_length <- nchar(pam)
 
 offset <- as.numeric(args[7])
 
-## Calculate pairwise alignments between insertion site sequence and gRNA sequence in forward and reverse orientation
+max_edits <- as.numeric(args[8])
+
+
+
+## Calculate pairwise alignments between cluster sequence and gRNA sequence in forward and reverse orientation
 watson= pairwiseAlignment(pattern = fasta,subject = grna,type = "local-global",gapOpening=10)
 crick = pairwiseAlignment(pattern = reverseComplement(fasta),subject = grna,type = "local-global",gapOpening=10)
 
 
 # find strand with best score
 
-## NEW 
 align_stat <- data.frame(position = names(fasta),
                          watson_score = score(watson),
                          crick_score =  score(crick),
@@ -85,16 +94,13 @@ align_stat <- data.frame(position = names(fasta),
                          watson_mm = nmismatch(watson),
                          crick_mm = nmismatch(crick),
                          watson_pid = pid(watson),
-                         crick_pid = pid(crick)) %>% 
+                         crick_pid = pid(crick) ) %>% 
   separate("position", into = c("clusterID","cluster"),sep = "::",convert = T)
 
-## use edit instead of mismatches (it includes indels and mismatches)
-align_stat <- align_stat %>%
-  filter(watson_score!=crick_score) %>% 
-  filter(watson_edit <= 6 | crick_edit <= 6) 
+
 
 if(nrow(align_stat)>0){
-  ## WATSON strand analysis
+  
   
   align_stat <- align_stat %>%
     mutate(grna_orientation = case_when(watson_score > crick_score ~ "watson",
@@ -102,8 +108,12 @@ if(nrow(align_stat)>0){
                                         TRUE ~ NA))
   
   
+  
+  
+  
+  ## WATSON strand analysis
   watson_best <- align_stat %>% 
-    filter(grna_orientation == "watson") %>% 
+    filter(grna_orientation == "watson", watson_edit <= max_edits) %>% ### keep clusters with less than n edits
     select(clusterID,cluster,grna_orientation,starts_with("watson")) %>%
     rename_all(~str_remove(.,"watson_"))
   
@@ -162,19 +172,15 @@ if(nrow(align_stat)>0){
     
     
     indels_list <- indel(watson_sub)
-    
-    
-    
-    
-    
+
     indels_table <- bind_rows(
       bind_rows(
         "insertions" = insertion(indels_list)%>%
           data.frame,
         "deletions"= deletion(indels_list) %>%
           data.frame, .id = "indel") %>% 
-        bind_rows(data.frame(indel = c("deletions","insertions"),group=-1,start=-1,end=-1,width = 1)) %>% 
-        group_by(indel,group = group) %>% 
+        #bind_rows(data.frame(indel = c("deletions","insertions"),group=-1,start=-1,end=-1,width = 1)) %>% 
+        group_by(indel,group) %>% 
         summarise(start = toString(start),
                   end = toString(end),
                   width = toString(width))) %>% 
@@ -195,7 +201,7 @@ if(nrow(align_stat)>0){
   ## CRICK strand analysis
   
   crick_best <- align_stat %>% 
-    filter(grna_orientation == "crick") %>% 
+    filter(grna_orientation == "crick", crick_edit <= max_edits) %>% 
     select(clusterID,cluster,grna_orientation,starts_with("crick")) %>%
     rename_all(~str_remove(.,"crick_"))
   
@@ -254,7 +260,7 @@ if(nrow(align_stat)>0){
           data.frame,
         "deletions"= deletion(indels_list) %>%
           data.frame, .id = "indel") %>% 
-        bind_rows(data.frame(indel = c("deletions","insertions"),group=-1,start=-1,end=-1,width = 1)) %>% 
+        #bind_rows(data.frame(indel = c("deletions","insertions"),group=-1,start=-1,end=-1,width = 1)) %>% 
         group_by(indel,group = group) %>% 
         summarise(start = toString(start),
                   end = toString(end),
@@ -314,7 +320,7 @@ if(nrow(align_stat)>0){
   
   
   
-  ## get cuting site based on CAS offset and strand orientation
+  ## get cutting site position based on CAS offset and strand orientation
   
   if(nrow(best)>0){
     best <- best %>% 
@@ -324,7 +330,6 @@ if(nrow(align_stat)>0){
       mutate(cut_gRNa_alignment = case_when(grna_orientation == "watson" ~ start_chr + alignment_end_gDNA + offset + 1 ,
                                             TRUE ~ end_chr - alignment_end_gDNA - offset ))
   } else{
-    
     
     col.idx <- c("start" ,"end", "width", "clusterID", "chromosome", "start_chr",  "end_chr","sequence", "mismatches", "strand_guide","cut_gRNa_alignment")
     best <- data.frame(matrix(nrow = 0, ncol = length(col.idx) ))
@@ -362,9 +367,9 @@ if(nrow(align_stat)>0){
   cluster_annotated <- cluster_annotated %>%
     left_join(modal_cut_position, by = c("clusterID"))
   
-  save(cluster_annotated, fasta,grna, bed_collapsedUMI, clusters, watson,crick,IS_in_clusters, file = args[8])
+  save(cluster_annotated, fasta,grna, bed_collapsedUMI, clusters, watson,crick,IS_in_clusters, file = args[9])
 } else {
-  save(fasta,grna, bed_collapsedUMI, clusters, watson,crick, file = args[8])
+  save(fasta,grna, bed_collapsedUMI, clusters, watson,crick, file = args[9])
   
 }
 

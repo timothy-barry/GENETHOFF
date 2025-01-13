@@ -149,6 +149,7 @@ dependencies:
   - r-dbplyr
   - r-digest
   - r-dplyr
+  - r-dt
   - r-dtplyr
   - r-ellipsis
   - r-evaluate

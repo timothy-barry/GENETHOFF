@@ -10,6 +10,7 @@ if not os.path.isfile("guideSeq_GNT.yml"):
 
 configfile: "guideSeq_GNT.yml"
 #validate(config, "config.schema.yaml")
+config_file_path=os.getcwd()+'/'+workflow.configfiles[0]
 
 
 ## Load the sample information files as a TSV file. 'sampleName' column is mandatory
@@ -34,8 +35,10 @@ genomes_unique=list(set(genomes))
 ##########################################################
 
 rule target:
-    input: "05-Report/report.html", ["05-Report/{sample}.rdata".format(sample=sample) for sample in samples["sampleName"]],
-     expand("06-offPredict/{gen}_{grna}{pam}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs)
+    input: "05-Report/report.html",
+     ["05-Report/{sample}.rdata".format(sample=sample) for sample in samples["sampleName"]],
+     expand("06-offPredict/{gen}_{grna}{pam}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs),
+     ["03-align/{sample}_multi.txt".format(sample=sample) for sample in samples["sampleName"]]
      
      
 
@@ -89,10 +92,13 @@ rule add_UMI:
      I3=temp("00-demultiplexing/{sample}_I3.UMI.fastq.gz")
     threads:6
     conda: "../01-envs/env_tools.yml"
-    params: suffix_length={config["UMI_length_3prime"]} ## bp in 3' of index to considere as UMI
+    params: UMI=config["UMI_pattern"] ## bp in 3' of index to considere as UMI
     shell: """
-        cutadapt -j {threads} -u -{params.suffix_length} --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R1} {input.I3} {input.R1}
-        cutadapt -j {threads} -u -{params.suffix_length} --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2}
+        
+        UMI_length=$(expr length {params.UMI})
+        
+        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R1} {input.I3} {input.R1}
+        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2}
         """
 
 # remove ODN and discard reads without ODN
@@ -193,7 +199,7 @@ elif (config["aligner"]  == "bwa" or config["aligner"]  == "Bwa") :
 
 rule get_multihits_reads:
     input: sam=rules.alignOnGenome.output.sam
-    output: list="03-align/{sample}_multi.txt", bam_unique="03-align/{sample}.UMI.ODN.trimmed.filtered.unique.bam", bam_multi="03-align/{sample}.UMI.ODN.trimmed.filtered.multi.bam"
+    output: list="03-align/{sample}_multi.txt"
     threads: 2
     conda: "../01-envs/env_tools.yml"
     shell: """
@@ -217,7 +223,7 @@ rule get_multihits_reads:
 # sort alignments by names (required for BEDPE conversion) and position (for viewing)
 rule sort_aligned:
     input: sam=rules.alignOnGenome.output.sam
-    output: bamPos="03-align/{sample}.UMI.ODN.trimmed.filtered.bam",  bamName=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.bam")
+    output: bamPos="03-align/{sample}.UMI.ODN.trimmed.filtered.bam",  bamName="03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.bam"
     threads: 6
     log:
     conda: "../01-envs/env_tools.yml"
@@ -243,7 +249,7 @@ rule call_IS:
     params:  minMAPQ=config["minMAPQ"], UMI=config["UMI_pattern"]
     shell: """
     
-        UMI_length=$(expr length {config[UMI]})
+        UMI_length=$(expr length {params.UMI})
 
         bedtools bamtobed -bedpe -mate1 -i {input} > {output.tmp}
         
@@ -262,12 +268,11 @@ rule correct_UMI:
     output: "04-IScalling/{sample}.reads_per_UMI_per_IS_corrected.bed"
     conda: "../01-envs/env_R4.3.2.yml"
     threads: 2
-    params: hamming=config["hamming_distance"], filter = config["UMI_filter"],  UMI=config["UMI_pattern"]
+    params: hamming=config["UMI_hamming_distance"], filter = config["UMI_filter"],  UMI=config["UMI_pattern"], method = config["UMI_deduplication"]
     shell: """
-        Rscript ../00-pipeline/correct_umi.r {input} {params.UMI} {params.filter} {params.hamming} {output}
+        Rscript ../00-pipeline/correct_umi.R {input} {params.UMI} {params.filter} {params.hamming} {params.method} {output}
         """
-    
-        
+
 
 rule Collapse_UMI_IS:
     input: rules.correct_UMI.output
@@ -282,7 +287,7 @@ rule Collapse_UMI_IS:
         # aggregate UMI per IS
         ##################################################################
         
-        awk 'NR>1 && $6>{params.minReadsPerUMI}' {output.frag} | sort -k1,1 -k2,2n -k3,3n -k5,5 | bedtools groupby -g 1,2,3,5 -c 4,6,4,6,7  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $6>{params.minUMIPerIS}' |  sort -k1,1 -k2,2n -k3,3n -k5,5 | bedtools cluster -d {params.window} > {output.collapse}
+        awk 'NR>1 && $6>{params.minReadsPerUMI}' {input} | sort -k1,1 -k2,2n -k3,3n -k5,5 | bedtools groupby -g 1,2,3,5 -c 4,6,4,6,7  -o count_distinct,sum,collapse,collapse,median  | awk 'BEGIN{{OFS="\\t";FS="\\t"}} $5>{params.minUMIPerIS} {{print $1,$2,$3,"ID_"NR,$9,$4,$5,$6,$7,$8}}' |  sort -k1,1 -k2,2n -k3,3n -k5,5 | bedtools cluster -d {params.window} > {output.collapse}
         """
     
 
@@ -301,7 +306,7 @@ rule get_chrom_length:
         
 rule get_fasta_around_is:
     input: bed=rules.Collapse_UMI_IS.output.collapse, chr_length=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["fasta"]+".fai"
-    output: cluster=temp("04-IScalling/{sample}.cluster_slop.bed"), fa=temp("04-IScalling/{sample}.cluster_slop.fa")
+    output: cluster="04-IScalling/{sample}.cluster_slop.bed", fa="04-IScalling/{sample}.cluster_slop.fa"
     threads: 1
     conda: "../01-envs/env_tools.yml"
     log:
@@ -358,20 +363,32 @@ rule report_data:
     params: gRNA_seq=lambda wildcards:samples["gRNA_sequence"][wildcards.sample], 
      gRNA_name=lambda wildcards:samples["gRNA_name"][wildcards.sample],
      PAM=lambda wildcards:samples["PAM_sequence"][wildcards.sample],
-     offset=lambda wildcards:samples["Cut_Offset"][wildcards.sample]
+     offset=lambda wildcards:samples["Cut_Offset"][wildcards.sample],
+     max_edits=config["max_edits_crRNA"]
     shell : """
-        Rscript ../00-pipeline/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {output}
+        Rscript ../00-pipeline/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {params.max_edits} {output}
         """
         
 
+rule prepare_annotations:
+    input: 
+    output: ["../02-ressources/{species}.rds".format(species=species) for species in genomes_unique]
+    threads: 6
+    conda: "../01-envs/env_R4.3.2.yml"
+    params: config=os.path.abspath(workflow.configfiles[0])
+    shell: """
+        Rscript ../00-pipeline/prepare_annotations.R {params.config}
+    """
+    
+
 rule annotate_sites:
-    input: rdata=rules.report_data.output
+    input: rdata=rules.report_data.output, species=rules.prepare_annotations.output
     output: "05-Report/{sample}_summary.xlsx"
     conda: "../01-envs/env_R4.3.2.yml"
     threads: 4
-    params: gtf=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["annotation"]
+    params: species=lambda wildcards: samples["Genome"][wildcards.sample]
     shell: """
-        Rscript ../00-pipeline/annotate_cuting_sites.R {params.gtf} {input.rdata} {output}
+        Rscript ../00-pipeline/annotate_cuting_sites.R {params.species} {input.rdata} {output}
         """
 
 
@@ -381,19 +398,24 @@ rule report:
     output: report_rdata= "05-Report/report.rdata"
     conda: "../01-envs/env_R4.3.2.yml"
     threads: 1
-    params: sampleInfo=config["sampleInfo_path"], config=os.path.abspath(workflow.configfiles[0])
+    params: sampleInfo=config["sampleInfo_path"], 
+     config=os.path.abspath(workflow.configfiles[0]), 
+     minUMI_alignments_figure=config["minUMI_alignments_figure"],
+     min_predicted_distance=config["min_predicted_distance"],
+     max_clusters=config["max_clusters"]
     shell: """
         mkdir -p 05-Report/report-files/;
-        Rscript ../00-pipeline/generate_tables.r "{input.summaries}" {params.sampleInfo} {params.config} "{input.predictions}"
+        Rscript ../00-pipeline/generate_tables.r "{input.summaries}" {params.sampleInfo} {params.config} "{input.predictions}" {params.max_clusters} {params.minUMI_alignments_figure} {params.min_predicted_distance}
         """
 
 rule make_report:
     input:  rules.report.output.report_rdata
     output: report_html="05-Report/report.html"
     conda: "../01-envs/env_R4.3.2.yml"
+    params: config_path=config_file_path
     threads: 1
     shell: """
-        Rscript ../00-pipeline/publish_report.r {input} {output}
+        Rscript ../00-pipeline/publish_report.r {input} {params.config_path} {output}
     """
 
 
@@ -403,4 +425,4 @@ onsuccess:
 
 onerror:
     print("An error occurred")
-    shell(" cowsay -e \XX  Houston, we have a problem !")
+    shell(" cowsay -e \X\X  Houston, we have a problem !")
