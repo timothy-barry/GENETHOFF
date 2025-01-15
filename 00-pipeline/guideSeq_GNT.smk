@@ -339,18 +339,27 @@ rule predict_offtarget_SWOffinder:
     conda: '../01-envs/env_tools.yml'
     params: genome=lambda wildcards: config["genome"][wildcards.gen]["fasta"],
         gRNA=lambda wildcards:{wildcards.grna},
-        maxE=config["SWoffFinder"]["maxE"],               #Max edits allowed (integer).
-        maxM=config["SWoffFinder"]["maxM"],               #Max mismatches allowed without bulges (integer).
-        maxMB=config["SWoffFinder"]["maxMB"],             #Max mismatches allowed with bulges (integer).
+        maxE=config["max_edits_crRNA"],               #Max edits allowed (integer).
+        maxM=config["max_edits_crRNA"],               #Max mismatches allowed without bulges (integer).
+        maxMB=config["max_edits_crRNA"],             #Max mismatches allowed with bulges (integer).
         maxB=config["SWoffFinder"]["maxB"],               #Max bulges allowed (integer).
         window_size=config["SWoffFinder"]["window_size"], #The window size for choosing the best in a window
+        bulges=config["tolerate_bulges"],
         PAM=lambda wildcards:wildcards.pam,
         SWoffFinder=config["SWoffFinder"]["path"]
     threads: 12
     shell: """
         echo {params.gRNA}{params.PAM} > {output.txt}
         
-        java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign {params.genome} {output.txt} 06-offPredict/{wildcards.gen} {params.maxE} {params.maxM} {params.maxMB} {params.maxB} {threads} TRUE {params.window_size} {params.PAM} TRUE
+        if [ {params.bulges} = TRUE ] ; 
+        then 
+            bulge_size={params.maxB}; 
+        else 
+            bulge_size=0;
+        fi
+
+        
+        java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign {params.genome} {output.txt} 06-offPredict/{wildcards.gen} {params.maxE} {params.maxM} {params.maxMB} $(echo $bulge_size) {threads} TRUE {params.window_size} {params.PAM} TRUE
         """
 
 
@@ -364,9 +373,10 @@ rule report_data:
      gRNA_name=lambda wildcards:samples["gRNA_name"][wildcards.sample],
      PAM=lambda wildcards:samples["PAM_sequence"][wildcards.sample],
      offset=lambda wildcards:samples["Cut_Offset"][wildcards.sample],
-     max_edits=config["max_edits_crRNA"]
+     max_edits=config["max_edits_crRNA"],
+     bulges=config["tolerate_bulges"]
     shell : """
-        Rscript ../00-pipeline/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {params.max_edits} {output}
+        Rscript ../00-pipeline/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {params.max_edits} {params.bulges} {output}
         """
         
 

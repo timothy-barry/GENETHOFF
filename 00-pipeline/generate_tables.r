@@ -1,5 +1,5 @@
 options(tidyverse.quiet = TRUE,conflicts.policy = list(warn = FALSE),verbose = F)
-
+options(knitr.kable.NA = '')
 
 library(tidyverse,quietly = T,warn.conflicts = F,verbose = F)
 library(readxl,quietly = T,warn.conflicts = F,verbose = F)
@@ -25,13 +25,13 @@ minUMI_alignments_figure <- as.numeric(args[6])
 min_predicted_distance <- as.numeric(args[7])
 
 # debug
-summary_files = "05-Report/g53_a_Cas_NNN_K562_summary.xlsx 05-Report/g20_a_Cas_NNN_K562_summary.xlsx 05-Report/g16_Cas_NNN_K562_summary.xlsx 05-Report/g12_Cas_NNN_K562_summary.xlsx 05-Report/epe18.2_Cas_NNN_K562_summary.xlsx 05-Report/epe10.5_Cas_NGG_K562_summary.xlsx 05-Report/g20_b_Cas_NGG_K562_summary.xlsx 05-Report/g53_b_Cas_NGG_K562_summary.xlsx 05-Report/EBS_Cas_NGG_hDMD_summary.xlsx"
-sampleInfo <- read.delim("sampleInfo.csv",sep=";")
-config=read_yaml("guideSeq_GNT.yml")
-predicted_files = "06-offPredict/human_GCATCATCCTGGTACCAGGANNN.csv 06-offPredict/human_TTTATCACAGGCTCCAGGAANNN.csv 06-offPredict/human_CAGATAACTGGGCCAACCATNNN.csv 06-offPredict/human_TTGTAATCAGCAGTACCATTNNN.csv 06-offPredict/human_GTATCCTCTTGGGGGCCCCTNNN.csv 06-offPredict/human_GTTTGCCTTGTCAAGGCTATNGG.csv 06-offPredict/human_TTTATCACAGGCTCCAGGAANGG.csv 06-offPredict/human_GCATCATCCTGGTACCAGGANGG.csv 06-offPredict/human_TCTTCCGGAACAAAGTTGCTNGG.csv"
-max_clusters = 100
-minUMI_alignments_figure = 1
-min_predicted_distance = 100
+# summary_files = "05-Report/g53_a_Cas_NNN_K562_summary.xlsx 05-Report/g20_a_Cas_NNN_K562_summary.xlsx 05-Report/g16_Cas_NNN_K562_summary.xlsx 05-Report/g12_Cas_NNN_K562_summary.xlsx 05-Report/epe18.2_Cas_NNN_K562_summary.xlsx 05-Report/epe10.5_Cas_NGG_K562_summary.xlsx 05-Report/g20_b_Cas_NGG_K562_summary.xlsx 05-Report/g53_b_Cas_NGG_K562_summary.xlsx 05-Report/EBS_Cas_NGG_hDMD_summary.xlsx"
+# sampleInfo <- read.delim("sampleInfo.csv",sep=";")
+# config=read_yaml("guideSeq_GNT.yml")
+# predicted_files = "06-offPredict/human_GCATCATCCTGGTACCAGGANNN.csv 06-offPredict/human_TTTATCACAGGCTCCAGGAANNN.csv 06-offPredict/human_CAGATAACTGGGCCAACCATNNN.csv 06-offPredict/human_TTGTAATCAGCAGTACCATTNNN.csv 06-offPredict/human_GTATCCTCTTGGGGGCCCCTNNN.csv 06-offPredict/human_GTTTGCCTTGTCAAGGCTATNGG.csv 06-offPredict/human_TTTATCACAGGCTCCAGGAANGG.csv 06-offPredict/human_GCATCATCCTGGTACCAGGANGG.csv 06-offPredict/human_TCTTCCGGAACAAAGTTGCTNGG.csv"
+# max_clusters = 100
+# minUMI_alignments_figure = 1
+# min_predicted_distance = 100
 
 
 
@@ -52,8 +52,8 @@ stats <- stats %>%
   mutate(library = str_match(file,"/(.+)_R1")[,2]) %>% 
   mutate(step = case_when(str_detect(file, "_R1.UMI.fastq.gz")~"demultiplexed",
                           str_ends(file, "_R1.UMI.ODN.fastq.gz")~"ODN checked",
-                          str_ends(file, "R1.UMI.ODN.trimmed.fastq.gz")~"trimmed",
-                          str_ends(file, "_R1.UMI.ODN.trimmed.filtered.fastq.gz")~"filtered",
+                          str_ends(file, "R1.UMI.ODN.trimmed.fastq.gz")~NA,
+                          str_ends(file, "_R1.UMI.ODN.trimmed.filtered.fastq.gz")~"trimmed-filtered",
          TRUE ~ NA)) %>% 
   filter(!is.na(step)) %>% 
   select(-file) %>% 
@@ -83,23 +83,17 @@ libraries_count <- length(summary)
 summary <- lapply(summary,function(x){
   
   best <- x %>% 
-    #slice_min(n = 1,with_ties = T, order_by = N_edits) %>% 
-    #slice_min(n = 1,with_ties = T, order_by = PAM_indel_count) %>% 
-    filter(N_edits==0,
-           PAM_indel_count==0,
-           !str_detect(pam_gDNA,"\\."),
-           !str_ends(seq_gDNA,"---"),
-           !str_ends(seq_gRNA,"---"),
-           !str_starts(seq_gDNA,"---"),
-           !str_starts(seq_gRNA,"---")) %>% 
+    slice_min(n = 1,with_ties = T, order_by = N_edits) %>% 
+    slice_min(n = 1,with_ties = T, order_by = PAM_indel_count) %>% 
+    #filter(N_edits==0) %>% 
     select(library,clusterID) %>% 
-    mutate(OT=TRUE)
+    mutate(best=TRUE)
 
   abundance <- x  %>% 
     filter(!is.na(Alignment)) %>% 
     left_join(best) %>%
     mutate(Relative_abundance = round(N_UMI_cluster / sum(N_UMI_cluster) *100,digits = 2)) %>% 
-    select(library,clusterID, OT,Relative_abundance )
+    select(library,clusterID, best,Relative_abundance )
   
   x <-x %>% left_join(abundance)
   return(x)
@@ -110,9 +104,9 @@ summary <- lapply(summary,function(x){
 
 best_aligns <- summary %>%  
   bind_rows() %>% 
-  filter(OT==T) %>%
+  filter(best==T) %>%
   arrange(library) %>% 
-  select(library, clusterID,chromosome,cut_modal_position,cut_gRNa_alignment, N_IS_cluster, N_UMI_cluster,N_orientations_cluster,Relative_abundance)
+  select(library, clusterID,chromosome,cut_modal_position,cut_gRNa_alignment, Edits_gRNA = N_edits, Edits_PAM=PAM_indel_count,N_IS_cluster, N_UMI_cluster,Relative_abundance)
 
 
 
@@ -437,25 +431,27 @@ tables_off <- lapply(seq_along(tables_html),function(x){
   x3$predicted_alignment_html <- cell_spec(x3$predicted, background = ifelse(x3$predicted == "yes", "#129749", "white"))
 
   
-    x3 <- x3 %>% select(library,chromosome,cut_gRNa_alignment,
-           alignment=alignment_html,
-           UMI=N_UMI_cluster, "#Edits crRNA"=N_edits,"#Edits pam"= PAM_indel_count,
-           Symbol=Symbol_html,
-           Position=position_html,
-           predicted= predicted_alignment_html,
-           bulge) %>% 
-    unite(col = "position",chromosome,cut_gRNa_alignment,sep = ":")
+  x3 <- x3 %>% select(library,chromosome,cut_gRNa_alignment,
+                      alignment=alignment_html,
+                      UMI=N_UMI_cluster,
+                      "Edits crRNA"=N_edits, N_mismatches, n_indels, soft_trim,
+                      "Edits pam"= PAM_indel_count,
+                      Symbol=Symbol_html,
+                      Position=position_html,
+                      predicted= predicted_alignment_html,
+                      bulge) %>% 
+    unite(col = "position",chromosome,cut_gRNa_alignment,sep = ":") %>% 
+    unite("MM_indels_softClip",N_mismatches, n_indels, soft_trim,sep = "_",remove = T)
   
   kb <- kbl(x3 %>% select(-library),
             escape = F,
-            align=rep('c', 7)) %>%
+            align=c("l","r",rep('c', 9))) %>%
     kable_classic_2(full_width = F,html_font = "helvetica") %>%
     kable_styling(bootstrap_options = c("condensed","hover","stripped"),
                   font_size = 12,
                   fixed_thead = T) %>%
 
-    column_spec(1:8,extra_css = "vertical-align:middle;")
-    #column_spec(2, monospace = T)
+    column_spec(1:10,extra_css = "vertical-align:middle;")
 
     save_kable(kb,file = paste("05-Report/report-files/",names(summary)[x],"_offtargets.html",sep=""),self_contained=T)
 
@@ -479,7 +475,7 @@ tables_off <- lapply(seq_along(tables_html),function(x){
     # 
     # return(paste("05-Report/report-files/",names(summary)[x],"_offtargets.html",sep=""))
     # 
-    # htmlwidgets::saveWidget(widget = dt, file = paste("05-Report/report-files/",names(summary)[x],"_offtargets.html",sep=""),selfcontained = T)
+     #htmlwidgets::saveWidget(widget = dt, file = paste(names(summary)[x],"_offtargets.html",sep=""),selfcontained = T)
 
 })
 

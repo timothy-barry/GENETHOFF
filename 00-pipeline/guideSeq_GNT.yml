@@ -1,7 +1,7 @@
 
 author: "Guillaume CORRE, PhD"
-organism: "GENETHON"
-
+affiliation: "Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay University, Evry, France"
+version: 0.1
 
 
 ## Library informations
@@ -27,7 +27,7 @@ SWoffFinder:
   path: "/opt/SWOffinder" ## Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)
   maxE: 6                 # Max edits allowed (integer).
   maxM: 6                 # Max mismatches allowed without bulges (integer).
-  maxMB: 8                # Max mismatches allowed with bulges (integer).
+  maxMB: 6                # Max mismatches allowed with bulges (integer).
   maxB: 3                 # Max bulges allowed (integer).
   window_size: 100
 ################################################
@@ -39,6 +39,10 @@ genome:
     fasta: "/media/References/Human/Genecode/GRch38/Sequences/GRCh38.primary_assembly.genome.fa"
     index: "/media/References/Human/Genecode/GRch38/Indexes/Bowtie2/GRCh38.primary_assembly.genome" # path to index created during the run if not existing yet
     annotation: "/media/References/Human/Genecode/GRch38/Annotations/gencode.v46.annotation.gtf.gz"
+  mouse:
+    fasta: ""
+    index: ""
+    annotation: ""
 ################################################
 
 
@@ -47,7 +51,6 @@ genome:
 ## Alignement 
 minFragLength: 100         # Minimal fragment length after alignment
 maxFragLength: 1500        # Maximal fragment length after alignment 
-reportedAlignments: 1      # number of alignments to report (1= best if multiple hits)
 ################################################
 
 ################################################
@@ -56,26 +59,26 @@ minMAPQ: 1                      # Min MAPQ score to keep alignments -> !!! multi
 UMI_hamming_distance: 1         # min distance to cluster UMI using network-based deduplication, use [0] to keep raw UMIs
 UMI_deduplication: "Adjacency"  # method to correct UMI (cluster or Adjacency)
 UMI_pattern: "NNWNNWNN"  
-UMI_filter: FALSE               # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
-ISbinWindow: 100                # insertion sites closer than 'ISbinWindow' will be clustered together
-minReadsPerUMI: 0               # 1 to keep all UMIs, otherwise min number of reads per UMIs
-minUMIPerIS: 0                  # 1 to keep all IS, otherwise min number of UMI per IS
-slopSize: 50                    # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)
+UMI_filter: "FALSE"               # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
 ################################################
 
 
 ################################################
 ## Off targets calling
-minEdits: 6    # minimal number of edits for an alignment between crRNA (without PAM) & cluster sequence to be considered
-minScore: 1    # minimal candidate score; a +1 score is given for each condition below :
-                # there are more than 1 cuting positions in a cluster 
-                # there are 2 orientations of reads (means that the ODN integrated in both orientations)
-                # Number of edits is lower than 6
-                # there are more than 3 UMI is the cluster
-                # The crRNA sequence is detected
-
+tolerate_bulges: "FALSE"           # whether to include gaps in the gRNA alignment (this will change the gap penalty during SW pairwise alignment)
+max_edits_crRNA: 6              # filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)
+ISbinWindow: 100                # insertion sites closer than 'ISbinWindow' will be clustered together
+minReadsPerUMI: 0               # 1 to keep all UMIs, otherwise min number of reads per UMIs
+minUMIPerIS: 0                  # 1 to keep all IS, otherwise min number of UMI per IS
+slopSize: 50                    # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)
+min_predicted_distance: 100     # distance between cut site and predicted cut site to consider as predicted
 ################################################
 
+################################################
+# reporting
+max_clusters: 100                 # max number of cluster alignments to report
+minUMI_alignments_figure: 1       # filter clusters with more than n UMI in the report alignment figure (set to 0 to keep all clusters -> can be slow)
+################################################
 
 ################################################
 # Sequences for the trimming steps

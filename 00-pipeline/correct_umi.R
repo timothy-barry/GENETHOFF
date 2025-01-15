@@ -16,7 +16,7 @@ args <- commandArgs(trailingOnly = T)
 
   bed <- read.delim(args[1], header = F)
   motif <- args[2]
-  filt.umi <- toupper(args[3])
+  filt.umi <- as.logical(toupper(args[3]))
   hamming_threshold <- as.numeric(args[4])
   method <- args[5]
   output <- args[6]

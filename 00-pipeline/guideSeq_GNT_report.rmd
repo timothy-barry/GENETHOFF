@@ -47,7 +47,7 @@ kbl(sampleInfo %>%
                       caption = "Table 1") %>%
         kable_classic_2(full_width = T,html_font = "helvetica") %>% 
         kable_styling(bootstrap_options = c("condensed","hover","stripped"),
-                      font_size = 10,
+                      font_size = 11,
                       fixed_thead = T) 
 ```
 
@@ -59,7 +59,7 @@ kbl(best_aligns %>% arrange(library) %>% select(-clusterID,-cut_modal_position) 
     format.args = list(big.mark = ",")) %>%
         kable_classic_2(full_width = T,html_font = "helvetica") %>% 
         kable_styling(bootstrap_options = c("condensed","hover","stripped"),
-                      font_size = 10,
+                      font_size = 12,
                       fixed_thead = T) %>%
   collapse_rows(columns = 1, valign = "middle")
 ```
@@ -83,7 +83,7 @@ kbl(stats%>% arrange(library),
                       caption = "Table 2") %>%
         kable_classic_2(full_width = T,html_font = "helvetica") %>% 
         kable_styling(bootstrap_options = c("condensed","hover","stripped"),
-                      font_size = 10,
+                      font_size = 12,
                       fixed_thead = T)
 ```
 
@@ -134,7 +134,7 @@ kbl(stats_summary %>%  arrange(library) %>% left_join(alignment_table),escape = 
         kable_classic_2(full_width = T,html_font = "helvetica") %>% 
         add_header_above(c(" " = 4, "Clusters" = 5)) %>% 
         kable_styling(bootstrap_options = c("condensed","hover","stripped"),
-                      font_size = 10,
+                      font_size = 12,
                       fixed_thead = T)
 ```
 

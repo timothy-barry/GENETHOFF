@@ -20,16 +20,17 @@ library(tidyverse,quietly = T, verbose = F,warn.conflicts = F)
 library(Biostrings,quietly = T,verbose = F, warn.conflicts = F)
 library(DECIPHER,quietly = T,warn.conflicts = F,verbose = F)
 
-if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
+# if (!require("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# 
+# BiocManager::install("pwalign")
 
-BiocManager::install("pwalign")
-
-library(pwalign)
+library(pwalign,quietly = T, verbose = F,warn.conflicts = F)
 
 # for debugging
- #args <- c("04-IScalling/EBS_Cas_NGG_hDMD.cluster_slop.fa","04-IScalling/EBS_Cas_NGG_hDMD.cluster_slop.bed","04-IScalling/EBS_Cas_NGG_hDMD.UMIs_Per_IS_in_Cluster.bed","TCTTCCGGAACAAAGTTGCT","ebs","NNN",4,6)
+ #args <- c("04-IScalling/EBS_Cas_NGG_hDMD.cluster_slop.fa","04-IScalling/EBS_Cas_NGG_hDMD.cluster_slop.bed","04-IScalling/EBS_Cas_NGG_hDMD.UMIs_Per_IS_in_Cluster.bed","TCTTCCGGAACAAAGTTGCT","ebs","NNN",4,6,FALSE)
 # args <- c("ngRNA11_5NGG_pos-A5.cluster_slop.fa","ngRNA11_5NGG_pos-A5.cluster_slop.bed","ngRNA11_5NGG_pos-A5.collapsefragPerISCluster.bed","GGCTAGGGATGAAGAATAAA","EBS","NGG",-4,"test.data")
+# args <- c("04-IScalling/g53_a_Cas_NNN_K562.cluster_slop.fa", "04-IScalling/g53_a_Cas_NNN_K562.cluster_slop.bed", "04-IScalling/g53_a_Cas_NNN_K562.UMIs_per_IS_in_Cluster.bed", "GCATCATCCTGGTACCAGGA" ,"g53_a",  "NNN"  ,"-4", "6" ,"False", "05-Report/g53_a_Cas_NNN_K562.rdata")
 
 
 
@@ -77,11 +78,16 @@ offset <- as.numeric(args[7])
 
 max_edits <- as.numeric(args[8])
 
+bulges <- as.logical(toupper(args[9]))
 
+gap_open_penalty <- 10 ## default (this tolerate gap (bulges))
+if(bulges == FALSE){
+  gap_open_penalty <- gap_open_penalty *100  # this forces alignment without gap
+}
 
 ## Calculate pairwise alignments between cluster sequence and gRNA sequence in forward and reverse orientation
-watson= pairwiseAlignment(pattern = fasta,subject = grna,type = "local-global",gapOpening=10)
-crick = pairwiseAlignment(pattern = reverseComplement(fasta),subject = grna,type = "local-global",gapOpening=10)
+watson = pairwiseAlignment(pattern = fasta,subject = grna,type = "local-global",gapOpening=gap_open_penalty)
+crick = pairwiseAlignment(pattern = reverseComplement(fasta),subject = grna,type = "local-global",gapOpening=gap_open_penalty)
 
 
 # find strand with best score
@@ -89,10 +95,12 @@ crick = pairwiseAlignment(pattern = reverseComplement(fasta),subject = grna,type
 align_stat <- data.frame(position = names(fasta),
                          watson_score = score(watson),
                          crick_score =  score(crick),
-                         watson_edit = nedit(watson),
-                         crick_edit = nedit(crick),
-                         watson_mm = nmismatch(watson),
-                         crick_mm = nmismatch(crick),
+                         watson_edits = nedit(watson),
+                         crick_edits = nedit(crick),
+                         watson_mismatches = nmismatch(watson),
+                         crick_mismatches = nmismatch(crick),
+                         watson_matches = nmatch(watson),
+                         crick_matches = nmatch(crick),
                          watson_pid = pid(watson),
                          crick_pid = pid(crick) ) %>% 
   separate("position", into = c("clusterID","cluster"),sep = "::",convert = T)
@@ -112,17 +120,49 @@ if(nrow(align_stat)>0){
   
   
   ## WATSON strand analysis
+  cat("Analyzing WATSON strand")
+  
   watson_best <- align_stat %>% 
-    filter(grna_orientation == "watson", watson_edit <= max_edits) %>% ### keep clusters with less than n edits
-    select(clusterID,cluster,grna_orientation,starts_with("watson")) %>%
-    rename_all(~str_remove(.,"watson_"))
+    filter(grna_orientation == "watson", watson_edits <= max_edits) %>% ### keep clusters with less than n edits
+    dplyr::select(clusterID,cluster,grna_orientation,starts_with("watson")) %>%
+    rename_all(~str_remove(.,"watson_")) 
+  
+  
+  
+  
+  
   
   if(nrow(watson_best)>0){
     watson_sub <- watson[watson_best$clusterID]
     
+    width <- width(alignedPattern(watson_sub))
+    
+    indels <- nindel(watson_sub)
+    ins <- indels@insertion %>% data.frame
+    names(ins) <- c('Insertion_Events','Insertion_length')
+    del <- indels@deletion %>% data.frame
+    names(del) <- c('Deletion_Events','Deletion_length')
+    
+    ## We need to correct the edits as unaligned sequenced in extremities are not counted as gaps.
+    watson_best <- watson_best %>% 
+      mutate(alignment.width = width,
+             soft_trim = width - edits -matches) %>% 
+      dplyr::select(-alignment.width) %>% 
+      bind_cols(ins) %>% 
+      bind_cols(del) %>% 
+      mutate(indels = Insertion_length+ Deletion_length) %>% 
+      mutate(edits = indels + soft_trim + mismatches) %>% 
+      filter(edits <= max_edits)
+
+    watson_sub <- watson[watson_best$clusterID]
+    
+    
+    
+        
+    
     fasta_temp <- fasta[watson_best$clusterID]
-    seq_gDNA <- alignedPattern(watson_sub)
-    seq_gRNA <- alignedSubject(watson_sub)
+    seq_gDNA <- alignedPattern(watson_sub)   # this step can be long
+    seq_gRNA <- alignedSubject(watson_sub)   # this step can be long
     
     energy <- CalculateEfficiencyArray(seq_gDNA,seq_gRNA,temp = 37,FA = 0)
     colnames(energy) <- c("Gibbs_Hybridization_efficacy","Gibbs_dG_0")
@@ -133,7 +173,9 @@ if(nrow(align_stat)>0){
     watson_best <- watson_best %>% 
       rowwise() %>%
       mutate("Alignment" = paste(paste("gDNA :",seq_gDNA), paste("gRNA :", seq_gRNA),sep = "\r\n"))
-    watson_best <- watson_best %>% bind_cols(energy) 
+    watson_best <- watson_best %>%
+      bind_cols(energy) 
+    watson_best$GC_content = letterFrequency(seq_gDNA, letters = "GC",as.prob = T)
     watson_best$mismatches_position_gRNA <- lapply(watson_sub@subject@mismatch,toString) %>% unlist 
     watson_best <- watson_best %>% bind_cols(data.frame(watson_sub@pattern@range))
     watson_best <- watson_best %>% 
@@ -167,8 +209,8 @@ if(nrow(align_stat)>0){
     watson_best$pam_gDNA <- pams %>% as.character
     watson_best$pam_gRNA <- pam %>%  as.character
     watson_best <-watson_best %>% ungroup %>%  mutate(rank=row_number())
-    watson_best <- watson_best %>% bind_cols(nindel(watson_sub)@insertion %>% data.frame %>% select(Insertion_count = Length, Insertion_cum_width = WidthSum))
-    watson_best <- watson_best %>% bind_cols(nindel(watson_sub)@deletion %>% data.frame %>% select(Deletion_count = Length, Deletion_cum_width = WidthSum))
+    #watson_best <- watson_best %>% bind_cols(nindel(watson_sub)@insertion %>% data.frame %>% select(Insertion_count = Length, Insertion_cum_width = WidthSum))
+    #watson_best <- watson_best %>% bind_cols(nindel(watson_sub)@deletion %>% data.frame %>% select(Deletion_count = Length, Deletion_cum_width = WidthSum))
     
     
     indels_list <- indel(watson_sub)
@@ -179,7 +221,7 @@ if(nrow(align_stat)>0){
           data.frame,
         "deletions"= deletion(indels_list) %>%
           data.frame, .id = "indel") %>% 
-        #bind_rows(data.frame(indel = c("deletions","insertions"),group=-1,start=-1,end=-1,width = 1)) %>% 
+        bind_rows(data.frame(indel = c("deletions","insertions"),group=-1,start=-1,end=-1,width = 1)) %>% # this line is here in case there are no indels to avoid missing columns later
         group_by(indel,group) %>% 
         summarise(start = toString(start),
                   end = toString(end),
@@ -199,14 +241,36 @@ if(nrow(align_stat)>0){
   
   
   ## CRICK strand analysis
+  cat("Analyzing CRICK strand")
   
   crick_best <- align_stat %>% 
-    filter(grna_orientation == "crick", crick_edit <= max_edits) %>% 
+    filter(grna_orientation == "crick", crick_edits <= max_edits) %>% 
     select(clusterID,cluster,grna_orientation,starts_with("crick")) %>%
     rename_all(~str_remove(.,"crick_"))
   
   if(nrow(crick_best)>0) {
     fasta_temp <- reverseComplement(fasta[crick_best$clusterID])
+    
+    crick_sub <- crick[crick_best$clusterID]
+    
+    width <- width(alignedPattern(crick_sub))
+    
+    indels <- nindel(crick_sub)
+    ins <- indels@insertion %>% data.frame
+    names(ins) <- c('Insertion_Events','Insertion_length')
+    del <- indels@deletion %>% data.frame
+    names(del) <- c('Deletion_Events','Deletion_length')
+    
+    ## We need to correct the edits as unaligned sequenced in extremities are not counted as gaps.
+    crick_best <- crick_best %>% 
+      mutate(alignment.width = width,
+             soft_trim = width - edits -matches) %>% 
+      dplyr::select(-alignment.width) %>% 
+      bind_cols(ins) %>% 
+      bind_cols(del) %>% 
+      mutate(indels = Insertion_length+ Deletion_length) %>% 
+      mutate(edits = indels + soft_trim + mismatches) %>% 
+      filter(edits <= max_edits)
     
     crick_sub <- crick[crick_best$clusterID]
     
@@ -221,8 +285,9 @@ if(nrow(align_stat)>0){
     crick_best <- crick_best %>% 
       rowwise() %>%
       mutate("Alignment" = paste(paste("gDNA :",seq_gDNA), paste("gRNA :", seq_gRNA),sep = "\r\n"))
-    crick_best <- crick_best %>% bind_cols(energy) 
-    
+    crick_best <- crick_best %>%
+      bind_cols(energy) 
+    crick_best$GC_content = letterFrequency(seq_gDNA, letters = "GC",as.prob = T)
     crick_best$mismatches_position_gRNA <- lapply(crick_sub@subject@mismatch,toString) %>% unlist 
     crick_best <- crick_best %>% bind_cols(data.frame(crick_sub@pattern@range))
     crick_best <- crick_best %>% 
@@ -248,8 +313,8 @@ if(nrow(align_stat)>0){
     crick_best$pam_gDNA <- pams %>% as.character
     crick_best$pam_gRNA <- pam %>%  as.character
     crick_best <-crick_best %>% ungroup %>%  mutate(rank=row_number())
-    crick_best <- crick_best %>% bind_cols(nindel(crick_sub)@insertion %>% data.frame %>% select(Insertion_count = Length, Insertion_cum_width = WidthSum))
-    crick_best <- crick_best %>% bind_cols(nindel(crick_sub)@deletion %>% data.frame %>% select(Deletion_count = Length, Deletion_cum_width = WidthSum))
+    #crick_best <- crick_best %>% bind_cols(nindel(crick_sub)@insertion %>% data.frame %>% select(Insertion_count = Length, Insertion_cum_width = WidthSum))
+    #crick_best <- crick_best %>% bind_cols(nindel(crick_sub)@deletion %>% data.frame %>% select(Deletion_count = Length, Deletion_cum_width = WidthSum))
     
     
     indels_list <- indel(crick_sub)
@@ -260,7 +325,7 @@ if(nrow(align_stat)>0){
           data.frame,
         "deletions"= deletion(indels_list) %>%
           data.frame, .id = "indel") %>% 
-        #bind_rows(data.frame(indel = c("deletions","insertions"),group=-1,start=-1,end=-1,width = 1)) %>% 
+        bind_rows(data.frame(indel = c("deletions","insertions"),group=-1,start=-1,end=-1,width = 1)) %>% 
         group_by(indel,group = group) %>% 
         summarise(start = toString(start),
                   end = toString(end),
@@ -268,7 +333,7 @@ if(nrow(align_stat)>0){
       pivot_wider(names_from = indel, values_from = c(start,end,width)) %>% 
       select(group,ends_with("deletions"),ends_with("insertions")) %>% 
       filter(group>0) %>%  
-      arrange(group)
+      arrange(group) 
     
     
     crick_best <- crick_best %>% left_join(indels_table, by = c("rank"="group"))
@@ -294,15 +359,17 @@ if(nrow(align_stat)>0){
            grna_orientation,
            seq_gDNA,seq_gRNA,
            Alignment,
-           starts_with("Gibbs"),
+           starts_with("Gibbs"),GC_content,
            alignment_start_gDNA = start, alignment_end_gDNA = end, alignment_width_gDNA = width,
            alignment_score=score,
            Identity_pct = pid,
-           N_edits = edit,
-           N_mismatches = mm, mismatches_position_gRNA, 
-           Insertion_count,Insertion_cum_width,start_insertions,end_insertions,width_insertions,
-           Deletion_count,Deletion_cum_width,start_deletions,end_deletions,width_deletions,
+           N_edits = edits, 
+           N_mismatches = mismatches, mismatches_position_gRNA, soft_trim, 
+           n_indels=indels,
+           Insertion_length,start_insertions,end_insertions,width_insertions,
+           Deletion_length,start_deletions,end_deletions,width_deletions,
            pam_gDNA,pam_gRNA )
+  
   
   # calculate mismatches in pam
   x = pairwiseAlignment(best$pam_gDNA,best$pam_gRNA)
@@ -367,9 +434,9 @@ if(nrow(align_stat)>0){
   cluster_annotated <- cluster_annotated %>%
     left_join(modal_cut_position, by = c("clusterID"))
   
-  save(cluster_annotated, fasta,grna, bed_collapsedUMI, clusters, watson,crick,IS_in_clusters, file = args[9])
+  save(cluster_annotated, fasta, grna, bed_collapsedUMI, clusters, watson,crick,IS_in_clusters, file = args[10])
 } else {
-  save(fasta,grna, bed_collapsedUMI, clusters, watson,crick, file = args[9])
+  save(fasta,grna, bed_collapsedUMI, clusters, watson,crick, file = args[10])
   
 }
 
