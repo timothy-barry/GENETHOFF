@@ -1,8 +1,8 @@
 ---
 title: "GuideSeq report"
+subtitle: "`r config$affiliation`"
 author: "`r config$author`"
 date: "`r Sys.Date()`"
-subtitle: "`r dirname(config_path)`"
 output: 
     rmdformats::readthedown:
     highlight: kate
@@ -24,6 +24,27 @@ library(yaml,quietly = T,warn.conflicts = F,verbose = F)
 libraries_count <- length(tables_html)
 
 ```
+
+::: {#intro}
+:::
+
+![](../02-ressources/logo.png){style="border-radius:5px;margin-left: auto;   margin-right: auto;" width="150"}
+
+The guideSeq (Genome-wide Unbiased Identification of Double-strand breaks Enabled by Sequencing) method enables comprehensive detection and quantification of off-target activity by capturing double-strand breaks across the genome through oligonucleotide tagging, followed by sequencing and bioinformatic analysis.
+
+This report presents different tables and graphical representations to help in the interpretation of GuideSeq experiments.
+
+------------------------------------------------------------------------
+
+Working directory : **`r dirname(config_path)`**
+
+Pipeline version: ***To Be Extracted from pipeline file name when release*** **(2025/01/16)**
+
+The analysis was performed **`r ifelse(config$tolerate_bulges==TRUE, "with","without")`** bulge tolerance.
+
+All parameters can be found in [Configuration settings] at the end of the document.
+
+------------------------------------------------------------------------
 
 # Description of libraries
 
@@ -53,9 +74,16 @@ kbl(sampleInfo %>%
 
 # Best match found
 
+Table 2 contains information about the best match(es) for each library.
+
+Best matches are clusters with the minimal number of edits in the gRNA and PAM sequences ( not necessarily 0 ).
+
 ```{r,echo=F}
-kbl(best_aligns %>% arrange(library) %>% select(-clusterID,-cut_modal_position) %>% unite("position",chromosome,cut_gRNa_alignment,sep=":"),
-                      caption = "Table 1b",
+kbl(best_aligns %>% arrange(library) %>% 
+      mutate("cut offset" = as.numeric(cut_modal_position) - as.numeric(cut_gRNa_alignment),.after = chromosome) %>% 
+      select(-clusterID,-cut_modal_position) %>% 
+      unite("position",chromosome,cut_gRNa_alignment,sep=":"),
+                      caption = "Table 2",
     format.args = list(big.mark = ",")) %>%
         kable_classic_2(full_width = T,html_font = "helvetica") %>% 
         kable_styling(bootstrap_options = c("condensed","hover","stripped"),
@@ -64,56 +92,38 @@ kbl(best_aligns %>% arrange(library) %>% select(-clusterID,-cut_modal_position) 
   collapse_rows(columns = 1, valign = "middle")
 ```
 
+> -   "position" : theoretical cutting site based on gRNA alignment to gDNA and nuclease offset.
+>
+> -   "cut offset" : Difference between theoretical cutting site and most frequent cutting site in the cluster.
+>
+> -   "Relative Abundance" : Contribution of cluster abundance in % of total UMIs count. Only clusters with gRNA match with ≤ **`r config$max_edits_crRNA`** edits and ≥ **`r config$minUMIPerIS`** UMIs are considered.
+
 # Statistics of reads processing
 
-Reads were processes according to the following steps :
-
--   Reads were demultiplexed using **cutadapt**.
-
--   Presence of the ODN sequence at the 5' end of the R2 reads was checked.
-
--   I5 and I7 adaptors were trimmed if present
-
--   Reads longer than **`r config$minLength`** bp were filtered (both of the pair).
-
-Table 2 presents the read counts and % of demultiplexed for each step of the read processing.
+Table 3 presents the read counts and % of demultiplexed for each step of the read processing.
 
 ```{r, echo = F}
 kbl(stats%>% arrange(library),
-                      caption = "Table 2") %>%
+                      caption = "Table 3") %>%
         kable_classic_2(full_width = T,html_font = "helvetica") %>% 
         kable_styling(bootstrap_options = c("condensed","hover","stripped"),
                       font_size = 12,
                       fixed_thead = T)
 ```
 
-# Statistics of read alignment
+> Read-pairs with length greater than **`r config$minLength`** bp (both of the pair) were considered for analysis.
 
-## Genome mapping
+# Reads alignment, cut sites calling and clustering
 
-Reads passing the QC were aligned on the reference genome **`r basename(config$genome$human$fasta)`** using **`r config$aligner`** (see [Configuration settings]) .
+Table 4 contains a summary of the alignment step, calling step and clustering of cutting sites including :
 
-## Cutting sites calling and clustering
+-   The number of reads aligned on the genome
 
-Cut sites were identified from the alignment start position of R2 reads.
+-   The number of UMIs detected (estimation of total number of cells)
 
--   Reads aligning to the exact same start position were aggregated if they share the same UMI sequence.
+-   The number of unique ODN insertion sites
 
--   UMI were corrected using the **`r config$UMI_deduplication`** method with a Hamming distance tolerance of **`r config$UMI_hamming_distance`**.
-
--   Positions/UMI combinations with more than **`r config$minReadsPerUMI`** reads were considered for next step.
-
-Clusters are defined as a group of ODN insertion sites within a distance smaller than **`r config$ISbinWindow`** bp.
-
-Clusters are then characterized by :
-
--   Whether there are bi-directional reads alignments indicating both ODN orientations ("dual Orientation" in table below)
-
--   The number of ODN unique insertion sites ("multiple Cuts" in table below)
-
--   The presence of the crRNA sequence with less than **`r config$max_edits_crRNA`** edits withing the cluster boundaries +/- **`r config$slopSize`** bp("crRNA matched" in table below)
-
-Clusters with more than **`r config$minUMIPerIS`**total UMIs were considered.
+-   The number of clusters.
 
 ```{r,echo=F,warning=FALSE, message=FALSE,error=FALSE}
 alignment_table <- lapply(tables_off,data.frame) %>%
@@ -129,7 +139,7 @@ alignment_table <- alignment_table %>%
 
 
 kbl(stats_summary %>%  arrange(library) %>% left_join(alignment_table),escape = F,
-                      caption = "Table 3",
+                      caption = "Table 4",
     format.args = list(big.mark = ",")) %>%
         kable_classic_2(full_width = T,html_font = "helvetica") %>% 
         add_header_above(c(" " = 4, "Clusters" = 5)) %>% 
@@ -138,17 +148,35 @@ kbl(stats_summary %>%  arrange(library) %>% left_join(alignment_table),escape = 
                       fixed_thead = T)
 ```
 
+> Cut sites were identified from the alignment start position of R2 reads.
+>
+> -   Reads were aggregated if they share the exact same start position and the same UMI sequence.
+>
+> -   UMI were corrected using the **`r config$UMI_deduplication`** method with a Hamming distance tolerance of **`r config$UMI_hamming_distance`**.
+>
+> -   Positions/UMI with more than **`r config$minReadsPerUMI`** reads were considered for next step.
+>
+> Clusters are defined as a group of ODN insertion sites within a distance smaller than **`r config$ISbinWindow`** bp and characterized by :
+>
+> -   Presence of reads aligning in both directions, indicating both ODN orientations ("dual Orientation" in table below)
+>
+> -   Presence of multiple insertion sites positions ("multiple Cuts" in table below)
+>
+> -   Match of the crRNA sequence with less than **`r config$max_edits_crRNA`** edits withing the cluster boundaries +/- **`r config$slopSize`** bp ("crRNA matched" in table below)
+>
+> Clusters with more than **`r config$minUMIPerIS`** total UMIs were considered.
+
 # Graphical representations
 
 ## Number of clusters per chromosome
 
-This figure represents the distribution of unique clusters per chromosome and library, colored by the presence of the gRNA
+This figure represents the distribution of unique clusters per chromosome, colored by the detection of the gRNA sequence with number of edits (INDELs and substitutions) smaller or equal to **`r config$max_edits_crRNA`**.
 
 ```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*4,fig.align='center',fig.format='png', echo=FALSE}
 fig3
 ```
 
-This figure represents the distribution of unique clusters per chromosome and library, with gRNA match and colored by its prediction status.
+This figure represents the distribution of unique clusters with gRNA match per chromosome, colored by prediction status.
 
 ```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*4,fig.align='center',fig.format='png', echo=FALSE}
 fig4
@@ -156,13 +184,13 @@ fig4
 
 ## Number of UMI per chromosome
 
-This figure represents the total number of UMIs (cells) per chromosome and library, colored by the presence of the gRNA
+This figure represents the total number of UMIs (cells) per chromosome, colored by the detection of the gRNA sequence with number of edits (INDELs and substitutions) smaller or equal to **`r config$max_edits_crRNA`**.
 
 ```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*4,fig.align='center',fig.format='png', echo=FALSE}
 fig3b
 ```
 
-This figure represents the total number of UMIs (cells) per chromosome and library, for clusters with gRNA match and colored by prediction status.
+This figure represents the total number of UMIs (cells) per chromosome, for clusters with gRNA match and colored by prediction status.
 
 ```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*4,fig.align='center',fig.format='png', echo=FALSE}
 fig4b
@@ -172,13 +200,15 @@ fig4b
 
 The rank-abundance curve is used in ecology to visualize species diversity in a community by plotting species abundance against species rank on logarithmic scales. The resulting curve's shape provides insights into relative species abundance patterns and community evenness - a steep curve indicates dominance by a few species, while a shallow curve suggests more even distribution of abundances across species.
 
-Only clusters with gRNA match and **`r config$minUMIPerIS`** total UMIs are plotted. Red dots correspond to clusters with 0 Edits in the crRNA and PAM sequences. Top3 most abundant clusters (UMI counts) are labeled.
+Only clusters with gRNA match and more than **`r config$minUMI_alignments_figure`** total UMIs are plotted. Red dots correspond to clusters with 0 Edits in both crRNA and PAM sequences. Top3 most abundant clusters (UMI counts) are labeled.
 
 ```{r,fig.width=12, fig.height=ceiling(libraries_count/3)*3,fig.align='center',fig.format='png', echo=FALSE}
 fig5
 ```
 
-## Distribution of cut sites around on-Target sites
+## Distribution of cut sites around best candidates position
+
+See Table 2 for details.
 
 ```{r,fig.width=12,fig.height=ceiling(nrow(best_aligns)/3)*2,fig.align='center',fig.format='png', echo=FALSE}
 fig7

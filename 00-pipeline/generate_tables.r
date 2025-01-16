@@ -431,27 +431,29 @@ tables_off <- lapply(seq_along(tables_html),function(x){
   x3$predicted_alignment_html <- cell_spec(x3$predicted, background = ifelse(x3$predicted == "yes", "#129749", "white"))
 
   
-  x3 <- x3 %>% select(library,chromosome,cut_gRNa_alignment,
+  x3 <- x3 %>% 
+    mutate("cut offset" = as.numeric(cut_modal_position) - as.numeric(cut_gRNa_alignment)) %>% 
+    select(library,chromosome,cut_gRNa_alignment, `cut offset`,
                       alignment=alignment_html,
-                      UMI=N_UMI_cluster,
+                      UMIs=N_UMI_cluster,
                       "Edits crRNA"=N_edits, N_mismatches, n_indels, soft_trim,
                       "Edits pam"= PAM_indel_count,
                       Symbol=Symbol_html,
                       Position=position_html,
                       predicted= predicted_alignment_html,
                       bulge) %>% 
-    unite(col = "position",chromosome,cut_gRNa_alignment,sep = ":") %>% 
-    unite("MM_indels_softClip",N_mismatches, n_indels, soft_trim,sep = "_",remove = T)
+    unite(col = "gRNA cut<br>position",chromosome,cut_gRNa_alignment,sep = ":") %>% 
+    unite("MM_indels_softClip",N_mismatches, n_indels, soft_trim,sep = "_",remove = T) 
   
   kb <- kbl(x3 %>% select(-library),
             escape = F,
-            align=c("l","r",rep('c', 9))) %>%
+            align=c("l","r","r",rep('c', 9))) %>%
     kable_classic_2(full_width = F,html_font = "helvetica") %>%
     kable_styling(bootstrap_options = c("condensed","hover","stripped"),
                   font_size = 12,
                   fixed_thead = T) %>%
 
-    column_spec(1:10,extra_css = "vertical-align:middle;")
+    column_spec(1:11,extra_css = "vertical-align:middle;")
 
     save_kable(kb,file = paste("05-Report/report-files/",names(summary)[x],"_offtargets.html",sep=""),self_contained=T)
 

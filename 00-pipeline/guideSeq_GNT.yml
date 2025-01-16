@@ -13,25 +13,6 @@ I1: "/media/Data/common/guideseq_gnt_dev/margaux_5/Undetermined_S0_L001_I1_001.f
 I2: "/media/Data/common/guideseq_gnt_dev/margaux_5/Undetermined_S0_L001_I2_001.fastq.gz"
 
 
-
-################################################
-minLength: 25 ## Minimal read length after trimming, before alignment
-################################################
-
-################################################
-aligner: "bowtie2"   ## Aligner to use (bowtie2 or bwa)
-################################################
-
-################################################
-SWoffFinder:
-  path: "/opt/SWOffinder" ## Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)
-  maxE: 6                 # Max edits allowed (integer).
-  maxM: 6                 # Max mismatches allowed without bulges (integer).
-  maxMB: 6                # Max mismatches allowed with bulges (integer).
-  maxB: 3                 # Max bulges allowed (integer).
-  window_size: 100
-################################################
-
 ################################################
 ## path to references
 genome:
@@ -45,10 +26,13 @@ genome:
     annotation: ""
 ################################################
 
-
-
 ################################################
+minLength: 25 ## Minimal read length after trimming, before alignment
+################################################
+
 ## Alignement 
+################################################
+aligner: "bowtie2"   ## Aligner to use (bowtie2 or bwa)
 minFragLength: 100         # Minimal fragment length after alignment
 maxFragLength: 1500        # Maximal fragment length after alignment 
 ################################################
@@ -68,8 +52,8 @@ UMI_filter: "FALSE"               # If TRUE, remove UMIs that do no match the ex
 tolerate_bulges: "FALSE"           # whether to include gaps in the gRNA alignment (this will change the gap penalty during SW pairwise alignment)
 max_edits_crRNA: 6              # filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)
 ISbinWindow: 100                # insertion sites closer than 'ISbinWindow' will be clustered together
-minReadsPerUMI: 0               # 1 to keep all UMIs, otherwise min number of reads per UMIs
-minUMIPerIS: 0                  # 1 to keep all IS, otherwise min number of UMI per IS
+minReadsPerUMI: 0               # 0 to keep all UMIs, otherwise min number of reads per UMIs
+minUMIPerIS: 0                  # 0 to keep all IS, otherwise min number of UMI per IS
 slopSize: 50                    # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)
 min_predicted_distance: 100     # distance between cut site and predicted cut site to consider as predicted
 ################################################
@@ -79,6 +63,19 @@ min_predicted_distance: 100     # distance between cut site and predicted cut si
 max_clusters: 100                 # max number of cluster alignments to report
 minUMI_alignments_figure: 1       # filter clusters with more than n UMI in the report alignment figure (set to 0 to keep all clusters -> can be slow)
 ################################################
+
+# Prediction
+################################################
+SWoffFinder:
+  path: "/opt/SWOffinder" ## Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)
+  maxE: 6                 # Max edits allowed (integer).
+  maxM: 6                 # Max mismatches allowed without bulges (integer).
+  maxMB: 6                # Max mismatches allowed with bulges (integer).
+  maxB: 3                 # Max bulges allowed (integer).
+  window_size: 100
+################################################
+
+
 
 ################################################
 # Sequences for the trimming steps
