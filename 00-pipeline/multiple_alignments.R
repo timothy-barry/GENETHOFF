@@ -30,7 +30,7 @@ library(pwalign,quietly = T, verbose = F,warn.conflicts = F)
 # for debugging
  #args <- c("04-IScalling/EBS_Cas_NGG_hDMD.cluster_slop.fa","04-IScalling/EBS_Cas_NGG_hDMD.cluster_slop.bed","04-IScalling/EBS_Cas_NGG_hDMD.UMIs_Per_IS_in_Cluster.bed","TCTTCCGGAACAAAGTTGCT","ebs","NNN",4,6,FALSE)
 # args <- c("ngRNA11_5NGG_pos-A5.cluster_slop.fa","ngRNA11_5NGG_pos-A5.cluster_slop.bed","ngRNA11_5NGG_pos-A5.collapsefragPerISCluster.bed","GGCTAGGGATGAAGAATAAA","EBS","NGG",-4,"test.data")
-# args <- c("04-IScalling/g53_a_Cas_NNN_K562.cluster_slop.fa", "04-IScalling/g53_a_Cas_NNN_K562.cluster_slop.bed", "04-IScalling/g53_a_Cas_NNN_K562.UMIs_per_IS_in_Cluster.bed", "GCATCATCCTGGTACCAGGA" ,"g53_a",  "NNN"  ,"-4", "6" ,"False", "05-Report/g53_a_Cas_NNN_K562.rdata")
+ args <- c("04-IScalling/VEGFA_s1NGG_neg-1.cluster_slop.fa", "04-IScalling/VEGFA_s1NGG_neg-1.cluster_slop.bed", "04-IScalling/VEGFA_s1NGG_neg-1.UMIs_per_IS_in_Cluster.bed", "GGGTGGGGGGAGTTTGCTCC" ,"VEGFA_s1",  "NGG"  ,"-4", "6" ,"False", "05-Report/VEGFA_s1NGG_neg-1.rdata")
 
 
 
@@ -84,6 +84,52 @@ gap_open_penalty <- 10 ## default (this tolerate gap (bulges))
 if(bulges == FALSE){
   gap_open_penalty <- gap_open_penalty *100  # this forces alignment without gap
 }
+
+
+
+
+# Define matching function with IUPAC letters ---------------------------------------
+
+library(Biostrings)
+
+count_iupac_mismatches <- function(sequence, motif) {
+  # Convert inputs to DNAString objects if they aren't already
+  seq <- DNAString(sequence)
+  mot <- DNAString(motif)
+  
+  # Get lengths
+  seq_len <- length(seq)
+  mot_len <- length(mot)
+  
+  if (seq_len != mot_len) {
+    stop("Sequence and motif must be the same length")
+  }
+  
+  # Convert to character vectors for comparison
+  seq_chars <- strsplit(as.character(seq), "")[[1]]
+  mot_chars <- strsplit(as.character(mot), "")[[1]]
+  
+  # Count mismatches considering IUPAC codes
+  mismatches <- 0
+  mm_position <- NULL
+  for (i in 1:seq_len) {
+    # Get the IUPAC alternatives for both positions
+    seq_bases <- IUPAC_CODE_MAP[seq_chars[i]]
+    mot_bases <- IUPAC_CODE_MAP[mot_chars[i]]
+    
+    # If there's no overlap between the possible bases, it's a mismatch
+    if (length(intersect(unlist(strsplit(seq_bases, "")), 
+                         unlist(strsplit(mot_bases, "")))) == 0) {
+      mismatches <- mismatches + 1
+      mm_position <- c(mm_position,i)
+    }
+  }
+  
+  return(paste(mismatches,paste(mm_position,collapse = ","),sep = "_"))
+}
+
+
+
 
 ## Calculate pairwise alignments between cluster sequence and gRNA sequence in forward and reverse orientation
 watson = pairwiseAlignment(pattern = fasta,subject = grna,type = "local-global",gapOpening=gap_open_penalty)
@@ -372,18 +418,20 @@ if(nrow(align_stat)>0){
   
   
   # calculate mismatches in pam
-  x = pairwiseAlignment(best$pam_gDNA,best$pam_gRNA)
-  pam_indels <- mismatchTable(x) %>% 
-    filter(SubjectSubstring != "N") %>% # ignore degenerated base N
-    group_by(PatternId)  %>% 
-    summarise(PAM_indel_count=n(),PAM_indel_pos = toString(SubjectEnd))
-  pam_indels$clusterID <- best$clusterID[pam_indels$PatternId]
-  pam_indels <- pam_indels %>% select(-PatternId)
+  # x = pairwiseAlignment(best$pam_gDNA,best$pam_gRNA)
+  # pam_indels <- mismatchTable(x) %>% 
+  #   filter(SubjectSubstring != "N") %>% # ignore degenerated base N
+  #   group_by(PatternId)  %>% 
+  #   summarise(PAM_indel_count=n(),PAM_indel_pos = toString(SubjectEnd))
+  # 
+  # pam_indels$clusterID <- best$clusterID[pam_indels$PatternId]
+  # pam_indels <- pam_indels %>% select(-PatternId)
+  # best <- best %>% left_join(pam_indels, by = "clusterID") %>% 
+  #   replace_na(list(PAM_indel_count = 0))
   
-  best <- best %>% left_join(pam_indels, by = "clusterID") %>% 
-    replace_na(list(PAM_indel_count = 0))
   
-  
+  best$pam_iupac <- sapply(x$pam_gDNA, function(x) {count_iupac_mismatches(x,pam)})
+  best <- best %>% separate(pam_iupac, into = c("PAM_indel_count","PAM_indel_pos"),sep = "_",remove = T)
   
   
   
@@ -411,6 +459,7 @@ if(nrow(align_stat)>0){
                 select(-start_chr,-end_chr,-alignment_width_gDNA,-alignment_start_gDNA,-alignment_end_gDNA) ,by = c("chromosome","clusterID"))
   
   
+  # calculate distance between cut sites and cluster gRNA theoretical cutting site 
   IS_in_clusters = bed_collapsedUMI %>% 
     left_join(cluster_annotated %>%  
                 select(clusterID,cut_gRNa_alignment), 
@@ -426,9 +475,10 @@ if(nrow(align_stat)>0){
     summarise(count_UMI = sum(N_UMI_IS)) %>% 
     mutate(UMI_proportion = round(count_UMI / sum(count_UMI)*100,digits = 1)) %>% 
     group_by(clusterID) %>% 
-    slice_max(n = 1, order_by = UMI_proportion) %>%
-    group_by(clusterID,UMI_proportion) %>% 
-    summarise(cut_modal_position = toString(start_IS))
+    slice_max(n = 1, order_by = UMI_proportion,with_ties = F) %>%    ### here pick the first if multiple modes (specialty when low number of UMI and number of IS)
+    mutate(cut_modal_position = start_IS)
+    # group_by(clusterID,UMI_proportion) %>% 
+    # summarise(cut_modal_position = toString(start_IS))
   
   
   cluster_annotated <- cluster_annotated %>%
