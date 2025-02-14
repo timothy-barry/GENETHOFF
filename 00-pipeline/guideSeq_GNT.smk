@@ -197,41 +197,33 @@ elif (config["aligner"]  == "bwa" or config["aligner"]  == "Bwa") :
         """
 
 
-rule get_multihits_reads:
+rule filter_reads:
     input: sam=rules.alignOnGenome.output.sam
-    output: list="03-align/{sample}_multi.txt"
+    output: list="03-align/{sample}_multi.txt",
     threads: 2
     conda: "../01-envs/env_tools.yml"
+    message: "keep only alignments with high MAPQ or with equal score with best secondary alignment (multihits)"
     shell: """
-        samtools view -@ {threads} {input} | awk '
-            function abs(v) {{return v < 0 ? -v : v}}
-            {{
-                as=""; xs=""
-                for(i=12; i<=13; i++) {{
-                    if($i ~ /^AS:i:/) as=substr($i,6)
-                    if($i ~ /^XS:i:/) xs=substr($i,6)
-                }}
-                if(xs!="") {{
-                    if(abs(xs)== abs(as)) {{
-                         print $1
-                        }}
-                    }}
-            }}' > {output.list}
+        samtools view  {input} -e "((mapq < 30) && (mapq > 0) && ([AS] == [XS])) || (mapq >=30)" | cut -f1 | sort | uniq > reads_to_keep.txt > {output.list}
     """
 
 
 # sort alignments by names (required for BEDPE conversion) and position (for viewing)
 rule sort_aligned:
-    input: sam=rules.alignOnGenome.output.sam
-    output: bamPos="03-align/{sample}.UMI.ODN.trimmed.filtered.bam",  bamName="03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.bam"
+    input: sam=rules.alignOnGenome.output.sam, list = rules.filter_reads.output.list
+    output:  bam="03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.filtered.bam", 
+     bamPos="03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.bam",
+     bamName="03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam"
     threads: 6
     log:
     conda: "../01-envs/env_tools.yml"
     message: "Sort reads by name"
     shell: """
         samtools sort -@ {threads} {input.sam}  > {output.bamPos}
-        samtools index {output.bamPos}
-        samtools sort -n -@ {threads} {input.sam} > {output.bamName}
+
+        samtools view -hb --qname-file {output.list}  {output.bamPos} > {output.bam}
+        samtools index {output.bam}
+        samtools sort -n -@ {threads} {output.bam} > {output.bamName}
     """
 
 
