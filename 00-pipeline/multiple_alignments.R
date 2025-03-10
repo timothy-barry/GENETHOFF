@@ -20,6 +20,8 @@ library(tidyverse,quietly = T, verbose = F,warn.conflicts = F)
 library(Biostrings,quietly = T,verbose = F, warn.conflicts = F)
 library(DECIPHER,quietly = T,warn.conflicts = F,verbose = F)
 
+
+
 # if (!require("BiocManager", quietly = TRUE))
 #   install.packages("BiocManager")
 # 
@@ -28,9 +30,8 @@ library(DECIPHER,quietly = T,warn.conflicts = F,verbose = F)
 library(pwalign,quietly = T, verbose = F,warn.conflicts = F)
 
 # for debugging
- #args <- c("04-IScalling/EBS_Cas_NGG_hDMD.cluster_slop.fa","04-IScalling/EBS_Cas_NGG_hDMD.cluster_slop.bed","04-IScalling/EBS_Cas_NGG_hDMD.UMIs_Per_IS_in_Cluster.bed","TCTTCCGGAACAAAGTTGCT","ebs","NNN",4,6,FALSE)
-# args <- c("ngRNA11_5NGG_pos-A5.cluster_slop.fa","ngRNA11_5NGG_pos-A5.cluster_slop.bed","ngRNA11_5NGG_pos-A5.collapsefragPerISCluster.bed","GGCTAGGGATGAAGAATAAA","EBS","NGG",-4,"test.data")
- args <- c("04-IScalling/VEGFA_s1NGG_neg-1.cluster_slop.fa", "04-IScalling/VEGFA_s1NGG_neg-1.cluster_slop.bed", "04-IScalling/VEGFA_s1NGG_neg-1.UMIs_per_IS_in_Cluster.bed", "GGGTGGGGGGAGTTTGCTCC" ,"VEGFA_s1",  "NGG"  ,"-4", "6" ,"False", "05-Report/VEGFA_s1NGG_neg-1.rdata")
+
+# args <- c( "04-IScalling/g53_b_Cas_NGG_K562.cluster_slop.fa", "04-IScalling/g53_b_Cas_NGG_K562.cluster_slop.bed", "04-IScalling/g53_b_Cas_NGG_K562.UMIs_per_IS_in_Cluster.bed", "GCATCATCCTGGTACCAGGA", "g53_b",  "NGG",  -4, 6, TRUE, "05-Report/g53_b_Cas_NGG_K562.rdata")
 
 
 
@@ -90,7 +91,7 @@ if(bulges == FALSE){
 
 # Define matching function with IUPAC letters ---------------------------------------
 
-library(Biostrings)
+
 
 count_iupac_mismatches <- function(sequence, motif) {
   # Convert inputs to DNAString objects if they aren't already
@@ -291,7 +292,7 @@ if(nrow(align_stat)>0){
   
   crick_best <- align_stat %>% 
     filter(grna_orientation == "crick", crick_edits <= max_edits) %>% 
-    select(clusterID,cluster,grna_orientation,starts_with("crick")) %>%
+    dplyr::select(clusterID,cluster,grna_orientation,starts_with("crick")) %>%
     rename_all(~str_remove(.,"crick_"))
   
   if(nrow(crick_best)>0) {
@@ -401,7 +402,7 @@ if(nrow(align_stat)>0){
   
   # reorder columns : 
   best <- best %>% 
-    select(clusterID, cluster, sequence_window,
+    dplyr::select(clusterID, cluster, sequence_window,
            grna_orientation,
            seq_gDNA,seq_gRNA,
            Alignment,
@@ -417,20 +418,7 @@ if(nrow(align_stat)>0){
            pam_gDNA,pam_gRNA )
   
   
-  # calculate mismatches in pam
-  # x = pairwiseAlignment(best$pam_gDNA,best$pam_gRNA)
-  # pam_indels <- mismatchTable(x) %>% 
-  #   filter(SubjectSubstring != "N") %>% # ignore degenerated base N
-  #   group_by(PatternId)  %>% 
-  #   summarise(PAM_indel_count=n(),PAM_indel_pos = toString(SubjectEnd))
-  # 
-  # pam_indels$clusterID <- best$clusterID[pam_indels$PatternId]
-  # pam_indels <- pam_indels %>% select(-PatternId)
-  # best <- best %>% left_join(pam_indels, by = "clusterID") %>% 
-  #   replace_na(list(PAM_indel_count = 0))
-  
-  
-  best$pam_iupac <- sapply(x$pam_gDNA, function(x) {count_iupac_mismatches(x,pam)})
+  best$pam_iupac <- sapply(best$pam_gDNA, function(x) {count_iupac_mismatches(x,pam)})
   best <- best %>% separate(pam_iupac, into = c("PAM_indel_count","PAM_indel_pos"),sep = "_",remove = T)
   
   

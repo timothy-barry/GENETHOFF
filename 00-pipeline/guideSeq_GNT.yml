@@ -16,14 +16,14 @@ I2: "/media/Data/common/guideseq_gnt_dev/margaux_5/Undetermined_S0_L001_I2_001.f
 ################################################
 ## path to references
 genome:
-  human:
-    fasta: "/media/References/Human/Genecode/GRch38/Sequences/GRCh38.primary_assembly.genome.fa"
-    index: "/media/References/Human/Genecode/GRch38/Indexes/Bowtie2/GRCh38.primary_assembly.genome" # path to index created during the run if not existing yet
-    annotation: "/media/References/Human/Genecode/GRch38/Annotations/gencode.v46.annotation.gtf.gz"
-  mouse:
-    fasta: ""
-    index: ""
-    annotation: ""
+  GRCh38:
+    fasta: "/media/References/Human/ensembl/GRCh38/Sequences/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
+    index: "/media/References/Human/ensembl/GRCh38/Indexes/Bowtie2/Homo_sapiens.GRCh38.dna.primary_assembly" # path to index created during the run if not existing yet
+    annotation: "/media/References/Human/ensembl/GRCh38/Annotations/Homo_sapiens.GRCh38.113.chr.gtf.gz"
+  GRCm39: 
+    fasta: "/media/References/Mouse/ensembl/GRCm39/Sequences/Mus_musculus.GRCm39.dna.primary_assembly.fa"
+    index: "/media/References/Mouse/ensembl/GRCm39/Indexes/Bowtie2//Mus_musculus.GRCm39.dna.primary_assembly"
+    annotation: "/media/References/Mouse/ensembl/GRCm39/Annotations/Mus_musculus.GRCm39.113.chr.gtf.gz"
 ################################################
 
 ################################################

@@ -58,7 +58,6 @@ kbl(sampleInfo %>%
              "gRNA sequence"=gRNA_sequence, 
              "PAM"=PAM_sequence,
              Cas,
-             Cut_Offset ,
              type,
              orientation) %>% 
       select(
