@@ -1,9 +1,10 @@
+
+
+# Set R options
 options(tidyverse.quiet = TRUE,warn = -1,verbose = F)
 
 
-
-
-
+# load necessary libraries
 library(tidyverse,quietly = T, verbose = F,warn.conflicts = F)
 library(GenomicRanges,quietly = T, verbose = F,warn.conflicts = F)
 library(annotatr,quietly = T, verbose = F,warn.conflicts = F)
@@ -12,7 +13,11 @@ library(writexl,quietly = T, verbose = F,warn.conflicts = F)
 library(rtracklayer,quietly = T, verbose = F,warn.conflicts = F)
 library(pwalign,quietly = T, verbose = F,warn.conflicts = F)
 
+
+# get argument from command line 
 args <- commandArgs(trailingOnly = T)
+
+# Parse arguments to objects
 annotation <- args[1]
 files <- args[2]
 output<- args[3]
@@ -24,16 +29,16 @@ output<- args[3]
 # annotation <- "GRCh38"
 ###########################################################
 
-
+# load sample rdata file
 names(files) <- str_remove(basename(files),pattern = ".rdata")
-
-
 load(files)
+
+
 
 ## if file is not empty ...
 if(exists("cluster_annotated") && nrow(cluster_annotated)>0){
   
-  ## sort & convert some features
+  ## sort & convert some features type
   results_df <- cluster_annotated %>% 
     arrange(desc(N_UMI_cluster)) %>% 
     mutate(gRNA = as.character(grna),
@@ -42,7 +47,7 @@ if(exists("cluster_annotated") && nrow(cluster_annotated)>0){
   rm(cluster_annotated);
   
   
-# load preprepared annotation GRange object
+# load pre-prepared annotation GRange object
   gtf <- readRDS(paste("../02-ressources/",annotation,".rds",sep=""))
   
   # convert OTS to gRanges -----------------------------------------------------
@@ -66,7 +71,7 @@ if(exists("cluster_annotated") && nrow(cluster_annotated)>0){
                                             minoverlap = 1)
   
   
-  
+  # convert to data.frame
   results_granges_df <- data.frame(results_granges_annot) %>%
     dplyr::select(clusterID,starts_with('anno') ) 
   

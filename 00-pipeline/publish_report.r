@@ -1,14 +1,19 @@
+
+# Set global options
 options(tidyverse.quiet = TRUE,warn = -1,verbose = F)
 
-
+# Load necessary libraries
 library(rmdformats,quietly = T,warn.conflicts = F,verbose = F)
 
-
+# get arguments from command line
 args <- commandArgs(trailingOnly = T)
 
-
+# parse arguments to objects
 load(args[1])
 config_path=args[2]
+
+
+# Generate the html report
 
 rmarkdown::render(input = "../00-pipeline/guideSeq_GNT_report.rmd", 
                   output_format = "readthedown", 

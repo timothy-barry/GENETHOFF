@@ -6,21 +6,22 @@
 ####-------------------------------------------------------###
 ####-------------------------------------------------------###
 
+
+# Set global options
 options(tidyverse.quiet = TRUE,warn = -1,verbose = F)
 
 
 #R.Version()$version.string == "R version 4.3.2 (2023-10-31 ucrt)"
 
+# Get arguments fro mcommand line 
 args <- commandArgs(trailingOnly = T)
 
 
-# Load libraries --------------------------------------------------------------------
+# Load necessary libraries --------------------------------------------------------------------
 
 library(tidyverse,quietly = T, verbose = F,warn.conflicts = F)
 library(Biostrings,quietly = T,verbose = F, warn.conflicts = F)
 library(DECIPHER,quietly = T,warn.conflicts = F,verbose = F)
-
-
 
 # if (!require("BiocManager", quietly = TRUE))
 #   install.packages("BiocManager")
@@ -31,11 +32,11 @@ library(pwalign,quietly = T, verbose = F,warn.conflicts = F)
 
 # for debugging
 
-# args <- c( "04-IScalling/g53_b_Cas_NGG_K562.cluster_slop.fa", "04-IScalling/g53_b_Cas_NGG_K562.cluster_slop.bed", "04-IScalling/g53_b_Cas_NGG_K562.UMIs_per_IS_in_Cluster.bed", "GCATCATCCTGGTACCAGGA", "g53_b",  "NGG",  -4, 6, TRUE, "05-Report/g53_b_Cas_NGG_K562.rdata")
+# args <- c( "04-IScalling/VEGFA_s1NGG.cluster_slop.fa", "04-IScalling/VEGFA_s1NGG.cluster_slop.bed", "04-IScalling/VEGFA_s1NGG.UMIs_per_IS_in_Cluster.bed", "GGGTGGGGGGAGTTTGCTCC", "VEGFA_s1",  "NGG",  -4, 6, TRUE, "05-Report/VEGFA_s1NGG.rdata")
 
 
 
-# Load sample results ---------------------------------------------------------------
+# Parse arguments to objects ---------------------------------------------------------------
 
 
 fasta <- readDNAStringSet(args[1],
@@ -47,9 +48,10 @@ clusters <- read.delim(args[2],
                                      "start_cluster",
                                      "end_cluster",
                                      "clusterID",
-                                     "N_orientations_cluster",
                                      "medianMAPQ_cluster",
                                      "N_IS_cluster",
+                                     "N_orientations_cluster",
+                                     "N_orientations_PCR",
                                      "N_UMI_cluster",
                                      "N_reads_cluster"))
 
@@ -61,6 +63,7 @@ bed_collapsedUMI <- read.delim(args[3],
                                              "IS_ID",
                                              "MedianMAPQ_IS",
                                              "strand_IS",
+                                             "PCR_orientation",
                                              "N_UMI_IS",
                                              "Nreads_IS",
                                              "UMI_list",
@@ -81,6 +84,9 @@ max_edits <- as.numeric(args[8])
 
 bulges <- as.logical(toupper(args[9]))
 
+
+# Change gap penalty if bulges are tolerated or not
+
 gap_open_penalty <- 10 ## default (this tolerate gap (bulges))
 if(bulges == FALSE){
   gap_open_penalty <- gap_open_penalty *100  # this forces alignment without gap
@@ -90,9 +96,7 @@ if(bulges == FALSE){
 
 
 # Define matching function with IUPAC letters ---------------------------------------
-
-
-
+# This function is for the detection of mismatches between 2 DNAstring objects using IUAPC code
 count_iupac_mismatches <- function(sequence, motif) {
   # Convert inputs to DNAString objects if they aren't already
   seq <- DNAString(sequence)
@@ -137,8 +141,8 @@ watson = pairwiseAlignment(pattern = fasta,subject = grna,type = "local-global",
 crick = pairwiseAlignment(pattern = reverseComplement(fasta),subject = grna,type = "local-global",gapOpening=gap_open_penalty)
 
 
-# find strand with best score
 
+# aggregate results to dataframe
 align_stat <- data.frame(position = names(fasta),
                          watson_score = score(watson),
                          crick_score =  score(crick),
@@ -156,7 +160,7 @@ align_stat <- data.frame(position = names(fasta),
 
 if(nrow(align_stat)>0){
   
-  
+  # find strand with best score
   align_stat <- align_stat %>%
     mutate(grna_orientation = case_when(watson_score > crick_score ~ "watson",
                                         watson_score < crick_score  ~ "crick",
@@ -180,6 +184,7 @@ if(nrow(align_stat)>0){
   
   
   if(nrow(watson_best)>0){
+    
     watson_sub <- watson[watson_best$clusterID]
     
     width <- width(alignedPattern(watson_sub))
@@ -251,14 +256,10 @@ if(nrow(align_stat)>0){
     
     pams <- do.call(c,pams)
     
-    #pams_align  <- pairwiseAlignment(pattern = pams,subject = pam,type = "local-global",gapOpening=10)
-    
     watson_best$pam_gDNA <- pams %>% as.character
     watson_best$pam_gRNA <- pam %>%  as.character
     watson_best <-watson_best %>% ungroup %>%  mutate(rank=row_number())
-    #watson_best <- watson_best %>% bind_cols(nindel(watson_sub)@insertion %>% data.frame %>% select(Insertion_count = Length, Insertion_cum_width = WidthSum))
-    #watson_best <- watson_best %>% bind_cols(nindel(watson_sub)@deletion %>% data.frame %>% select(Deletion_count = Length, Deletion_cum_width = WidthSum))
-    
+
     
     indels_list <- indel(watson_sub)
 
@@ -355,15 +356,11 @@ if(nrow(align_stat)>0){
     
     pams <- do.call(c,pams)
     
-    #pams_align  <- pairwiseAlignment(pattern = pams,subject = pam,type = "local-global",gapOpening=10)
-    
+
     crick_best$pam_gDNA <- pams %>% as.character
     crick_best$pam_gRNA <- pam %>%  as.character
     crick_best <-crick_best %>% ungroup %>%  mutate(rank=row_number())
-    #crick_best <- crick_best %>% bind_cols(nindel(crick_sub)@insertion %>% data.frame %>% select(Insertion_count = Length, Insertion_cum_width = WidthSum))
-    #crick_best <- crick_best %>% bind_cols(nindel(crick_sub)@deletion %>% data.frame %>% select(Deletion_count = Length, Deletion_cum_width = WidthSum))
-    
-    
+
     indels_list <- indel(crick_sub)
     
     indels_table <- bind_rows(
@@ -402,20 +399,33 @@ if(nrow(align_stat)>0){
   
   # reorder columns : 
   best <- best %>% 
-    dplyr::select(clusterID, cluster, sequence_window,
-           grna_orientation,
-           seq_gDNA,seq_gRNA,
-           Alignment,
-           starts_with("Gibbs"),GC_content,
-           alignment_start_gDNA = start, alignment_end_gDNA = end, alignment_width_gDNA = width,
-           alignment_score=score,
-           Identity_pct = pid,
-           N_edits = edits, 
-           N_mismatches = mismatches, mismatches_position_gRNA, soft_trim, 
-           n_indels=indels,
-           Insertion_length,start_insertions,end_insertions,width_insertions,
-           Deletion_length,start_deletions,end_deletions,width_deletions,
-           pam_gDNA,pam_gRNA )
+    dplyr::select(clusterID, 
+                  cluster, 
+                  sequence_window,
+                  grna_orientation,
+                  seq_gDNA,seq_gRNA,
+                  Alignment,
+                  starts_with("Gibbs"),
+                  GC_content,
+                  alignment_start_gDNA = start,
+                  alignment_end_gDNA = end,
+                  alignment_width_gDNA = width,
+                  alignment_score=score,
+                  Identity_pct = pid,
+                  N_edits = edits, 
+                  N_mismatches = mismatches,
+                  mismatches_position_gRNA,
+                  soft_trim, 
+                  n_indels=indels,
+                  Insertion_length,
+                  start_insertions,
+                  end_insertions,
+                  width_insertions,
+                  Deletion_length,
+                  start_deletions,
+                  end_deletions,
+                  width_deletions,
+                  pam_gDNA,pam_gRNA )
   
   
   best$pam_iupac <- sapply(best$pam_gDNA, function(x) {count_iupac_mismatches(x,pam)})
@@ -441,36 +451,53 @@ if(nrow(align_stat)>0){
   
   
   
+
+  ## Breakdown positive and negative PCRs
+
+  cluster_PCR <- bed_collapsedUMI %>% 
+    select(-c(start_IS:end_IS,UMI_list:ReadPerUMI)) %>%
+    group_by(clusterID,chromosome,PCR_orientation) %>% 
+    summarise(N_IS = n_distinct(IS_ID),
+              N_UMI = sum(N_UMI_IS),
+              N_Reads = sum(Nreads_IS),
+              N_Orientation = n_distinct(strand_IS),
+              MapQ = median(MedianMAPQ_IS)
+              ) %>%
+    pivot_wider(names_from = PCR_orientation, values_from = c(N_IS:MapQ), values_fill = 0)
+  
+  
+  
   ## annotate clusters with identified gRNA sequence
   cluster_annotated <- clusters %>% 
+    left_join(cluster_PCR, by = c("clusterID","chromosome")) %>% 
     left_join(best %>% 
-                select(-start_chr,-end_chr,-alignment_width_gDNA,-alignment_start_gDNA,-alignment_end_gDNA) ,by = c("chromosome","clusterID"))
+                select(-start_chr,-end_chr,-alignment_width_gDNA,-alignment_start_gDNA,-alignment_end_gDNA) ,by = c("clusterID","chromosome"))
   
   
-  # calculate distance between cut sites and cluster gRNA theoretical cutting site 
+  
+  # calculate distance between cut sites and cluster gRNA matched theoretical cutting site 
   IS_in_clusters = bed_collapsedUMI %>% 
     left_join(cluster_annotated %>%  
-                select(clusterID,cut_gRNa_alignment), 
-              by = c("clusterID")) 
+                select(clusterID,chromosome,cut_gRNa_alignment), 
+              by = c("clusterID","chromosome")) 
   
   IS_in_clusters = IS_in_clusters %>% 
-    mutate(relative_distance = start_IS - cut_gRNa_alignment)
+    mutate(relative_distance = start_IS - cut_gRNa_alignment)  # distance between IS and predicted gRNA cut site
   
   
-  
+  # get the position with most abundant UMIs in a cluster
   modal_cut_position <- IS_in_clusters %>% 
-    group_by(clusterID,start_IS) %>%
+    group_by(clusterID,chromosome,start_IS) %>%
     summarise(count_UMI = sum(N_UMI_IS)) %>% 
     mutate(UMI_proportion = round(count_UMI / sum(count_UMI)*100,digits = 1)) %>% 
-    group_by(clusterID) %>% 
-    slice_max(n = 1, order_by = UMI_proportion,with_ties = F) %>%    ### here pick the first if multiple modes (specialty when low number of UMI and number of IS)
+    group_by(clusterID,chromosome) %>% 
+    slice_max(n = 1, order_by = UMI_proportion,with_ties = F) %>%    ### here pick the first if multiple modes (especialty when low number of UMI and number of IS)
     mutate(cut_modal_position = start_IS)
-    # group_by(clusterID,UMI_proportion) %>% 
-    # summarise(cut_modal_position = toString(start_IS))
+
   
   
   cluster_annotated <- cluster_annotated %>%
-    left_join(modal_cut_position, by = c("clusterID"))
+    left_join(modal_cut_position, by = c("clusterID","chromosome"))
   
   save(cluster_annotated, fasta, grna, bed_collapsedUMI, clusters, watson,crick,IS_in_clusters, file = args[10])
 } else {

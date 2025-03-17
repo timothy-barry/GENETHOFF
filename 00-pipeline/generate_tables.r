@@ -1,6 +1,12 @@
+## this script preprares tables and figures for the final report
+## it also generates alignment html files
+
+# Set options for R environment
 options(tidyverse.quiet = TRUE,conflicts.policy = list(warn = FALSE),verbose = F)
 options(knitr.kable.NA = '')
 
+
+# Load necessary libraries
 library(tidyverse,quietly = T,warn.conflicts = F,verbose = F)
 library(readxl,quietly = T,warn.conflicts = F,verbose = F)
 library(kableExtra,quietly = T,warn.conflicts = F,verbose = F)
@@ -12,10 +18,11 @@ library(data.table,quietly = T,warn.conflicts = F,verbose = F)
 library(DT, quietly = T,warn.conflicts = F,verbose = F)
 
 
+# get command line arguments 
 args <- commandArgs(trailingOnly = T)
 
 
-
+# Assign command-line arguments to variables
 summary_files = args[1] 
 sampleInfo <- read.delim(args[2], sep=";")
 config <- read_yaml(args[3])
@@ -25,13 +32,13 @@ minUMI_alignments_figure <- as.numeric(args[6])
 min_predicted_distance <- as.numeric(args[7])
 
 # debug
- # summary_files = "05-Report/g16_Cas_NNN_K562_summary.xlsx 05-Report/g12_Cas_NNN_K562_summary.xlsx 05-Report/epe18.2_Cas_NNN_K562_summary.xlsx 05-Report/epe10.5_Cas_NGG_K562_summary.xlsx 05-Report/g20_b_Cas_NGG_K562_summary.xlsx 05-Report/g53_b_Cas_NGG_K562_summary.xlsx 05-Report/EBS_Cas_NGG_hDMD_summary.xlsx"
- # sampleInfo <- read.delim("sampleInfo.csv",sep=";")
- # config=read_yaml("guideSeq_GNT.yml")
- # predicted_files = "06-offPredict/human_CAGATAACTGGGCCAACCATNNN.csv 06-offPredict/human_TTGTAATCAGCAGTACCATTNNN.csv 06-offPredict/human_GTATCCTCTTGGGGGCCCCTNNN.csv 06-offPredict/human_GTTTGCCTTGTCAAGGCTATNGG.csv 06-offPredict/human_TTTATCACAGGCTCCAGGAANGG.csv 06-offPredict/human_GCATCATCCTGGTACCAGGANGG.csv 06-offPredict/human_TCTTCCGGAACAAAGTTGCTNGG.csv"
- # max_clusters = 100
- # minUMI_alignments_figure = 1
- # min_predicted_distance = 100
+# summary_files = "05-Report/VEGFA_s1NGG_summary.xlsx"
+# sampleInfo <- read.delim("sampleInfo.csv",sep=";")
+# config=read_yaml("guideSeq_GNT.yml")
+# predicted_files = "06-offPredict/human_GGGTGGGGGGAGTTTGCTCCNGG.csv"
+# max_clusters = 100
+# minUMI_alignments_figure = 1
+# min_predicted_distance = 100
 
 
 
@@ -51,10 +58,10 @@ stats <- stats %>%
   select(file,num_seqs) %>% 
   mutate(library = str_match(file,"/(.+)_R1")[,2]) %>% 
   mutate(step = case_when(str_detect(file, "_R1.fastq.gz")~"Demultiplexed",
-                          str_ends(file, "_R1.UMI.ODN.fastq.gz")~"ODN checked",
-                          str_ends(file, "R1.UMI.ODN.trimmed.fastq.gz")~NA,
-                          str_ends(file, "_R1.UMI.ODN.trimmed.filtered.fastq.gz")~"Trimmed-filtered",
-         TRUE ~ NA)) %>% 
+                          str_ends(file, "R1.ODN.fastq.gz")~"ODN checked",
+                          str_ends(file, "R1.ODN.UMI.trimmed.fastq.gz")~NA,
+                          str_ends(file, "R1.UMI.ODN.trimmed.filtered.fastq.gz")~"Trimmed-filtered",
+                          TRUE ~ NA)) %>% 
   filter(!is.na(step)) %>% 
   select(-file) %>% 
   group_by(library) %>% 
@@ -64,15 +71,10 @@ stats <- stats %>%
 
 
 
-## Load summary excel file
-
- 
-
+## Load summary excel file -------------------------------------------------------
 summary_files <- unlist(str_split(summary_files," "))
 summary <- lapply(summary_files,read_excel)
-
 names(summary) <- str_remove(basename(summary_files),"\\_summary.xlsx")
-
 
 libraries_count <- length(summary)
 
@@ -88,7 +90,7 @@ summary <- lapply(summary,function(x){
     #filter(N_edits==0) %>% 
     select(library,clusterID) %>% 
     mutate(best=TRUE)
-
+  
   abundance <- x  %>% 
     filter(!is.na(Alignment)) %>% ## remove alignments without gRNA match
     left_join(best,by = c("clusterID","library")) %>%
@@ -101,46 +103,26 @@ summary <- lapply(summary,function(x){
   
 })
 
-
+## get best match informations by library:
 best_aligns <- summary %>%  
   bind_rows() %>% 
   filter(best==T) %>%
   arrange(library) %>% 
-  select(library, clusterID,chromosome,cut_modal_position,cut_gRNa_alignment, Edits_gRNA = N_edits, Edits_PAM=PAM_indel_count,N_IS_cluster, N_UMI_cluster,Relative_abundance)
+  select(library,
+         clusterID,
+         chromosome,
+         cut_modal_position,
+         cut_gRNa_alignment,
+         Edits_gRNA = N_edits,
+         Edits_PAM=PAM_indel_count,
+         N_IS_cluster, 
+         N_UMI_cluster,
+         Relative_abundance)
 
 
 
 
 
-# figure 7 ------------------------------
-
-files <- list.files("04-IScalling/", pattern="UMIs_per_IS_in_Cluster.bed", full.names = T)
-names(files) <- str_remove(basename(files),".UMIs_per_IS_in_Cluster.bed")
-
-IS <- lapply(files, read.delim,header=F)
-
-IS <- IS %>% bind_rows(.id="library")
-
-IS <- IS %>% inner_join(best_aligns, by = c("library","V11"="clusterID"))
-
-IS <- IS %>% mutate(rel_dist_gRNA = V2 - cut_gRNa_alignment,
-                    rel_dist_mod = V2 - as.numeric(cut_modal_position))
-
-IS_stat <- IS %>%
-  group_by(library,V6,chromosome,cut_gRNa_alignment ,rel_dist_gRNA,clusterID=V11 ) %>%
-  summarise(count=sum(V7),
-            UMI = log10(sum(V7)+1)) %>%
-  mutate(UMI = case_when(V6 == "+"~UMI,
-                         TRUE ~ -UMI))
-
-fig7 <- ggplot(IS_stat, aes(rel_dist_gRNA,UMI,fill = factor(sign(UMI)))) +
-  geom_vline(xintercept = 0, lty = 2,col = "black") +
-  geom_col(show.legend = F) + 
-  facet_wrap(~library+paste(chromosome,cut_gRNa_alignment,sep=":"),scales= "free_y",ncol = 3) +
-  theme_bw() +
-  geom_hline(yintercept = 0) +
-  labs(x = "Distance to cut site (bp)", y = "log10(UMI)")+
-  scale_fill_discrete()
 
 
 # Get stats -------------------------------------------------------------------------
@@ -150,15 +132,16 @@ stats_summary <- lapply(seq_along(summary), function(x){
   df <- summary[[x]]
   
   df %>% summarise(
-                   Reads_aligned = sum(N_reads_cluster),
-                   UMIs = sum(N_UMI_cluster),
-                   Insertions = sum(N_IS_cluster),
-                   total = n(),
-                   "dual Orientation" = length(which(N_orientations_cluster==2)),
-                   "crRNA matched"= length(which(!is.na(Alignment))),
-                   "multiple Cuts" = length(which(N_IS_cluster>3)))
-  }
-  )
+    Reads_aligned = sum(N_reads_cluster),
+    UMIs = sum(N_UMI_cluster),
+    Insertions = sum(N_IS_cluster),
+    total = n(),
+    "both PCRs" = length(which(N_orientations_PCR==2)),
+    "both Strands" = length(which(N_orientations_cluster==2)),
+    "crRNA matched"= length(which(!is.na(Alignment))),
+    "multiple Cuts" = length(which(N_IS_cluster>3)))
+}
+)
 
 names(stats_summary) <- names(summary)
 
@@ -175,83 +158,103 @@ names(predict_gRNA) <- str_remove(basename(predicted_files),"\\.csv")
 
 # Perform analysis for each library ------------------------------------------------------------------
 
-tables_html <- lapply(seq_along(summary), function(x){
+
+summary_pred_bulge <- lapply(seq_along(summary), function(x){
   lib_name <- names(summary)[x]
   cat("processing",lib_name,"\n")
   
   
-  
+  ## take summary excel file
   df <- summary[[x]] 
   
+  # remove clusters without gRNA match
   df_grna <- df %>% 
     dplyr::filter(!is.na(Alignment))
   
   if(nrow(df_grna)>0){
-
-    ### load prediction
+    
+    ### load prediction for corresponding gRNA/genome/PAM
     if(nrow(df_grna)>0){
       grna_name <- sampleInfo %>% 
         filter(sampleName == names(summary)[x]) %>% 
         mutate("grna_name" = paste(Genome,"_",gRNA_sequence,PAM_sequence,sep="")) %>%
+        distinct(grna_name) %>% 
         pull(grna_name)
       
       if(length(grna_name)==1){
         cat("Using .....", grna_name,"\n")
         
         if(nrow(predict_gRNA[[grna_name]])>0){
-
+          
           predict <- predict_gRNA[[grna_name]] %>% 
-            #filter(str_starts(Chromosome,"chr")) %>% 
             mutate(Chromosome = str_remove_all(Chromosome,"_.+$"))
-
-
-          gr_predict <- makeGRangesFromDataFrame(predict,start.field = "Position", end.field = "Position",seqnames.field = "chromosome",keep.extra.columns = F)
-          gr_data <- makeGRangesFromDataFrame(df_grna, start.field = "cut_gRNa_alignment", end.field = "cut_gRNa_alignment",seqnames.field = "chromosome",keep.extra.columns = F)
+          
+          
+          
+          ## intersect cluster range and prediction ranges to find predicted clusters
+          gr_predict <- makeGRangesFromDataFrame(predict,
+                                                 start.field = "Position",
+                                                 end.field = "Position",
+                                                 seqnames.field = "chromosome",
+                                                 keep.extra.columns = F)
+          
+          gr_data <- makeGRangesFromDataFrame(df_grna, 
+                                              start.field = "cut_gRNa_alignment",
+                                              end.field = "cut_gRNa_alignment",
+                                              seqnames.field = "chromosome",
+                                              keep.extra.columns = F)
+          
+          # distance to nearest predicted cut site
           near_df <- distanceToNearest(gr_data,gr_predict)
+          
+          # filter predicted that are within window defined in configuration file
           near_df <- near_df[near_df@elementMetadata$distance <= min_predicted_distance,]
           
-
+          # clear
+          rm(gr_predict);rm(gr_data)
           
-        
-          # get cluster with gRNA
+          # get identified clusters with gRNA
           x3 <- df_grna %>% 
             unite("DNA", seq_gDNA,pam_gDNA,sep="",remove = F ) %>% 
             unite("crRNA",seq_gRNA,pam_gRNA,sep="",remove=F) %>% 
             distinct(chromosome, clusterID,DNA,crRNA)
           
           
-          # keep those with predicted in window
+          # keep those predicted
           x3 <- data.frame(x3[near_df@from,])
           
           # Add predicted alignments
-          
           pred <- predict[near_df@to,] %>% data.frame()
           
           pred <- pred %>%
-              select(chromosome_pred=Chromosome,DNA_pred=AlignedText,crRNA_pred=AlignedTarget)
+            select(chromosome_pred=Chromosome,DNA_pred=AlignedText,crRNA_pred=AlignedTarget)
           
-          
+          # merge identified clusters and the predicted alignments
           x3 <- x3 %>% bind_cols(pred)
           
+          # annotate clusters if predicted by position (in window) or exact alignment pattern
           x3 <- x3 %>% 
             mutate(predicted_position = "yes",
                    predicted_pattern = case_when(DNA == DNA_pred & crRNA == crRNA_pred ~ "yes",
-                               TRUE ~"no")) %>% 
-            select(clusterID,predicted_position,predicted_pattern)
+                                                 TRUE ~"no"))
           
           
           
+          ## add prediction status to table of identified OT with gRNA match
           x3 <- df_grna %>% 
             left_join(x3, by = "clusterID") %>% 
-            replace_na(list(predicted_position="no",predicted_pattern="no")) #%>% 
-            
+            replace_na(list(predicted_position="no",predicted_pattern="no"))
+          
+          
+          ## define if there are bulges in the alignments --> presence of indels
           x3 <- x3 %>% mutate(bulge = case_when(str_detect(seq_gDNA,"-") & str_detect(seq_gRNA,"-") ~ "both",
                                                 str_detect(seq_gRNA,"-") ~ "gDNA",
                                                 str_detect(seq_gDNA,"-") ~ "gRNA",
-                                                TRUE ~ "none")) %>% 
+                                                TRUE ~ "none")) %>%
             select(clusterID,predicted=predicted_position,bulge)
           
           
+          # annotate table of clusters with prediction / bulges
           df <- df %>% left_join(x3, by = "clusterID")
           return(df)
           
@@ -263,12 +266,12 @@ tables_html <- lapply(seq_along(summary), function(x){
 }
 )
 
-names(tables_html) <- names(summary)
+names(summary_pred_bulge) <- names(summary)
 
 
 # figure 3 --------------------------------------------------------------------------
 
-data_fig3 <- lapply(tables_html, function(x){
+data_fig3 <- lapply(summary_pred_bulge, function(x){
   
   x %>% group_by(chromosome,"has_gRNA?"=!is.na(Alignment)) %>% 
     summarise(clusters = n(), reads = sum(N_reads_cluster), UMI = sum(N_UMI_cluster))
@@ -283,7 +286,7 @@ data_fig3 <- data_fig3 %>%
 
 # change MT to M
 data_fig3 <- data_fig3 %>% 
-    mutate(chromosome = recode(chromosome, "MT" = "M"))
+  mutate(chromosome = recode(chromosome, "MT" = "M"))
 
 
 #convert ensemble to UCSC
@@ -327,7 +330,7 @@ fig3b <- ggplot(data_fig3, aes( chromosome, UMI,fill = `has_gRNA?`)) +
 
 # figure 4 --------------------------------------------------------------------------
 
-data_fig4 <- lapply(tables_html, function(x){
+data_fig4 <- lapply(summary_pred_bulge, function(x){
   
   x %>%
     filter(!is.na(Alignment)) %>% 
@@ -383,7 +386,7 @@ fig4b <- ggplot(data_fig4, aes( chromosome, UMI,fill=predicted)) +
 
 # figure 5 --------------------------------------------------------------------------
 
-fig5 <- lapply(tables_html, function(x){
+fig5 <- lapply(summary_pred_bulge, function(x){
   
   x %>% filter(N_UMI_cluster>=minUMI_alignments_figure, !is.na(Alignment))
 }
@@ -408,12 +411,10 @@ fig5 <- ggplot(fig5_data, aes(rank_desc,N_UMI_cluster)) +
 
 
 
-
-
 # figure 6 --------------------------------------------------------------------------
 
 
-data_fig6 <- lapply(tables_html, function(x){
+data_fig6 <- lapply(summary_pred_bulge, function(x){
   
   x %>% filter(!is.na(Alignment))
 }
@@ -442,24 +443,71 @@ fig6b <- ggplot(data_fig6, aes(as.numeric(PAM_indel_count),fill = predicted)) +
 
 
 
+# figure 7 ------------------------------
 
+files <- list.files("04-IScalling/", pattern="UMIs_per_IS_in_Cluster.bed", full.names = T)
+names(files) <- str_remove(basename(files),".UMIs_per_IS_in_Cluster.bed")
+
+IS <- lapply(files, read.delim,header=F)
+
+IS <- IS %>% bind_rows(.id="library")
+
+IS <- IS %>% inner_join(best_aligns, by = c("library","V12"="clusterID"))
+
+IS <- IS %>% mutate(rel_dist_gRNA = V2 - cut_gRNa_alignment,
+                    rel_dist_mod = V2 - as.numeric(cut_modal_position))
+
+IS_stat <- IS %>%
+  group_by(library,V6,chromosome,cut_gRNa_alignment ,rel_dist_gRNA,clusterID=V12 ) %>%
+  summarise(count=sum(V8),
+            UMI = log10(sum(V8)+1)) %>%
+  mutate(UMI = case_when(V6 == "+"~UMI,
+                         TRUE ~ -UMI))
+
+fig7 <- ggplot(IS_stat, aes(rel_dist_gRNA,UMI,fill = factor(sign(UMI)))) +
+  geom_vline(xintercept = 0, lty = 2,col = "black") +
+  geom_col(show.legend = F) + 
+  facet_wrap(~library+paste(chromosome,cut_gRNa_alignment,sep=":"),scales= "free_y",ncol = 3) +
+  theme_bw() +
+  geom_hline(yintercept = 0) +
+  labs(x = "Distance to cut site (bp)", y = "log10(UMI)")+
+  scale_fill_discrete()
 
 
 
 # tables off targets ----------------------------------------------------------------
 
 
-tables_off <- lapply(seq_along(tables_html),function(x){
+tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
   
-  cat("Generating html table ",names(tables_html)[x],"\n")
+  cat("Generating html table for sample : ",names(summary_pred_bulge)[x],"\n")
   
-  df <- tables_html[[x]] %>% filter(!is.na(Alignment))  ## keep only clusters with gRNA match
+  df <- summary_pred_bulge[[x]] %>% filter(!is.na(Alignment))  ## keep only clusters with gRNA match
   
+  ## subset top n clusters by UMI count (defined in the configuration file)
   dt <-  df  %>% ungroup %>% 
+    filter(N_UMI_cluster > minUMI_alignments_figure) %>% 
     slice_max(n = max_clusters,order_by = N_UMI_cluster,with_ties = F) %>% 
-    filter(N_UMI_cluster > minUMI_alignments_figure)
+    as.data.table(dt)
   
-  dt <- as.data.table(dt)
+  
+  compare_strings <- function(DNA,RNA){
+    
+    DNA <- str_split_1(DNA,"")
+    RNA <- str_split_1(RNA,"")
+    
+    DNA[DNA==RNA]<- "."
+    return(paste(DNA,collapse=""))
+    
+  }
+  
+  dt  <- dt %>% 
+    rowwise() %>% 
+    mutate(seq_gDNA_plot = compare_strings(seq_gDNA,seq_gRNA),
+           PAM_plot = compare_strings(pam_gDNA,pam_gRNA)) %>% ungroup %>% data.table()
+  
+  ### FORMAT alignments to HTML to add some colors
+  ## use a monospace font to keep equal character width
   
   dt[, seq_gRNA_html := paste(text_spec(background_as_tile = FALSE, monospace = TRUE,
                                         strsplit(seq_gRNA, split = "")[[1]],
@@ -468,9 +516,9 @@ tables_off <- lapply(seq_along(tables_html),function(x){
                               collapse = ""), by = 1:nrow(dt)]
   
   dt[, seq_gDNA_html := paste(text_spec(background_as_tile = FALSE, monospace = TRUE,
-                                        strsplit(seq_gDNA, split = "")[[1]],
-                                        background = recode(strsplit(seq_gDNA, split = "")[[1]],
-                                                            A = "#129749", T = "#d62839", C = "#255c99", G = "#f7b32b")),
+                                        strsplit(seq_gDNA_plot, split = "")[[1]],
+                                        background = recode(strsplit(seq_gDNA_plot, split = "")[[1]],
+                                                            A = "#129749", T = "#d62839", C = "#255c99", G = "#f7b32b", "-" = "grey70")),
                               collapse = ""), by = 1:nrow(dt)]
   
   dt[, pam_gRNA_html := paste(text_spec(background_as_tile = FALSE, monospace = TRUE,
@@ -480,8 +528,8 @@ tables_off <- lapply(seq_along(tables_html),function(x){
                               collapse = ""), by = 1:nrow(dt)]
   
   dt[, pam_gDNA_html := paste(text_spec(background_as_tile = FALSE, monospace = TRUE,
-                                        strsplit(pam_gDNA, split = "")[[1]],
-                                        background = recode(strsplit(pam_gDNA, split = "")[[1]],
+                                        strsplit(PAM_plot, split = "")[[1]],
+                                        background = recode(strsplit(PAM_plot, split = "")[[1]],
                                                             A = "#129749", T = "#d62839", C = "#255c99", G = "#f7b32b")),
                               collapse = ""), by = 1:nrow(dt)]
   
@@ -489,122 +537,112 @@ tables_off <- lapply(seq_along(tables_html),function(x){
   dt[, Symbol_html := str_replace_all(Symbol, ", ", " <br>")]
   dt[, position_html := str_replace_all(position, ", ", " <br>")]
   
-    # rowwise() %>%   # this step is very slow, try to find an alternative ASAP (maybe use data.table package ?)
-    # mutate(seq_gRNA_html = 
-    #          paste(text_spec(background_as_tile=F,monospace = T,
-    #                          strsplit(
-    #                            seq_gRNA,split="")[[1]],
-    #                          background = recode(strsplit(
-    #                            seq_gRNA,split="")[[1]], A="#129749",T="#d62839",C="#255c99",G="#f7b32b")),collapse = ""),
-    #        seq_gDNA_html = 
-    #          paste(text_spec(background_as_tile=F,monospace = T,
-    #                          strsplit(
-    #                            seq_gDNA,split="")[[1]],
-    #                          background = recode(strsplit(
-    #                            seq_gDNA,split="")[[1]], A="#129749",T="#d62839",C="#255c99",G="#f7b32b")),collapse = ""),
-    #        pam_gRNA_html = 
-    #          paste(text_spec(background_as_tile=F,monospace = T,
-    #                          strsplit(
-    #                            pam_gRNA,split="")[[1]],
-    #                          background = recode(strsplit(
-    #                            pam_gRNA,split="")[[1]],N="grey", A="#129749",T="#d62839",C="#255c99",G="#f7b32b")),collapse = ""),
-    #        pam_gDNA_html = 
-    #          paste(text_spec(background_as_tile=F,monospace = T,
-    #                          strsplit(
-    #                            pam_gDNA,split="")[[1]],
-    #                          background = recode(strsplit(
-    #                            pam_gDNA,split="")[[1]], A="#129749",T="#d62839",C="#255c99",G="#f7b32b")),collapse = "")) %>% 
-    # 
-    # mutate(alignment_html = paste("gRNA: ",seq_gRNA_html," ",pam_gRNA_html," <br>gDNA: ",seq_gDNA_html," ",pam_gDNA_html,sep=""),
-    #        Symbol_html = str_replace_all(Symbol,", "," <br>"),
-    #        position_html = str_replace_all(position,", "," <br>"))
+  
   
   dt$predicted_alignment_html <- cell_spec(dt$predicted, background = ifelse(dt$predicted == "yes", "#129749", "white"))
-
   
+  
+  ## which columns to add to the alignment html file
   dt <- dt %>% 
-    mutate("cut offset" = as.numeric(cut_modal_position) - as.numeric(cut_gRNa_alignment)) %>% 
-    select(library,chromosome,cut_gRNa_alignment, `cut offset`,
-                      alignment=alignment_html,
-                      UMIs=N_UMI_cluster,
-                      reads=N_reads_cluster,
-                      "Edits crRNA"=N_edits, N_mismatches, n_indels, soft_trim,
-                      "Edits pam"= PAM_indel_count,
-                      Symbol=Symbol_html,
-                      Position=position_html,
-                      predicted= predicted_alignment_html,
-                      bulge) %>% 
+    mutate("cut offset" = as.numeric(cut_modal_position) - as.numeric(cut_gRNa_alignment),
+           PCR = case_when(N_UMI_positive>0 & N_UMI_negative > 0 ~ "+/-",
+                           N_UMI_positive>0 ~"+",
+                           N_UMI_negative>0 ~"-",
+                           TRUE ~ NA)) %>% 
+    select(library,
+           chromosome,
+           cut_gRNa_alignment, 
+           `cut offset`,
+           alignment=alignment_html,
+           UMIs=N_UMI_cluster,
+           reads=N_reads_cluster,
+           "Edits crRNA"=N_edits, 
+           N_mismatches,
+           n_indels,
+           soft_trim,
+           "Edits pam"= PAM_indel_count,
+           Symbol=Symbol_html,
+           Position=position_html,
+           predicted= predicted_alignment_html,
+           bulge,
+           PCR) %>% 
     unite(col = "gRNA<br>position",chromosome,cut_gRNa_alignment,sep = ":") %>% 
     unite("MM_indels_softClip",N_mismatches, n_indels, soft_trim,sep = "_",remove = T) 
   
+  
+  
+  ## Make kable static table
+  
   kb <- kbl(dt %>% select(-library),
             escape = F,
-            align=c("r","r","r","r","r",rep('c', 9))) %>%
+            align=c("r","r","r","r","r",rep('c', 10))) %>%
     kable_classic_2(full_width = F,html_font = "helvetica") %>%
     kable_styling(bootstrap_options = c("condensed","hover","stripped"),
                   font_size = 12,
                   fixed_thead = T) %>%
-    column_spec(1:12,extra_css = "vertical-align:middle;")
-
-    save_kable(kb,file = paste("05-Report/report-files/",names(tables_html)[x],"_offtargets.html",sep=""),self_contained=T)
-
-    
-    dt2 <- DT::datatable(dt %>% select(-library),
-                         escape = F, 
-                         extensions = 'Buttons',
-                         rownames = FALSE,
-                         filter = 'top',
-                         class = 'nowrap display compact',
-                         options = list(
-                           pageLength = 20,
-                           autoWidth = F,
-                           lengthMenu = list(20,50,-1),
-                           fixedHeader = TRUE,
-                           dom = 'Blcfrtip',
-                           buttons = c('copy', 'csv', 'excel'),
-                           columnDefs = list(list(className = 'dt-body-center', targets = c(6,7,8,9,10,11)),
-                                             list(className = 'dt-body-right', targets = c(0,1,2,3,4,5)),
-                                             list(className = 'dt-head-center', targets = c(0,1,2,3,4,5,6,7,8,9,10,11)),
-                                             list(width = "2%", targets = 5)),
-                           initComplete = DT::JS(
-                             "function(settings, json) {",
-                             "$('body').css({'font-family': 'Calibri', 'font-size': '12px'});",
-                             "$('table').css({'width': '100%'});
-                            }"
-                           )
-                         )
-    ) %>% formatStyle(
-      'UMIs',
-      background = styleColorBar(dt$UMIs, 'steelblue'),
-      backgroundSize = '100% 90%',
-      backgroundRepeat = 'no-repeat',
-      backgroundPosition = 'center'
-    )%>% formatStyle(
-      'reads',
-      background = styleColorBar(dt$reads, 'steelblue'),
-      backgroundSize = '100% 90%',
-      backgroundRepeat = 'no-repeat',
-      backgroundPosition = 'center'
-    )
-
+    column_spec(1:13,extra_css = "vertical-align:middle;")
   
-
-    htmlwidgets::saveWidget(widget = dt2, file = paste("05-Report/report-files/",names(tables_html)[x],"_offtargets_dynamic.html",sep=""),selfcontained = T)
-    
-    return(paste("05-Report/report-files/",names(tables_html)[x],"_offtargets_dynamic.html",sep="")) # name the output in list
-
+  save_kable(kb,file = paste("05-Report/report-files/",names(summary_pred_bulge)[x],"_offtargets.html",sep=""),self_contained=T)
+  
+  
+  
+  
+  # Make DT dynamic table
+  
+  dt2 <- DT::datatable(dt %>% select(-library),
+                       escape = F, 
+                       extensions = 'Buttons',
+                       rownames = FALSE,
+                       filter = 'top',
+                       class = 'nowrap display compact',
+                       options = list(
+                         pageLength = 20,
+                         autoWidth = F,
+                         lengthMenu = list(20,50,-1),
+                         fixedHeader = TRUE,
+                         dom = 'Blcfrtip',
+                         buttons = c('copy', 'csv', 'excel'),
+                         columnDefs = list(list(className = 'dt-body-center', targets = c(6,7,8,9,10,11)),
+                                           list(className = 'dt-body-right', targets = c(0,1,2,3,4,5)),
+                                           list(className = 'dt-head-center', targets = c(0,1,2,3,4,5,6,7,8,9,10,11)),
+                                           list(width = "2%", targets = 5)),
+                         initComplete = DT::JS(
+                           "function(settings, json) {",
+                           "$('body').css({'font-family': 'Calibri', 'font-size': '12px'});",
+                           "$('table').css({'width': '100%'});
+                            }"
+                         )
+                       )
+  ) %>% formatStyle(
+    'UMIs',
+    background = styleColorBar(dt$UMIs, 'steelblue'),
+    backgroundSize = '100% 90%',
+    backgroundRepeat = 'no-repeat',
+    backgroundPosition = 'center'
+  )%>% formatStyle(
+    'reads',
+    background = styleColorBar(dt$reads, 'steelblue'),
+    backgroundSize = '100% 90%',
+    backgroundRepeat = 'no-repeat',
+    backgroundPosition = 'center'
+  )
+  
+  
+  
+  htmlwidgets::saveWidget(widget = dt2, file = paste("05-Report/report-files/",names(summary_pred_bulge)[x],"_offtargets_dynamic.html",sep=""),selfcontained = T)
+  
+  return(paste("05-Report/report-files/",names(summary_pred_bulge)[x],"_offtargets_dynamic.html",sep="")) # name the output in list
+  
 })
 
-names(tables_off) <- names(tables_html)
+names(tables_off) <- names(summary_pred_bulge)
 
 
 
 # Save report data ------------------------------------------------------------------
 
-save(list = c("tables_off", "tables_html","sampleInfo", "stats", "stats_summary","best_aligns", grep(x=ls(),"fig",value = T)), file = "05-Report/report.rdata")
+save(list = c("tables_off", "summary_pred_bulge","sampleInfo", "stats", "stats_summary","best_aligns", grep(x=ls(),"fig",value = T)), file = "05-Report/report.rdata")
 
-
-# Make report -----------------------------------------------------------------------
 
 
 

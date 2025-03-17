@@ -21,14 +21,13 @@ library(tidyverse,quietly = T,warn.conflicts = F,verbose = F)
 library(kableExtra,quietly = T,warn.conflicts = F,verbose = F)
 library(yaml,quietly = T,warn.conflicts = F,verbose = F)
 
-libraries_count <- length(tables_html)
+libraries_count <- length(summary_pred_bulge)
 
 ```
 
-::: {#intro}
+::: {style="align-items: center;"}
+![](../02-ressources/logo.png){style="border-radius:5px;margin-left: auto;   margin-right: auto;justify-content: center;" width="150"}
 :::
-
-![](../02-ressources/logo.png){style="border-radius:5px;margin-left: auto;   margin-right: auto;" width="150"}
 
 The guideSeq (Genome-wide Unbiased Identification of Double-strand breaks Enabled by Sequencing) method enables comprehensive detection and quantification of off-target activity by capturing double-strand breaks across the genome through oligonucleotide tagging, followed by sequencing and bioinformatic analysis.
 
@@ -49,7 +48,7 @@ All parameters can be found in [Configuration settings] at the end of the docume
 # Description of libraries
 
 ```{r,echo=F}
-kbl(sampleInfo %>% 
+collapse_rows(kbl(sampleInfo %>% 
       arrange(sampleName) %>% 
       select(library=sampleName,
              replicate,
@@ -68,7 +67,7 @@ kbl(sampleInfo %>%
         kable_classic_2(full_width = T,html_font = "helvetica") %>% 
         kable_styling(bootstrap_options = c("condensed","hover","stripped"),
                       font_size = 11,
-                      fixed_thead = T) 
+                      fixed_thead = T))
 ```
 
 # Best match found
@@ -141,7 +140,7 @@ kbl(stats_summary %>%  arrange(library) %>% left_join(alignment_table),escape = 
                       caption = "Table 4",
     format.args = list(big.mark = ",")) %>%
         kable_classic_2(full_width = T,html_font = "helvetica") %>% 
-        add_header_above(c(" " = 4, "Clusters" = 5)) %>% 
+        add_header_above(c(" " = 4, "Clusters" = 6)) %>% 
         kable_styling(bootstrap_options = c("condensed","hover","stripped"),
                       font_size = 12,
                       fixed_thead = T)

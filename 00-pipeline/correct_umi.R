@@ -18,7 +18,7 @@ args <- commandArgs(trailingOnly = T)
   motif <- args[2]
   filt.umi <- as.logical(toupper(args[3]))
   hamming_threshold <- as.numeric(args[4])
-  method <- args[5]
+  method <- str_to_lower(args[5])
   output <- args[6]
 
 
@@ -34,7 +34,7 @@ args <- commandArgs(trailingOnly = T)
 # Select sites to correct UMIs -----------------------------------------------------------
 
 bed <- bed %>%  
-  unite("site", V1,V2,V3,V5,remove = F)
+  unite("site", V1,V2,V3,V6,remove = F)
 
 to_process <- bed %>% dplyr::count(site) %>% filter(n>1) %>% distinct(site)
 
@@ -95,7 +95,7 @@ to_process <- bed %>% dplyr::count(site) %>% filter(n>1) %>% distinct(site)
       return(result_df)
     }
     
-    if(type == "Adjacency"){
+    if(type == "adjacency"){
       
       # Initialize results list
       results <- list()
@@ -186,7 +186,7 @@ to_process <- bed %>% dplyr::count(site) %>% filter(n>1) %>% distinct(site)
 sp2 <- lapply(sp, function(x){
   
   umis <- x$V4
-  counts <- x$V6
+  counts <- x$V7
   
   group_umis(umis, counts, hamming_threshold = hamming_threshold, graph = F, type = method)
 
@@ -198,12 +198,12 @@ corrected <- sp2 %>% bind_rows(.id="site") %>% distinct()
 
 w <- bed_sub %>% 
   left_join(corrected, by = c("site","V4"="UMI")) %>% 
-  group_by(V1,V2,V3,V4=UMI_node,V5) %>% 
+  group_by(V1,V2,V3,V4=UMI_node,V5,V6) %>% 
   summarise(
-            V7 = sum(V7*V6)/sum(V6),
+            V8 = sum(V8*V7)/sum(V7),
             UMIs = toString(V4),
-            UMIs_count = toString(V6),
-            V6 = sum(V6),
+            UMIs_count = toString(V7),
+            V7 = sum(V7),
             nUMIs = n())
 
 
@@ -214,7 +214,7 @@ bed_corrected <- bed %>% anti_join(to_process) %>% bind_rows(w) %>%
   select(-site) %>% 
   replace_na(list(nUMIs = 1)) %>% 
   mutate(UMIs  = case_when(is.na(UMIs )~V4, TRUE ~ UMIs ),
-         UMIs_count  = case_when(is.na(UMIs_count )~ as.character(V6), TRUE ~ UMIs_count ))
+         UMIs_count  = case_when(is.na(UMIs_count )~ as.character(V7), TRUE ~ UMIs_count ))
 
 
 # Check if UMI pattern is correct ---------------------------------------------------
