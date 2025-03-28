@@ -7,6 +7,7 @@ import sys
 from collections import defaultdict
 
 
+# check that the config file is present in current folder
 if not os.path.isfile("guideSeq_GNT.yml"):
     raise SystemExit("\n  No config file found in current directory \n")
 
@@ -14,8 +15,14 @@ configfile: "guideSeq_GNT.yml"
 config_file_path=os.getcwd()+'/'+workflow.configfiles[0]
 
 
-## Load the sample information files as a TSV file. 'sampleName' column is mandatory
+## Load the sample information files as a TSV file.
+# check that the config file is present in current folder
+if not os.path.isfile(config["sampleInfo_path"]):
+    raise SystemExit("\n  No Sample Dta Sheet file found in current directory \n")
+
 samplesTable = pd.read_table(config["sampleInfo_path"],sep=";").set_index("sampleName", drop=False)
+
+#check the validity of the sample Data Sheet (Path is relative to pipeline file, not current folder)
 validate(samplesTable, "samples.schema.yaml")
 
 
@@ -23,6 +30,8 @@ validate(samplesTable, "samples.schema.yaml")
 
 
 ## if multiple rows have the same sampleName, check that they have the same gRNA,PAM, Cas and genome
+# The purpose of this code is to ensure data consistency by verifying that samples with the same name have identical features. 
+# The check for hyphens in sample names is to prevent issues with delimiters in file names or identifiers.
 
 RED= "\x1b[33m"
 RESET= RESET = "\033[0m"
@@ -43,7 +52,7 @@ if identical_values.all():
     ## check there is no "-" in sample name
     strings_with_hyphen = [item for item in samples_unique if "-" in item]
     if strings_with_hyphen:
-        print(f"{RED} !! '-' detected in the following sample name :", strings_with_hyphen,"\n Please modify sample name and replace '-' by another symbol")
+        print(f"{RED} !! '-' detected in the following sample name :", strings_with_hyphen,"\n Please modify sample name and replace '-' by another delimiter")
         sys.exit(1)
     else:
       
@@ -65,7 +74,7 @@ else:
 
 
 
-#print(samples)
+
 ## RUN the pipeline in the project folder.
 ## snakemake -s ../00-pipeline/guideSeq_GNT.smk -k -j 12 --use-conda --conda-front-end mamba --conda-prefix ../01-envs -n
 
@@ -79,17 +88,17 @@ rule target:
      "05-Report/report.html"
      
 
-rule make_genome_index:
-    input: lambda wildcards: config["genome"][wildcards.genome]["fasta"]
-    output: "../02-ressources/{genome}.log"
-    threads: 24
-    conda: "../01-envs/env_tools.yml"
-    params: idx=lambda wildcards: config["genome"][wildcards.genome]["index"]
-    shell: """
-        mkdir -p $(dirname {params.idx})
-        bowtie2-build --threads {threads} {input} {params.idx} > {params}.log
-        ln -s {params}.log {output}
-        """
+#rule make_genome_index:
+#    input: lambda wildcards: config["genome"][wildcards.genome]["fasta"]
+#    output: "../02-ressources/{genome}.log"
+#    threads: 24
+#    conda: "../01-envs/env_tools.yml"
+#    params: idx=lambda wildcards: config["genome"][wildcards.genome]["index"]
+#    shell: """
+#        mkdir -p $(dirname {params.idx})
+#        bowtie2-build --threads {threads} {input} {params.idx} > {params}.log
+#        ln -s {params}.log {output}
+#        """
 
 
 
@@ -126,7 +135,11 @@ rule merge_indexes:
     output: I3=("I3.fastq.gz")
     conda: "../01-envs/env_tools.yml"
     shell: """
-        python ../00-pipeline/merge_I1_I2.py {input.I1} {input.I2} {output}
+        #python ../00-pipeline/merge_I1_I2.py {input.I1} {input.I2} {output}
+        
+        paste -d ";" <(gzip -dc {input.I1}) <(gzip -dc {input.I2}) | awk 'BEGIN{{FS=";";OFS=""}} {{if( NR % 4 ==1 || NR % 4 == 3) {{print $1}} else {{print $1,$2}}}}' > I3.fastq
+        gzip I3.fastq
+
         """
 
 
@@ -259,7 +272,7 @@ rule filter_reads:
   # map reads on the reference genome as pairs
 if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
     rule alignOnGenome:
-        input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2, idx=["../02-ressources/{genome}.log".format(genome=genome) for genome in genomes_unique]
+        input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2
         output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam")
         threads: 6
         log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
@@ -271,8 +284,7 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
         shell: """
                 bowtie2 -p {threads} --no-unal -I {params.minFragLength} -X {params.maxFragLength} --dovetail --no-mixed --no-discordant --un-conc-gz 03-align/{wildcards.sample}_R%.UMI.ODN.trimmed.unmapped.fastq.gz   -x {params.index} -1 {input.R1} -2 {input.R2} -S {output.sam} 2> {log}
             """
- 
-  
+
 elif (config["aligner"]  == "bwa" or config["aligner"]  == "Bwa") :
     rule alignOnGenome:
         input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2

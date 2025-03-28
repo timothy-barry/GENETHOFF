@@ -47,7 +47,7 @@ if(exists("cluster_annotated") && nrow(cluster_annotated)>0){
   rm(cluster_annotated);
   
   
-# load pre-prepared annotation GRange object
+  # load pre-prepared annotation GRange object
   gtf <- readRDS(paste("../02-ressources/",annotation,".rds",sep=""))
   
   # convert OTS to gRanges -----------------------------------------------------
@@ -61,7 +61,7 @@ if(exists("cluster_annotated") && nrow(cluster_annotated)>0){
                                               na.rm = T)
   
   
-
+  
   
   # annotate gRanges -------------------------------------------------------------------
   
@@ -91,10 +91,46 @@ if(exists("cluster_annotated") && nrow(cluster_annotated)>0){
               Symbol = toString(annot.gene_name),
               gene_type = toString(annot.gene_biotype),
               position = toString(position))
-
+  
+  
+  
+  
+ 
+  
+  
+  # Annotate ------------------------------------------------------------------
+  
   
   
   results_granges_df_annot <- results_df %>%  left_join(results_granges_df_annot, by = "clusterID")
+  
+  
+  
+  # Annotate clusters that have a similar alignment pattern --> multihits -------------
+  
+  
+  multihits <- results_granges_df_annot %>% 
+    filter(!is.na(Alignment))  %>%    #keep clusters with gRNa match
+    distinct(clusterID,Alignment)%>% 
+    arrange(Alignment) %>% 
+    mutate(multi_cluster = as.numeric(factor(Alignment))) %>%     # assign ID to clusters with identical alignment pattern
+    group_by(multi_cluster) %>% 
+    mutate(SimilarAlignmentCount = n_distinct(clusterID)) %>%     # count how many clusters share the same alignment pattern
+    distinct(clusterID,multi_cluster,SimilarAlignmentCount)       # select columns for annotation
+  
+  
+  
+  results_granges_df_annot <- results_granges_df_annot %>% 
+    left_join(multihits, by = "clusterID") %>% 
+    group_by(multi_cluster) %>% 
+    mutate(n_UMI_multiSum = sum(N_UMI_cluster),                 # calculate sum of UMI counts per ID. As we don't know which site is the correct one, we sum up all UMI from all site with same pattern
+           multiHit = SimilarAlignmentCount>1)                  # if there are more than 1 site per ID, it's a multihit
+  
+  
+
+  # Save to csv file  -----------------------------------------------------------------
+
+  
   write.table(results_granges_df_annot, str_replace(output,pattern = "xlsx$","tsv"),sep="\t",row.names = F,quote=F)
   
   

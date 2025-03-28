@@ -565,7 +565,9 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
            Position=position_html,
            predicted= predicted_alignment_html,
            bulge,
-           PCR) %>% 
+           PCR,
+           multiHit,
+           n_UMI_multiSum) %>% 
     unite(col = "gRNA<br>position",chromosome,cut_gRNa_alignment,sep = ":") %>% 
     unite("MM_indels_softClip",N_mismatches, n_indels, soft_trim,sep = "_",remove = T) 
   
@@ -575,12 +577,12 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
   
   kb <- kbl(dt %>% select(-library),
             escape = F,
-            align=c("r","r","r","r","r",rep('c', 10))) %>%
+            align=c("r","r","r","r","r",rep('c', 12))) %>%
     kable_classic_2(full_width = F,html_font = "helvetica") %>%
     kable_styling(bootstrap_options = c("condensed","hover","stripped"),
                   font_size = 12,
                   fixed_thead = T) %>%
-    column_spec(1:13,extra_css = "vertical-align:middle;")
+    column_spec(1:15,extra_css = "vertical-align:middle;")
   
   save_kable(kb,file = paste("05-Report/report-files/",names(summary_pred_bulge)[x],"_offtargets.html",sep=""),self_contained=T)
   

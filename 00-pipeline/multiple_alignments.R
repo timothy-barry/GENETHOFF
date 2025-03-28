@@ -205,12 +205,12 @@ if(nrow(align_stat)>0){
       mutate(indels = Insertion_length+ Deletion_length) %>% 
       mutate(edits = indels + soft_trim + mismatches) %>% 
       filter(edits <= max_edits)
-
+    
     watson_sub <- watson[watson_best$clusterID]
     
     
     
-        
+    
     
     fasta_temp <- fasta[watson_best$clusterID]
     seq_gDNA <- alignedPattern(watson_sub)   # this step can be long
@@ -259,10 +259,10 @@ if(nrow(align_stat)>0){
     watson_best$pam_gDNA <- pams %>% as.character
     watson_best$pam_gRNA <- pam %>%  as.character
     watson_best <-watson_best %>% ungroup %>%  mutate(rank=row_number())
-
+    
     
     indels_list <- indel(watson_sub)
-
+    
     indels_table <- bind_rows(
       bind_rows(
         "insertions" = insertion(indels_list)%>%
@@ -356,11 +356,11 @@ if(nrow(align_stat)>0){
     
     pams <- do.call(c,pams)
     
-
+    
     crick_best$pam_gDNA <- pams %>% as.character
     crick_best$pam_gRNA <- pam %>%  as.character
     crick_best <-crick_best %>% ungroup %>%  mutate(rank=row_number())
-
+    
     indels_list <- indel(crick_sub)
     
     indels_table <- bind_rows(
@@ -451,9 +451,9 @@ if(nrow(align_stat)>0){
   
   
   
-
+  
   ## Breakdown positive and negative PCRs
-
+  
   cluster_PCR <- bed_collapsedUMI %>% 
     select(-c(start_IS:end_IS,UMI_list:ReadPerUMI)) %>%
     group_by(clusterID,chromosome,PCR_orientation) %>% 
@@ -462,7 +462,7 @@ if(nrow(align_stat)>0){
               N_Reads = sum(Nreads_IS),
               N_Orientation = n_distinct(strand_IS),
               MapQ = median(MedianMAPQ_IS)
-              ) %>%
+    ) %>%
     pivot_wider(names_from = PCR_orientation, values_from = c(N_IS:MapQ), values_fill = 0)
   
   
@@ -493,7 +493,7 @@ if(nrow(align_stat)>0){
     group_by(clusterID,chromosome) %>% 
     slice_max(n = 1, order_by = UMI_proportion,with_ties = F) %>%    ### here pick the first if multiple modes (especialty when low number of UMI and number of IS)
     mutate(cut_modal_position = start_IS)
-
+  
   
   
   cluster_annotated <- cluster_annotated %>%
