@@ -32,7 +32,7 @@ library(pwalign,quietly = T, verbose = F,warn.conflicts = F)
 
 # for debugging
 
-# args <- c( "04-IScalling/VEGFA_s1NGG.cluster_slop.fa", "04-IScalling/VEGFA_s1NGG.cluster_slop.bed", "04-IScalling/VEGFA_s1NGG.UMIs_per_IS_in_Cluster.bed", "GGGTGGGGGGAGTTTGCTCC", "VEGFA_s1",  "NGG",  -4, 6, TRUE, "05-Report/VEGFA_s1NGG.rdata")
+#args <- c( "04-IScalling/epe18.2_NNN.cluster_slop.fa", "04-IScalling/epe18.2_NNN.cluster_slop.bed", "04-IScalling/epe18.2_NNN.UMIs_per_IS_in_Cluster.bed", "GCATCATCCTGGTACCAGGA", "epe18.2",  "NNN",  -4, 6, TRUE, "05-Report/epe18.2_NNN.rdata")
 
 
 
@@ -69,6 +69,13 @@ bed_collapsedUMI <- read.delim(args[3],
                                              "UMI_list",
                                              "ReadPerUMI",
                                              "clusterID"))
+
+
+bed_collapsedUMI <- bed_collapsedUMI %>% mutate(chromosome = as.character(chromosome),
+                                                PCR_orientation = factor(PCR_orientation,levels = c("negative","positive")))
+
+
+
 
 grna <- DNAString(args[4])
 gRNA_name <- args[5]
@@ -246,7 +253,7 @@ if(nrow(align_stat)>0){
       end = watson_best$end[x] + pam_length
       length = seqlengths(fasta[watson_best$clusterID[x]])
       if((end + pam_length)> length){
-        DNAStringSet("...")
+        DNAStringSet(paste(rep(".",pam_length),collapse = ""))
       } else {
         subseq(fasta[watson_best$clusterID[x]],start  , end )
         
@@ -258,7 +265,7 @@ if(nrow(align_stat)>0){
     
     watson_best$pam_gDNA <- pams %>% as.character
     watson_best$pam_gRNA <- pam %>%  as.character
-    watson_best <-watson_best %>% ungroup %>%  mutate(rank=row_number())
+    watson_best <- watson_best %>% ungroup %>%  mutate(rank=row_number())
     
     
     indels_list <- indel(watson_sub)
@@ -347,7 +354,7 @@ if(nrow(align_stat)>0){
       end = crick_best$end[x] + pam_length
       length = seqlengths(fasta[crick_best$clusterID[x]])
       if((end + pam_length)> length){
-        DNAStringSet("...")
+        DNAStringSet(paste(rep(".",pam_length),collapse = ""))
       } else {
         subseq(reverseComplement(fasta[crick_best$clusterID[x]]),start  , end )
       }
@@ -437,7 +444,7 @@ if(nrow(align_stat)>0){
   
   if(nrow(best)>0){
     best <- best %>% 
-      separate(cluster, into = c("chromosome","start_chr","end_chr"), sep = "[:]+|-",convert = T)
+      separate(cluster, into = c("chromosome","start_chr","end_chr"), sep = "[:]+|-",convert = T) %>% mutate(chromosome = as.character(chromosome))
     
     best <- best %>%
       mutate(cut_gRNa_alignment = case_when(grna_orientation == "watson" ~ start_chr + alignment_end_gDNA + offset + 1 ,
@@ -453,10 +460,13 @@ if(nrow(align_stat)>0){
   
   
   ## Breakdown positive and negative PCRs
+  # PCR orientation is a factor with the 2 levels. If one level is missing, it is still reported with value 0.
+  
   
   cluster_PCR <- bed_collapsedUMI %>% 
+    mutate(chromosome = as.character(chromosome)) %>% 
     select(-c(start_IS:end_IS,UMI_list:ReadPerUMI)) %>%
-    group_by(clusterID,chromosome,PCR_orientation) %>% 
+    group_by(clusterID,chromosome,PCR_orientation,.drop = F) %>% 
     summarise(N_IS = n_distinct(IS_ID),
               N_UMI = sum(N_UMI_IS),
               N_Reads = sum(Nreads_IS),
@@ -468,7 +478,7 @@ if(nrow(align_stat)>0){
   
   
   ## annotate clusters with identified gRNA sequence
-  cluster_annotated <- clusters %>% 
+  cluster_annotated <- clusters %>% mutate(chromosome = as.character(chromosome)) %>% 
     left_join(cluster_PCR, by = c("clusterID","chromosome")) %>% 
     left_join(best %>% 
                 select(-start_chr,-end_chr,-alignment_width_gDNA,-alignment_start_gDNA,-alignment_end_gDNA) ,by = c("clusterID","chromosome"))

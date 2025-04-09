@@ -32,14 +32,13 @@ minUMI_alignments_figure <- as.numeric(args[6])
 min_predicted_distance <- as.numeric(args[7])
 
 # debug
-# summary_files = "05-Report/VEGFA_s1NGG_summary.xlsx"
+# summary_files = "05-Report/GUIDE_ODN_only_summary.xlsx 05-Report/hDMD_25uM_dsODN_G_summary.xlsx 05-Report/hDMD_Let7c1_25uM_dsODN_iG_summary.xlsx 05-Report/iGUIDE_ODN_only_summary.xlsx 05-Report/293T_Let7c1_60uM_dsODN_iG_summary.xlsx 05-Report/293T_Let7c1_80uM_dsODN_iG_summary.xlsx"
 # sampleInfo <- read.delim("sampleInfo.csv",sep=";")
 # config=read_yaml("guideSeq_GNT.yml")
-# predicted_files = "06-offPredict/human_GGGTGGGGGGAGTTTGCTCCNGG.csv"
+# predicted_files = "06-offPredict/GRCh38_ATGGATCTGAGGTAGAAAGGNGG.csv"
 # max_clusters = 100
 # minUMI_alignments_figure = 1
 # min_predicted_distance = 100
-
 
 
 
@@ -74,6 +73,12 @@ stats <- stats %>%
 ## Load summary excel file -------------------------------------------------------
 summary_files <- unlist(str_split(summary_files," "))
 summary <- lapply(summary_files,read_excel)
+
+summary <- lapply(summary, function(x){
+  
+  x %>% mutate(chromosome = as.character(chromosome))
+})
+
 names(summary) <- str_remove(basename(summary_files),"\\_summary.xlsx")
 
 libraries_count <- length(summary)
@@ -97,7 +102,7 @@ summary <- lapply(summary,function(x){
     mutate(Relative_abundance = round(N_UMI_cluster / sum(N_UMI_cluster) *100,digits = 2)) %>% 
     select(library,clusterID, best,Relative_abundance )
   
-  x <-x %>% left_join(abundance)
+  x <-x %>% left_join(abundance) 
   return(x)
   
   
@@ -449,6 +454,10 @@ files <- list.files("04-IScalling/", pattern="UMIs_per_IS_in_Cluster.bed", full.
 names(files) <- str_remove(basename(files),".UMIs_per_IS_in_Cluster.bed")
 
 IS <- lapply(files, read.delim,header=F)
+IS <- lapply(IS, function(x){
+  x %>% mutate(V1 = as.character(V1))
+})
+
 
 IS <- IS %>% bind_rows(.id="library")
 

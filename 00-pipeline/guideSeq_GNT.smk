@@ -114,9 +114,6 @@ rule get_chrom_length:
         """
 
 
-
-
-
 rule prepare_annotations:
     input: lambda wildcards: config["genome"][wildcards.genome]["annotation"]
     output: "../02-ressources/{genome}.rds"
@@ -127,17 +124,18 @@ rule prepare_annotations:
         Rscript ../00-pipeline/prepare_annotations.R {wildcards.genome} {input}
     """     
 
-     
 
 # Merge index1 and 2 in a new fastq file I3. Easier for demultiplexing.
 rule merge_indexes:
-    input: I1=config["I1"] , I2=config["I2"]
-    output: I3=("I3.fastq.gz")
+    input: I1=config["read_path"]+"/"+config["I1"] , I2=config["read_path"]+"/"+config["I2"]
+    output: I3=temp("I3.fastq.gz")
     conda: "../01-envs/env_tools.yml"
     shell: """
         #python ../00-pipeline/merge_I1_I2.py {input.I1} {input.I2} {output}
         
-        paste -d ";" <(gzip -dc {input.I1}) <(gzip -dc {input.I2}) | awk 'BEGIN{{FS=";";OFS=""}} {{if( NR % 4 ==1 || NR % 4 == 3) {{print $1}} else {{print $1,$2}}}}' > I3.fastq
+        # concatenate I1 and I2, !! do not use an ASCII character used in PHRED score encoding (here use tab)
+        
+        paste -d "\t" <(gzip -dc {input.I1}) <(gzip -dc {input.I2}) | awk 'BEGIN{{FS="\\t";OFS=""}} {{if( NR % 4 ==1 || NR % 4 == 3) {{print $1}} else {{print $1,$2}}}}' > I3.fastq
         gzip I3.fastq
 
         """
@@ -164,7 +162,7 @@ rule make_indexes_fasta:
 # check whether an empty library will make the pip to crash (ie wrong index)
 ##
 rule demultiplex_library:
-    input: R1=config["R1"], R2=config["R2"], I1=config["I1"], I2=config["I2"],I3=rules.merge_indexes.output.I3, barcodes=rules.make_indexes_fasta.output
+    input: R1=config["read_path"]+"/"+config["R1"], R2=config["read_path"]+"/"+config["R2"], I1=config["read_path"]+"/"+config["I1"], I2=config["read_path"]+"/"+config["I2"],I3=rules.merge_indexes.output.I3, barcodes=rules.make_indexes_fasta.output
     output: 
      R1=temp(["00-demultiplexing/{sample}-1_R1.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
      R2=temp(["00-demultiplexing/{sample}-1_R2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
@@ -185,7 +183,7 @@ rule demultiplex_library:
 
 rule merge_sampleName:
     input: R1="00-demultiplexing/{sample}-1_R1.fastq.gz", R2="00-demultiplexing/{sample}-1_R2.fastq.gz",I3="00-demultiplexing/{sample}-1_I3.fastq.gz"
-    output: R1="00-demultiplexing/{sample}_R1.fastq.gz", R2="00-demultiplexing/{sample}_R2.fastq.gz",I3="00-demultiplexing/{sample}_I3.fastq.gz"
+    output: R1=temp("00-demultiplexing/{sample}_R1.fastq.gz"), R2=temp("00-demultiplexing/{sample}_R2.fastq.gz"),I3=temp("00-demultiplexing/{sample}_I3.fastq.gz")
     threads:1
     shell: """
         cat 00-demultiplexing/{wildcards.sample}-*_R1.fastq.gz > {output.R1}
@@ -205,7 +203,7 @@ rule trim_ODN:
   threads: 6
   log:"01-trimming/{sample}.odn.log"
   conda: "../01-envs/env_tools.yml"
-  message: "removing ODN sequence, discard reads without ODN sequence"
+  message: "removing ODN sequence, discard reads without ODN sequence {wildcards.sample}"
   params: ODN_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_leading"],
    ODN_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_leading"]
   shell: """
@@ -214,9 +212,6 @@ rule trim_ODN:
         cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2} > {log}
         
         """
-        
-        
-
   
   # Add UMI to read name
   
@@ -317,8 +312,8 @@ rule filter_alignments:
 rule sort_aligned:
     input: sam=rules.alignOnGenome.output.sam, list = rules.filter_alignments.output.list
     output:  bam="03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.filtered.bam", 
-     bamPos="03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.bam",
-     bamName="03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam"
+     bamPos=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.bam"),
+     bamName=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam")
     threads: 6
     conda: "../01-envs/env_tools.yml"
     message: "Sort reads by name"

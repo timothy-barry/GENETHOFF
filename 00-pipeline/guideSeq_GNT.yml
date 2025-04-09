@@ -7,10 +7,11 @@ version: 0.1
 ## Library informations
 sampleInfo_path: "sampleInfo.csv"
 
-R1: "/media/Data/common/guideseq_gnt_dev/margaux_5/Undetermined_S0_L001_R1_001.fastq.gz"
-R2: "/media/Data/common/guideseq_gnt_dev/margaux_5/Undetermined_S0_L001_R2_001.fastq.gz"
-I1: "/media/Data/common/guideseq_gnt_dev/margaux_5/Undetermined_S0_L001_I1_001.fastq.gz"
-I2: "/media/Data/common/guideseq_gnt_dev/margaux_5/Undetermined_S0_L001_I2_001.fastq.gz"
+read_path: "/media/Data/common/guideseq_gnt_dev/margaux_5/"
+R1: "Undetermined_S0_L001_R1_001.fastq.gz"
+R2: "Undetermined_S0_L001_R2_001.fastq.gz"
+I1: "Undetermined_S0_L001_I1_001.fastq.gz"
+I2: "Undetermined_S0_L001_I2_001.fastq.gz"
 
 
 ################################################
