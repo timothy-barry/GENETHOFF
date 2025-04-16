@@ -8,7 +8,7 @@
 
 
 # Set global options
-options(tidyverse.quiet = TRUE,warn = -1,verbose = F)
+options(tidyverse.quiet = TRUE,warn = -1,verbose = F,warn = -10,conflicts.policy = list(warn = FALSE))
 
 
 #R.Version()$version.string == "R version 4.3.2 (2023-10-31 ucrt)"

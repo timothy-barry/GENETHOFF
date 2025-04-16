@@ -2,7 +2,7 @@
 ## it also generates alignment html files
 
 # Set options for R environment
-options(tidyverse.quiet = TRUE,conflicts.policy = list(warn = FALSE),verbose = F)
+options(tidyverse.quiet = TRUE,warn = -1,verbose = F,warn = -10,conflicts.policy = list(warn = FALSE))
 options(knitr.kable.NA = '')
 
 
@@ -568,7 +568,7 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
            "Edits crRNA"=N_edits, 
            N_mismatches,
            n_indels,
-           soft_trim,
+           #soft_trim,
            "Edits pam"= PAM_indel_count,
            Symbol=Symbol_html,
            Position=position_html,
@@ -578,7 +578,7 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
            multiHit,
            n_UMI_multiSum) %>% 
     unite(col = "gRNA<br>position",chromosome,cut_gRNa_alignment,sep = ":") %>% 
-    unite("MM_indels_softClip",N_mismatches, n_indels, soft_trim,sep = "_",remove = T) 
+    unite("Mismatch_indels",N_mismatches, n_indels,sep = "_",remove = T) 
   
   
   

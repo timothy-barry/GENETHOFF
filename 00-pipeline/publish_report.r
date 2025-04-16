@@ -1,6 +1,6 @@
 
 # Set global options
-options(tidyverse.quiet = TRUE,warn = -1,verbose = F)
+options(tidyverse.quiet = TRUE,warn = -1,verbose = F,conflicts.policy = list(warn = FALSE))
 
 # Load necessary libraries
 library(rmdformats,quietly = T,warn.conflicts = F,verbose = F)

@@ -2,3 +2,11 @@
 .Rhistory
 .RData
 .Ruserdata
+!00-pipeline
+!01-envs
+!02-ressources
+documentation.html
+debug/
+make_index_files.py
+make_index.py
+results_gc/

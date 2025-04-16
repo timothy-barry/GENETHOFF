@@ -1,14 +1,14 @@
 
 
 # Set R options
-options(tidyverse.quiet = TRUE,warn = -1,verbose = F)
+options(tidyverse.quiet = TRUE,warn = -1,verbose = F,warn = -10,conflicts.policy = list(warn = FALSE))
 
 
 # load necessary libraries
 library(tidyverse,quietly = T, verbose = F,warn.conflicts = F)
 library(GenomicRanges,quietly = T, verbose = F,warn.conflicts = F)
 library(annotatr,quietly = T, verbose = F,warn.conflicts = F)
-library(biomaRt,quietly = T, verbose = F,warn.conflicts = F)
+#library(biomaRt,quietly = T, verbose = F,warn.conflicts = F)
 library(writexl,quietly = T, verbose = F,warn.conflicts = F)
 library(rtracklayer,quietly = T, verbose = F,warn.conflicts = F)
 library(pwalign,quietly = T, verbose = F,warn.conflicts = F)
@@ -131,7 +131,7 @@ if(exists("cluster_annotated") && nrow(cluster_annotated)>0){
   # Save to csv file  -----------------------------------------------------------------
 
   
-  write.table(results_granges_df_annot, str_replace(output,pattern = "xlsx$","tsv"),sep="\t",row.names = F,quote=F)
+  write.table(results_granges_df_annot, str_replace(output,pattern = "xlsx$","csv"),sep=",",row.names = F,quote=F)
   
   
   # save to excel file -----------------------------------------------------

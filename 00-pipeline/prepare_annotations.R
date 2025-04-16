@@ -1,3 +1,6 @@
+options(tidyverse.quiet = TRUE,warn = -1,verbose = F,warn = -10,conflicts.policy = list(warn = FALSE))
+
+
 library(rtracklayer,quietly = T, verbose = F,warn.conflicts = F)
 library(tidyverse,quietly = T, verbose = F,warn.conflicts = F)
 ## convert gtf file to R object

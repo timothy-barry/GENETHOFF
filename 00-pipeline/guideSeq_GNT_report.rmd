@@ -131,7 +131,7 @@ names(alignment_table) <- c('library','link')
 
 alignment_table <- alignment_table %>% 
   arrange(library) %>%  
-  mutate(Alignments = cell_spec("link", "html", new_tab=T,link = paste("./report-files/",basename(link),sep = ""))) %>% 
+  mutate(Alignments = cell_spec("link", "html", new_tab=T,link = paste("./05-Report/report-files/",basename(link),sep = ""))) %>% 
   select(-link)
 
 

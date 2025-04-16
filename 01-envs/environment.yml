@@ -1,0 +1,37 @@
+name: guideseq_tools
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - default
+  - r
+dependencies:
+  - bedtools=2.31.1
+  - biopython=1.85
+  - cutadapt=5.0
+  - pandas=2.2.3
+  - samtools=1.21
+  - seqkit=2.10.0
+  - bowtie2=2.5.4
+  - openjdk=23.0.2
+  - r-base=4.4.1
+  - r-data.table
+  - r-htmltools
+  - r-rmarkdown
+  - r-tidyverse
+  - r-kableextra
+  - r-readxl
+  - r-rmdformats
+  - r-ggrepel
+  - r-dt
+  - r-igraph
+  - r-stringdist
+  - r-yaml
+  - r-writexl
+  - bioconductor-annotatr
+  - bioconductor-biostrings
+  - bioconductor-genomicfeatures
+  - bioconductor-pwalign
+  - bioconductor-decipher
+  - bioconductor-rtracklayer
+  - cowpy
