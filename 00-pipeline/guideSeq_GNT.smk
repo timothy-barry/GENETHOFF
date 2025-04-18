@@ -335,8 +335,9 @@ rule filter_alignments:
     threads: 2
     conda: "guideseq"
     message: "keep only alignments with high MAPQ or with equal score with best secondary alignment (multihits)"
+    params: minMAPQ=config["minMAPQ"]
     shell: """
-        samtools view  {input} -e "((mapq < 30) && (mapq > 0) && ([AS] == [XS])) || (mapq >=20)" | cut -f1 | sort | uniq  > {output.list}
+        samtools view  {input} -e "((mapq < {params.minMAPQ}) && (mapq > 0) && ([AS] == [XS])) || (mapq >={params.minMAPQ})" | cut -f1 | sort | uniq  > {output.list}
     """
 
 
@@ -371,7 +372,7 @@ rule call_IS:
     threads: 1
     conda: "guideseq"
     log:
-    params:  minMAPQ=config["minMAPQ"], UMI=config["UMI_pattern"]
+    params: UMI=config["UMI_pattern"]
     shell: """
     
         UMI_length=$(expr length {params.UMI})
@@ -384,7 +385,7 @@ rule call_IS:
         # count number of reads per UMI and per IS (pos and strand separated)
         ##################################################################
 
-        awk 'BEGIN{{OFS="\\t";FS="\\t"}} ($8>={params.minMAPQ}) && ($1 == $4) {{split($7,a,"_"); if($10=="+") print $4,$5,$5,a[1],a[2],a[3],$8,$10,$3-$5; else print $4,$6-1,$6-1,a[1],a[2],a[3],$8,$10,$6-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k5,5 -k8,8 | bedtools groupby -g 1,2,3,6,5,8 -c 4,7 -o count_distinct,median  > {output.umi}
+        awk 'BEGIN{{OFS="\\t";FS="\\t"}} ($1 == $4) {{split($7,a,"_"); if($10=="+") print $4,$5,$5,a[1],a[2],a[3],$8,$10,$3-$5; else print $4,$6-1,$6-1,a[1],a[2],a[3],$8,$10,$6-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k5,5 -k8,8 | bedtools groupby -g 1,2,3,6,5,8 -c 4,7 -o count_distinct,median  > {output.umi}
         
         """
 
@@ -463,10 +464,10 @@ rule predict_offtarget_SWOffinder:
         gRNA=lambda wildcards:{wildcards.grna},
         maxE=config["max_edits_crRNA"],               #Max edits allowed (integer).
         maxM=config["max_edits_crRNA"],               #Max mismatches allowed without bulges (integer).
-        maxMB=config["max_edits_crRNA"],             #Max mismatches allowed with bulges (integer).
+        maxMB=config["SWoffFinder"]["maxMB"],             #Max mismatches allowed with bulges (integer).
         maxB=config["SWoffFinder"]["maxB"],               #Max bulges allowed (integer).
         window_size=config["SWoffFinder"]["window_size"], #The window size for choosing the best in a window
-        bulges=config["tolerate_bulges"],
+        bulges=config["tolerate_bulges"].upper(),
         PAM=lambda wildcards:wildcards.pam,
         SWoffFinder=config["SWoffFinder"]["path"]
     threads: 12

@@ -33,7 +33,7 @@ minLength: 25 ## Minimal read length after trimming, before alignment
 
 ## Alignement
 ################################################
-aligner: "bowtie2"   ## Aligner to use (bowtie2 or bwa)
+aligner: "bowtie2"   ## Aligner to use (bowtie2 only for now)
 minFragLength: 100         # Minimal fragment length after alignment
 maxFragLength: 1500        # Maximal fragment length after alignment
 ################################################
@@ -70,9 +70,9 @@ minUMI_alignments_figure: 1       # filter clusters with more than n UMI in the 
 ################################################
 SWoffFinder:
   path: "/opt/SWOffinder" ## Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)
-  maxE: 6                 # Max edits allowed (integer).
-  maxM: 6                 # Max mismatches allowed without bulges (integer).
-  maxMB: 6                # Max mismatches allowed with bulges (integer).
+  # maxE: 6                 # Max edits allowed (integer). --> actually use the same value as max_edits_crRNA above for consistency between prediction and filtering of OT
+  # maxM: 6                 # Max mismatches allowed without bulges (integer). --> actually use the same value as max_edits_crRNA above for consistency between prediction and filtering of OT
+  maxMB: 4                # Max mismatches allowed with bulges (integer).
   maxB: 3                 # Max bulges allowed (integer).
   window_size: 100
 ################################################
