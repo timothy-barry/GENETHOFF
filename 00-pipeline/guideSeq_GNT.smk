@@ -73,7 +73,7 @@ validate(samplesTable, "samples.schema.yaml")
 RED= "\x1b[33m"
 RESET= "\033[0m"
 
-columns_to_check = ['sampleName','Genome','gRNA_name', 'gRNA_sequence','PAM_sequence','Cas','type',"Cut_Offset"]
+columns_to_check = ['sampleName','Genome','gRNA_name', 'gRNA_sequence','PAM_sequence','PAM_side','Cas','type',"Cut_Offset"]
 
 identical_values=samplesTable.groupby(samplesTable.index).apply(lambda x: x[columns_to_check].nunique().eq(1).all())
     
@@ -81,7 +81,7 @@ if identical_values.all():
     samples = samplesTable[columns_to_check].drop_duplicates()
     print("################################################\n",samples,"\n################################################")
     
-    my_list=samples[["Genome","gRNA_sequence","PAM_sequence"]].drop_duplicates()
+    my_list=samples[["Genome","gRNA_sequence","PAM_sequence","PAM_side"]].drop_duplicates()
     
     
     samples_unique=list(set(samples["sampleName"]))
@@ -96,10 +96,11 @@ if identical_values.all():
       genomes=my_list["Genome"].tolist()
       gRNAs=my_list["gRNA_sequence"].tolist()
       PAMs=my_list["PAM_sequence"].tolist()
+      sides=my_list["PAM_side"].tolist()
       genomes_unique=list(set(genomes))
  
 else:
-    print(f"{RED}!! Samples with identical 'sampleName' value must share the same features : gRNA_name, gRNA_sequence, PAM_sequence, Genome, Cas\n---> Please correct metadata or use different samples name{RESET}")
+    print(f"{RED}!! Samples with identical 'sampleName' value must share the same features : gRNA_name, gRNA_sequence, PAM_sequence,PAM_side, Genome, Cas\n---> Please correct metadata or use different samples name{RESET}")
     print(samplesTable[columns_to_check])
     sys.exit(1)
 
@@ -114,7 +115,7 @@ else:
 
 rule target:
     input: 
-     expand("06-offPredict/{gen}_{grna}{pam}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs),
+     expand("06-offPredict/{gen}_{grna}_{pam}_{side}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs,side=sides),
      ["05-Report/{sample}_summary.xlsx".format(sample=sample) for sample in samples_unique],
      os.path.basename(os.getcwd())+"_report.html"
      
@@ -313,7 +314,7 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
                   -1 {input.R1} -2 {input.R2} -S {output.sam} 2> {log}
             """
 
-elif (config["aligner"]  == "bwa" or config["aligner"]  == "Bwa") :
+elif (config["aligner"]  == "bwa") :
     rule alignOnGenome:
         input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2
         output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"), unfilterdsam=temp("03-align/{sample}.UMI.ODN.trimmed.unfiltered.sam")
@@ -328,6 +329,7 @@ elif (config["aligner"]  == "bwa" or config["aligner"]  == "Bwa") :
                 samtools view -F 0x4 -F 0x8 -F 0x100 -F 0x800 -f 0x2 -b {output.unfilterdsam} > {output.sam}
             """
   
+  ## true multihits have MAPQ=1 with bowtie2
   
 rule filter_alignments:
     input: sam=rules.alignOnGenome.output.sam
@@ -337,7 +339,8 @@ rule filter_alignments:
     message: "keep only alignments with high MAPQ or with equal score with best secondary alignment (multihits)"
     params: minMAPQ=config["minMAPQ"]
     shell: """
-        samtools view  {input} -e "((mapq < {params.minMAPQ}) && (mapq > 0) && ([AS] == [XS])) || (mapq >={params.minMAPQ})" | cut -f1 | sort | uniq  > {output.list}
+    # https://biofinysics.blogspot.com/2014/05/how-does-bowtie2-assign-mapq-scores.html#bt2expt 
+        samtools view  {input} -e '((mapq ==1 && [AS] == [XS]) || (mapq >={params.minMAPQ}) || (mapq == 6))' | cut -f1 | sort | uniq  > {output.list}
     """
 
 
@@ -454,11 +457,19 @@ rule get_stats_fq:
         seqkit stat -j {threads} -a -T {input} > {output}
         """
 
+def get_output_files(wildcards):
+    # Custom logic to determine output file pattern
+    if wildcards.side == "3":
+        return "06-offPredict/{gen}_{side}_{grna}_{pam}.csv".format(gen=wildcards.gen, grna=wildcards.grna, pam=wildcards.pam,side=wildcards.side)
+    else:
+        return "06-offPredict/{gen}_{side}_{pam}_{grna}.csv".format(gen=wildcards.gen, grna=wildcards.grna, pam=wildcards.pam,side=wildcards.side)
+
+
 
 
 rule predict_offtarget_SWOffinder:
     input: 
-    output: txt=temp("06-offPredict/{gen}_{grna}{pam}.txt"), csv="06-offPredict/{gen}_{grna}{pam}.csv"
+    output: csv= "06-offPredict/{gen}_{grna}_{pam}_{side}.csv"
     conda: 'guideseq'
     params: genome=lambda wildcards: config["genome"][wildcards.gen]["fasta"],
         gRNA=lambda wildcards:{wildcards.grna},
@@ -469,25 +480,28 @@ rule predict_offtarget_SWOffinder:
         window_size=config["SWoffFinder"]["window_size"], #The window size for choosing the best in a window
         bulges=config["tolerate_bulges"].upper(),
         PAM=lambda wildcards:wildcards.pam,
+        PAM_side=lambda wildcards:wildcards.side,
         SWoffFinder=config["SWoffFinder"]["path"]
     threads: 12
     shell: """
-        echo {params.gRNA}{params.PAM} > {output.txt}
-        
         if [ {params.bulges} = TRUE ] ; 
         then 
             bulge_size={params.maxB}; 
         else 
             bulge_size=0;
         fi
-
+    
+    
+        if [ {params.PAM_side} = "5" ];
+        then
+            sequence={params.PAM}{params.gRNA}
+            java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign {params.genome} $sequence 06-offPredict/{wildcards.gen}_{wildcards.grna}_{wildcards.pam}_{wildcards.side} {params.maxE} {params.maxM} {params.maxMB} $(echo $bulge_size) {threads} TRUE {params.window_size} {params.PAM} TRUE
+        else
+            sequence={params.gRNA}{params.PAM}
+            java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign {params.genome} $sequence 06-offPredict/{wildcards.gen}_{wildcards.grna}_{wildcards.pam}_{wildcards.side} {params.maxE} {params.maxM} {params.maxMB} $(echo $bulge_size) {threads} TRUE {params.window_size} {params.PAM} TRUE
+        fi
         
-        java -cp {params.SWoffFinder}/bin SmithWatermanOffTarget.SmithWatermanOffTargetSearchAlign {params.genome} {output.txt} 06-offPredict/{wildcards.gen} {params.maxE} {params.maxM} {params.maxMB} $(echo $bulge_size) {threads} TRUE {params.window_size} {params.PAM} TRUE
         """
-        
-        
-        
-
 
 rule report_data:
     input: fasta=rules.get_fasta_around_is.output.fa, cluster=rules.get_fasta_around_is.output.cluster, bed=rules.Collapse_UMI_IS.output.collapse, statfq=rules.get_stats_fq.output,statal=rules.alignOnGenome.log
@@ -500,9 +514,10 @@ rule report_data:
      PAM=lambda wildcards:samples["PAM_sequence"][wildcards.sample],
      offset=lambda wildcards:samples["Cut_Offset"][wildcards.sample],
      max_edits=config["max_edits_crRNA"],
-     bulges=config["tolerate_bulges"]
+     bulges=config["tolerate_bulges"],
+     pam_side=lambda wildcards:samples["PAM_side"][wildcards.sample]
     shell : """
-        Rscript ../00-pipeline/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {params.max_edits} {params.bulges} {output}
+        Rscript ../00-pipeline/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {params.max_edits} {params.bulges} {params.pam_side} {output}
         """        
         
 
@@ -519,7 +534,7 @@ rule annotate_sites:
 
 rule report:
     input: summaries= ["05-Report/{sample}_summary.xlsx".format(sample=sample) for sample in samples_unique],
-     predictions=expand("06-offPredict/{gen}_{grna}{pam}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs)
+     predictions=expand("06-offPredict/{gen}_{grna}_{pam}_{side}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs,side=sides)
     output: report_rdata= "05-Report/report.rdata"
     conda: "guideseq"
     threads: 1

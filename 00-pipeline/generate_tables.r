@@ -32,10 +32,10 @@ minUMI_alignments_figure <- as.numeric(args[6])
 min_predicted_distance <- as.numeric(args[7])
 
 # debug
-# summary_files = "05-Report/GUIDE_ODN_only_summary.xlsx 05-Report/hDMD_25uM_dsODN_G_summary.xlsx 05-Report/hDMD_Let7c1_25uM_dsODN_iG_summary.xlsx 05-Report/iGUIDE_ODN_only_summary.xlsx 05-Report/293T_Let7c1_60uM_dsODN_iG_summary.xlsx 05-Report/293T_Let7c1_80uM_dsODN_iG_summary.xlsx"
+# summary_files = "05-Report/Cpf1_summary.xlsx"
 # sampleInfo <- read.delim("sampleInfo.csv",sep=";")
 # config=read_yaml("guideSeq_GNT.yml")
-# predicted_files = "06-offPredict/GRCh38_ATGGATCTGAGGTAGAAAGGNGG.csv"
+# predicted_files = "06-offPredict/GRCh38_AAAAGAGAGAGAGAGGGGGGAAATTTN.csv"
 # max_clusters = 100
 # minUMI_alignments_figure = 1
 # min_predicted_distance = 100
@@ -182,7 +182,7 @@ summary_pred_bulge <- lapply(seq_along(summary), function(x){
     if(nrow(df_grna)>0){
       grna_name <- sampleInfo %>% 
         filter(sampleName == names(summary)[x]) %>% 
-        mutate("grna_name" = paste(Genome,"_",gRNA_sequence,PAM_sequence,sep="")) %>%
+        mutate("grna_name" = paste(Genome,"_",gRNA_sequence,"_",PAM_sequence,"_",PAM_side,sep="")) %>%
         distinct(grna_name) %>% 
         pull(grna_name)
       
@@ -542,7 +542,13 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
                                                             A = "#129749", T = "#d62839", C = "#255c99", G = "#f7b32b")),
                               collapse = ""), by = 1:nrow(dt)]
   
-  dt[, alignment_html := paste("gRNA: ", seq_gRNA_html, " ", pam_gRNA_html, " <br>gDNA: ", seq_gDNA_html, " ", pam_gDNA_html, sep = "")]
+  
+  if(unique(dt$pam_side) == "3"){
+    dt[, alignment_html := paste("gRNA: ", seq_gRNA_html, " ", pam_gRNA_html, " <br>gDNA: ", seq_gDNA_html, " ", pam_gDNA_html, sep = "")]
+  } else {
+    dt[, alignment_html := paste("gRNA: ",pam_gRNA_html," ", seq_gRNA_html, " <br>gDNA: ", pam_gDNA_html," ",seq_gDNA_html,   sep = "")]
+  }
+
   dt[, Symbol_html := str_replace_all(Symbol, ", ", " <br>")]
   dt[, position_html := str_replace_all(position, ", ", " <br>")]
   

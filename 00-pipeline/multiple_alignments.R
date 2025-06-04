@@ -22,17 +22,11 @@ args <- commandArgs(trailingOnly = T)
 library(tidyverse,quietly = T, verbose = F,warn.conflicts = F)
 library(Biostrings,quietly = T,verbose = F, warn.conflicts = F)
 library(DECIPHER,quietly = T,warn.conflicts = F,verbose = F)
-
-# if (!require("BiocManager", quietly = TRUE))
-#   install.packages("BiocManager")
-# 
-# BiocManager::install("pwalign")
-
 library(pwalign,quietly = T, verbose = F,warn.conflicts = F)
 
-# for debugging
 
-#args <- c( "04-IScalling/epe18.2_NNN.cluster_slop.fa", "04-IScalling/epe18.2_NNN.cluster_slop.bed", "04-IScalling/epe18.2_NNN.UMIs_per_IS_in_Cluster.bed", "GCATCATCCTGGTACCAGGA", "epe18.2",  "NNN",  -4, 6, TRUE, "05-Report/epe18.2_NNN.rdata")
+# for debugging
+ # args <- c( "04-IScalling/Cpf1.cluster_slop.fa", "04-IScalling/Cpf1.cluster_slop.bed", "04-IScalling/Cpf1.UMIs_per_IS_in_Cluster.bed", "AAAAGAGAGAGAGAGGGGGGAAA", "SIPRa-S1",  "TTTN",  -4, 6, TRUE, "5", "05-Report/Cpf1.rdata")
 
 
 
@@ -85,12 +79,26 @@ grna@metadata$name <- gRNA_name
 pam <- DNAString(args[6])
 pam_length <- nchar(pam)
 
-offset <- as.numeric(args[7])
+
+
+
 
 max_edits <- as.numeric(args[8])
 
 bulges <- as.logical(toupper(args[9]))
 
+pam_side <- args[10]
+
+offset <- as.numeric(args[7])
+
+## check that offset is in the good direction
+## if PAM is in the 3', offset should be negative and opposite
+offset <- if((pam_side == "3" & sign(offset) < 0) |(pam_side == "5" & sign(offset) > 0) ){
+  offset <- offset
+} else {
+  offset <- offset * -1 # change sign
+  
+}
 
 # Change gap penalty if bulges are tolerated or not
 
@@ -245,18 +253,28 @@ if(nrow(align_stat)>0){
     
     
     
-    
-    
     pams <- lapply(seq_along(watson_sub), function(x) {
       #print(x)
-      start = watson_best$end[x]+1
-      end = watson_best$end[x] + pam_length
-      length = seqlengths(fasta[watson_best$clusterID[x]])
-      if((end + pam_length)> length){
-        DNAStringSet(paste(rep(".",pam_length),collapse = ""))
+      if(pam_side == "3"){
+        start = watson_best$end[x]+1
+        end = watson_best$end[x] + pam_length
+        length = seqlengths(fasta[watson_best$clusterID[x]])
+        if((end + pam_length)> length){
+          DNAStringSet(paste(rep(".",pam_length),collapse = ""))
+        } else {
+          subseq(fasta[watson_best$clusterID[x]],start  , end )
+          
+        }
       } else {
-        subseq(fasta[watson_best$clusterID[x]],start  , end )
-        
+        end = watson_best$start[x]-1
+        start = watson_best$start[x] - pam_length
+        length = seqlengths(fasta[watson_best$clusterID[x]])
+        if((start - pam_length)< 1){
+          DNAStringSet(paste(rep(".",pam_length),collapse = ""))
+        } else {
+          subseq(fasta[watson_best$clusterID[x]],start  , end )
+          
+        }
       }
     }
     )
@@ -265,6 +283,7 @@ if(nrow(align_stat)>0){
     
     watson_best$pam_gDNA <- pams %>% as.character
     watson_best$pam_gRNA <- pam %>%  as.character
+    watson_best$pam_side <- pam_side
     watson_best <- watson_best %>% ungroup %>%  mutate(rank=row_number())
     
     
@@ -350,13 +369,27 @@ if(nrow(align_stat)>0){
     
     
     pams <- lapply(seq_along(crick_sub), function(x) {
-      start = crick_best$end[x]+1
-      end = crick_best$end[x] + pam_length
-      length = seqlengths(fasta[crick_best$clusterID[x]])
-      if((end + pam_length)> length){
-        DNAStringSet(paste(rep(".",pam_length),collapse = ""))
+      #print(x)
+      if(pam_side == "3"){
+        start = crick_best$end[x]+1
+        end = crick_best$end[x] + pam_length
+        length = seqlengths(fasta[crick_best$clusterID[x]])
+        if((end + pam_length)> length){
+          DNAStringSet(paste(rep(".",pam_length),collapse = ""))
+        } else {
+          subseq(reverseComplement(fasta[crick_best$clusterID[x]]),start  , end )
+          
+        }
       } else {
-        subseq(reverseComplement(fasta[crick_best$clusterID[x]]),start  , end )
+        end = crick_best$start[x]-1
+        start = crick_best$start[x] - pam_length
+        length = seqlengths(fasta[crick_best$clusterID[x]])
+        if((start - pam_length)< 1){
+          DNAStringSet(paste(rep(".",pam_length),collapse = ""))
+        } else {
+          subseq(reverseComplement(fasta[crick_best$clusterID[x]]),start,end )
+          
+        }
       }
     }
     )
@@ -366,6 +399,7 @@ if(nrow(align_stat)>0){
     
     crick_best$pam_gDNA <- pams %>% as.character
     crick_best$pam_gRNA <- pam %>%  as.character
+    crick_best$pam_side <- pam_side
     crick_best <-crick_best %>% ungroup %>%  mutate(rank=row_number())
     
     indels_list <- indel(crick_sub)
@@ -432,7 +466,7 @@ if(nrow(align_stat)>0){
                   start_deletions,
                   end_deletions,
                   width_deletions,
-                  pam_gDNA,pam_gRNA )
+                  pam_gDNA,pam_gRNA,pam_side )
   
   
   best$pam_iupac <- sapply(best$pam_gDNA, function(x) {count_iupac_mismatches(x,pam)})
@@ -444,11 +478,18 @@ if(nrow(align_stat)>0){
   
   if(nrow(best)>0){
     best <- best %>% 
-      separate(cluster, into = c("chromosome","start_chr","end_chr"), sep = "[:]+|-",convert = T) %>% mutate(chromosome = as.character(chromosome))
-    
-    best <- best %>%
-      mutate(cut_gRNa_alignment = case_when(grna_orientation == "watson" ~ start_chr + alignment_end_gDNA + offset + 1 ,
-                                            TRUE ~ end_chr - alignment_end_gDNA - offset ))
+      separate(cluster, into = c("chromosome","start_chr","end_chr"), sep = "[:]+|-",convert = T) %>% 
+      mutate(chromosome = as.character(chromosome))
+    if(pam_side == "3"){
+      
+      best <- best %>%
+        mutate(cut_gRNa_alignment = case_when(grna_orientation == "watson" ~ start_chr + alignment_end_gDNA + offset + 1 ,
+                                              TRUE ~ end_chr - alignment_end_gDNA - offset ))
+    } else {
+      best <- best %>%
+        mutate(cut_gRNa_alignment = case_when(grna_orientation == "watson" ~ start_chr + alignment_start_gDNA + offset +1,
+                                              TRUE ~ end_chr - alignment_start_gDNA - offset ))
+    }
   } else{
     
     col.idx <- c("start" ,"end", "width", "clusterID", "chromosome", "start_chr",  "end_chr","sequence", "mismatches", "strand_guide","cut_gRNa_alignment")
@@ -509,9 +550,9 @@ if(nrow(align_stat)>0){
   cluster_annotated <- cluster_annotated %>%
     left_join(modal_cut_position, by = c("clusterID","chromosome"))
   
-  save(cluster_annotated, fasta, grna, bed_collapsedUMI, clusters, watson,crick,IS_in_clusters, file = args[10])
+  save(cluster_annotated, fasta, grna, bed_collapsedUMI, clusters, watson,crick,IS_in_clusters, file = args[11])
 } else {
-  save(fasta,grna, bed_collapsedUMI, clusters, watson,crick, file = args[10])
+  save(fasta,grna, bed_collapsedUMI, clusters, watson,crick, file = args[11])
   
 }
 

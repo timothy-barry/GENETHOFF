@@ -1,4 +1,4 @@
-$schema: "https://json-schema.org/draft-06/schema#"
+$schema: "https://json-schema.org/draft/2020-12/schema"
 description: Sample list datasheet
 properties:
   sampleName:
@@ -25,6 +25,9 @@ properties:
   PAM_sequence:
     type: string
     default: NGG
+  PAM_side:
+    type: string
+    default: 3
   gRNA_name:
     type: string
     description: name of gRNA
@@ -42,3 +45,4 @@ required:
   - PAM_sequence
   - gRNA_name
   - gRNA_sequence
+  - PAM_side

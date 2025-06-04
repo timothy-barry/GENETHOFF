@@ -25,7 +25,7 @@ output<- args[3]
 
 ###########################################################
 ## debug
-# files = "../debug/05-Report/epe1"
+# files = "05-Report/Cpf1.rdata"
 # annotation <- "GRCh38"
 ###########################################################
 
@@ -100,10 +100,7 @@ if(exists("cluster_annotated") && nrow(cluster_annotated)>0){
   
   # Annotate ------------------------------------------------------------------
   
-  
-  
   results_granges_df_annot <- results_df %>%  left_join(results_granges_df_annot, by = "clusterID")
-  
   
   
   # Annotate clusters that have a similar alignment pattern --> multihits -------------
