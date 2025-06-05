@@ -36,7 +36,7 @@ for file_key in files_to_check:
         results[file_key] = "\033[91m‚ùå\033[0m"  +  "  "  +file_path  # Red cross mark
 
 # Print the results in a table format with colors
-print("Check input files are present :")
+print("\n\n-------------------\nCheck if input files are present :")
 print("-------------------")
 print(f"{results['R1']}")
 print(f"{results['R2']}")
@@ -48,7 +48,7 @@ missing_files = [file_key for file_key, status in results.items() if "\033[91m‚ù
 if missing_files:
     raise FileNotFoundError(f"Missing files: {', '.join(missing_files)}")
 else:
-  print("\033[92m All files were found ... continue processing\033[0m" )
+  print("\n\033[92m All files were found ... continue processing\033[0m\n" )
 
 
 ###############################################################

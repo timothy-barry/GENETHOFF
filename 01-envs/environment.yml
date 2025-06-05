@@ -26,6 +26,7 @@ dependencies:
   - r-dt
   - r-igraph
   - r-stringdist
+  - r-upsetr
   - r-yaml
   - r-writexl
   - bioconductor-annotatr

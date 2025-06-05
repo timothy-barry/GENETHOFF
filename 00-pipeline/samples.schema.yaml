@@ -26,7 +26,7 @@ properties:
     type: string
     default: NGG
   PAM_side:
-    type: string
+    type: integer
     default: 3
   gRNA_name:
     type: string

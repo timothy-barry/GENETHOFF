@@ -2,34 +2,36 @@
 ## it also generates alignment html files
 
 # Set options for R environment
-options(tidyverse.quiet = TRUE,warn = -1,verbose = F,warn = -10,conflicts.policy = list(warn = FALSE))
-options(knitr.kable.NA = '')
+  options(tidyverse.quiet = TRUE,warn = -1,verbose = F,warn = -10,conflicts.policy = list(warn = FALSE))
+  options(knitr.kable.NA = '')
 
 
 # Load necessary libraries
-library(tidyverse,quietly = T,warn.conflicts = F,verbose = F)
-library(readxl,quietly = T,warn.conflicts = F,verbose = F)
-library(kableExtra,quietly = T,warn.conflicts = F,verbose = F)
-library(GenomicRanges,quietly = T,warn.conflicts = F,verbose = F)
-library(yaml,quietly = T,warn.conflicts = F,verbose = F)
-library(rmdformats,quietly = T,warn.conflicts = F,verbose = F)
-library(ggrepel,quietly = T,warn.conflicts = F,verbose = F)
-library(data.table,quietly = T,warn.conflicts = F,verbose = F)
-library(DT, quietly = T,warn.conflicts = F,verbose = F)
+  library(tidyverse,quietly = T,warn.conflicts = F,verbose = F)
+  library(readxl,quietly = T,warn.conflicts = F,verbose = F)
+  library(kableExtra,quietly = T,warn.conflicts = F,verbose = F)
+  library(GenomicRanges,quietly = T,warn.conflicts = F,verbose = F)
+  library(yaml,quietly = T,warn.conflicts = F,verbose = F)
+  library(rmdformats,quietly = T,warn.conflicts = F,verbose = F)
+  library(ggrepel,quietly = T,warn.conflicts = F,verbose = F)
+  library(data.table,quietly = T,warn.conflicts = F,verbose = F)
+  library(DT, quietly = T,warn.conflicts = F,verbose = F)
+  library(UpSetR, quietly = T,warn.conflicts = F,verbose = F)  
+  
 
 
 # get command line arguments 
-args <- commandArgs(trailingOnly = T)
+  args <- commandArgs(trailingOnly = T)
 
 
 # Assign command-line arguments to variables
-summary_files = args[1] 
-sampleInfo <- read.delim(args[2], sep=";")
-config <- read_yaml(args[3])
-predicted_files = args[4] 
-max_clusters <- as.numeric(args[5])
-minUMI_alignments_figure <- as.numeric(args[6])
-min_predicted_distance <- as.numeric(args[7])
+  summary_files = args[1] 
+  sampleInfo <- read.delim(args[2], sep=";")
+  config <- read_yaml(args[3])
+  predicted_files = args[4] 
+  max_clusters <- as.numeric(args[5])
+  minUMI_alignments_figure <- as.numeric(args[6])
+  min_predicted_distance <- as.numeric(args[7])
 
 # debug
 # summary_files = "05-Report/Cpf1_summary.xlsx"
@@ -45,84 +47,83 @@ min_predicted_distance <- as.numeric(args[7])
 
 # Load demux stat -------------------------------------------------------------------------
 
-files <- list.files("05-Report/", pattern = "stat$", full.names = T)
-names(files) <- str_remove(basename(files),"\\.stat")
-
-
-
-stats <- lapply(files, read.delim)
-stats <- stats %>% 
-  bind_rows() %>% 
-  distinct() %>% 
-  select(file,num_seqs) %>% 
-  mutate(library = str_match(file,"/(.+)_R1")[,2]) %>% 
-  mutate(step = case_when(str_detect(file, "_R1.fastq.gz")~"Demultiplexed",
-                          str_ends(file, "R1.ODN.fastq.gz")~"ODN checked",
-                          str_ends(file, "R1.ODN.UMI.trimmed.fastq.gz")~NA,
-                          str_ends(file, "R1.UMI.ODN.trimmed.filtered.fastq.gz")~"Trimmed-filtered",
-                          TRUE ~ NA)) %>% 
-  filter(!is.na(step)) %>% 
-  select(-file) %>% 
-  group_by(library) %>% 
-  mutate(prop = round(num_seqs/dplyr::first(num_seqs)*100,digits = 2),
-         value = paste(format(num_seqs,big.mark=",")," (",prop,"%)",sep="")) %>% 
-  pivot_wider(id_cols = "library",names_from = "step", values_from = "value")
+  files <- list.files("05-Report/", pattern = "stat$", full.names = T)
+  names(files) <- str_remove(basename(files),"\\.stat")
+  
+  
+  
+  stats <- lapply(files, read.delim)
+  stats <- stats %>% 
+    bind_rows() %>% 
+    distinct() %>% 
+    select(file,num_seqs) %>% 
+    mutate(library = str_match(file,"/(.+)_R1")[,2]) %>% 
+    mutate(step = case_when(str_detect(file, "_R1.fastq.gz")~"Demultiplexed",
+                            str_ends(file, "R1.ODN.fastq.gz")~"ODN checked",
+                            str_ends(file, "R1.ODN.UMI.trimmed.fastq.gz")~NA,
+                            str_ends(file, "R1.UMI.ODN.trimmed.filtered.fastq.gz")~"Trimmed-filtered",
+                            TRUE ~ NA)) %>% 
+    filter(!is.na(step)) %>% 
+    select(-file) %>% 
+    group_by(library) %>% 
+    mutate(prop = round(num_seqs/dplyr::first(num_seqs)*100,digits = 2),
+           value = paste(format(num_seqs,big.mark=",")," (",prop,"%)",sep="")) %>% 
+    pivot_wider(id_cols = "library",names_from = "step", values_from = "value")
 
 
 
 ## Load summary excel file -------------------------------------------------------
-summary_files <- unlist(str_split(summary_files," "))
-summary <- lapply(summary_files,read_excel)
-
-summary <- lapply(summary, function(x){
+  summary_files <- unlist(str_split(summary_files," "))
+  summary <- lapply(summary_files,read_excel)
   
-  x %>% mutate(chromosome = as.character(chromosome))
-})
-
-names(summary) <- str_remove(basename(summary_files),"\\_summary.xlsx")
-
-libraries_count <- length(summary)
+  summary <- lapply(summary, function(x){
+    
+    x %>% mutate(chromosome = as.character(chromosome))
+  })
+  
+  names(summary) <- str_remove(basename(summary_files),"\\_summary.xlsx")
+  
+  libraries_count <- length(summary)
 
 
 # Get probable ON-targets -----------------------------------------------------------
 # based on smallest EDITS in crRNA & PAM
-
-summary <- lapply(summary,function(x){
   
-  best <- x %>% 
-    slice_min(n = 1,with_ties = T, order_by = N_edits) %>% 
-    slice_min(n = 1,with_ties = T, order_by = PAM_indel_count) %>% 
-    #filter(N_edits==0) %>% 
-    select(library,clusterID) %>% 
-    mutate(best=TRUE)
-  
-  abundance <- x  %>% 
-    filter(!is.na(Alignment)) %>% ## remove alignments without gRNA match
-    left_join(best,by = c("clusterID","library")) %>%
-    mutate(Relative_abundance = round(N_UMI_cluster / sum(N_UMI_cluster) *100,digits = 2)) %>% 
-    select(library,clusterID, best,Relative_abundance )
-  
-  x <-x %>% left_join(abundance) 
-  return(x)
-  
-  
-})
+  summary <- lapply(summary,function(x){
+    
+    best <- x %>% 
+      slice_min(n = 1,with_ties = T, order_by = N_edits) %>% 
+      slice_min(n = 1,with_ties = T, order_by = PAM_indel_count) %>% 
+      #filter(N_edits==0) %>% 
+      select(library,clusterID) %>% 
+      mutate(best=TRUE)
+    
+    abundance <- x  %>% 
+      filter(!is.na(Alignment)) %>% ## remove alignments without gRNA match
+      left_join(best,by = c("clusterID","library")) %>%
+      mutate(Relative_abundance = round(N_UMI_cluster / sum(N_UMI_cluster) *100,digits = 2)) %>% 
+      select(library,clusterID, best,Relative_abundance )
+    
+    x <-x %>% left_join(abundance) 
+    return(x)
+    
+    
+  })
 
 ## get best match informations by library:
-best_aligns <- summary %>%  
-  bind_rows() %>% 
-  filter(best==T) %>%
-  arrange(library) %>% 
-  select(library,
-         clusterID,
-         chromosome,
-         cut_modal_position,
-         cut_gRNa_alignment,
-         Edits_gRNA = N_edits,
-         Edits_PAM=PAM_indel_count,
-         N_IS_cluster, 
-         N_UMI_cluster,
-         Relative_abundance)
+  best_aligns <- summary %>%  
+    bind_rows() %>% 
+    filter(best==T) %>%
+    arrange(library) %>% 
+    select(library,
+           clusterID,
+           chromosome,
+           cut_modal_position,
+           cut_gRNa_alignment,
+           Edits_gRNA = N_edits,
+           Edits_PAM=PAM_indel_count,
+           N_UMI_cluster,
+           Relative_abundance)
 
 
 
@@ -137,7 +138,7 @@ stats_summary <- lapply(seq_along(summary), function(x){
   df <- summary[[x]]
   
   df %>% summarise(
-    Reads_aligned = sum(N_reads_cluster),
+    Alignments = sum(N_reads_cluster),
     UMIs = sum(N_UMI_cluster),
     Insertions = sum(N_IS_cluster),
     total = n(),
@@ -151,6 +152,8 @@ stats_summary <- lapply(seq_along(summary), function(x){
 names(stats_summary) <- names(summary)
 
 stats_summary <- stats_summary %>% bind_rows(.id="library")
+
+
 
 
 # Load predictions ------------------------------------------------------------------
@@ -314,6 +317,37 @@ fig3 <- ggplot(data_fig3, aes( chromosome, clusters,fill = `has_gRNA?`)) +
   theme_bw(base_size = 12)+
   scale_fill_manual(values = c("green4","grey")) +
   theme(panel.grid.major.x = element_line(linetype = 2,colour = "grey40"),axis.text =  element_text(color = "black"))
+
+
+
+# figure upset plot -----------------------------------------------------------------
+
+data_cluster_venn <- lapply(summary, function(x){
+  
+  list("Have gRNA match"=x$clusterID[!is.na(x$Alignment)],
+       "Detected in 2 PCR directions"=x$clusterID[x$N_orientations_PCR==2],
+       "Contains > 3 cut sites"=x$clusterID[x$N_IS_cluster>3],
+       "Contains > 10 UMIs"=x$clusterID[x$N_UMI_cluster>10],
+       "Have 2 ODN orientations"=x$clusterID[x$N_orientations_cluster==2])
+}
+)
+
+
+
+fig_cluster_venn <- lapply(data_cluster_venn, function(x){
+  UpSetR::upset(UpSetR::fromList(x),text.scale = 1.5,
+                order.by = "freq",
+                nsets = 5,empty.intersections = T,
+                queries = list(list(query = UpSetR::intersects, 
+                                    params = list("Have gRNA match",
+                                                  "Contains > 3 cut sites",
+                                                  "Contains > 10 UMIs",
+                                                  "Have 2 ODN orientations"),
+                                    color= "red", active = T),
+                               list(query = UpSetR::intersects, params = list(names(x)),
+                                    color= "red", active = T))) 
+  }
+)
 
 
 

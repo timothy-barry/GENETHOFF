@@ -6,6 +6,8 @@ date: "`r Sys.Date()`"
 output: 
     rmdformats::readthedown:
     highlight: kate
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -20,6 +22,7 @@ options(knitr.kable.NA = '')
 library(tidyverse,quietly = T,warn.conflicts = F,verbose = F)
 library(kableExtra,quietly = T,warn.conflicts = F,verbose = F)
 library(yaml,quietly = T,warn.conflicts = F,verbose = F)
+library(UpSetR)
 
 libraries_count <- length(summary_pred_bulge)
 
@@ -41,7 +44,7 @@ Pipeline version: ***To Be Extracted from pipeline file name when release*** **(
 
 The analysis was performed **`r ifelse(config$tolerate_bulges==TRUE, "with","without")`** bulge tolerance.
 
-All parameters can be found in [Configuration settings] at the end of the document.
+All parameters can be found in [Configuration settings] at the end of this document.
 
 ------------------------------------------------------------------------
 
@@ -136,7 +139,7 @@ alignment_table <- alignment_table %>%
 
 
 
-kbl(stats_summary %>%  arrange(library) %>% left_join(alignment_table),escape = F,
+kbl(stats_summary %>%  arrange(library) %>% left_join(alignment_table,by="library"),escape = F,
                       caption = "Table 4",
     format.args = list(big.mark = ",")) %>%
         kable_classic_2(full_width = T,html_font = "helvetica") %>% 
@@ -163,6 +166,11 @@ kbl(stats_summary %>%  arrange(library) %>% left_join(alignment_table),escape = 
 > -   Match of the crRNA sequence with less than **`r config$max_edits_crRNA`** edits withing the cluster boundaries +/- **`r config$slopSize`** bp ("crRNA matched" in table below)
 >
 > Clusters with more than **`r config$minUMIPerIS`** total UMIs were considered.
+
+```{r,results='markup',fig.width=12, fig.height=6,fig.align='center',fig.format='png', echo=FALSE}
+print(fig_cluster_venn)
+
+```
 
 # Graphical representations
 
