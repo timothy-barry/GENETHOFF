@@ -34,15 +34,13 @@
   min_predicted_distance <- as.numeric(args[7])
 
 # debug
-# summary_files = "05-Report/Cpf1_summary.xlsx"
+# summary_files = "05-Report/hDMD_25uM_dsODN_G_summary.xlsx 05-Report/GUIDE_ODN_only_summary.xlsx 05-Report/293T_Let7c1_60uM_dsODN_iG_summary.xlsx 05-Report/293T_Let7c1_80uM_dsODN_iG_summary.xlsx 05-Report/hDMD_Let7c1_25uM_dsODN_iG_summary.xlsx 05-Report/iGUIDE_ODN_only_summary.xlsx"
 # sampleInfo <- read.delim("sampleInfo.csv",sep=";")
 # config=read_yaml("guideSeq_GNT.yml")
-# predicted_files = "06-offPredict/GRCh38_AAAAGAGAGAGAGAGGGGGGAAATTTN.csv"
-# max_clusters = 100
+# predicted_files = "06-offPredict/GRCh38_ATGGATCTGAGGTAGAAAGG_NGG_3.csv"
+# max_clusters = 200
 # minUMI_alignments_figure = 1
 # min_predicted_distance = 100
-
-
 
 
 # Load demux stat -------------------------------------------------------------------------
@@ -335,21 +333,53 @@ data_cluster_venn <- lapply(summary, function(x){
 
 
 fig_cluster_venn <- lapply(data_cluster_venn, function(x){
-  UpSetR::upset(UpSetR::fromList(x),text.scale = 1.5,
-                order.by = "freq",
-                nsets = 5,empty.intersections = T,
-                queries = list(list(query = UpSetR::intersects, 
-                                    params = list("Have gRNA match",
-                                                  "Contains > 3 cut sites",
-                                                  "Contains > 10 UMIs",
-                                                  "Have 2 ODN orientations"),
-                                    color= "red", active = T),
-                               list(query = UpSetR::intersects, params = list(names(x)),
-                                    color= "red", active = T))) 
+  
+  not_empty <- names(x)[which(sapply(x,length)>0)]
+  
+  if(all(names(x) %in% not_empty)){
+    
+    UpSetR::upset(number.angles = 45,UpSetR::fromList(x),text.scale = 1.5,
+                  order.by = "freq",
+                  nsets = 6, 
+                  empty.intersections = T,
+                  queries = list(list(query = UpSetR::intersects,
+                                      params = list("Have gRNA match",
+                                                    "Contains > 3 cut sites",
+                                                    "Contains > 10 UMIs",
+                                                    "Have 2 ODN orientations"),
+                                      color= "red", active = T),
+                                 list(query = UpSetR::intersects, params = list(names(x)),
+                                      color= "red", active = T))
+    ) 
+  } else { 
+    
+    cat.keep <- c("Have gRNA match",
+                  "Contains > 3 cut sites",
+                  "Contains > 10 UMIs",
+                  "Have 2 ODN orientations")
+    
+    if(all( cat.keep %in% not_empty)){
+      UpSetR::upset(number.angles = 45,UpSetR::fromList(x),text.scale = 1.5,
+                    order.by = "freq",
+                    nsets = 6, 
+                    empty.intersections = T,
+                    queries = list(list(query = UpSetR::intersects,
+                                        params = as.list(cat.keep),
+                                        color= "red", active = T)))
+      
+      
+    }else {
+      UpSetR::upset(number.angles = 45,UpSetR::fromList(x),text.scale = 1.5,
+                    order.by = "freq",
+                    nsets = 6, 
+                    empty.intersections = T)
+      
+    }
+    
   }
+  
+}
 )
-
-
 
 
 

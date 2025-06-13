@@ -294,7 +294,8 @@ rule filter_reads:
 if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
     rule alignOnGenome:
         input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2
-        output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam")
+        output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"),
+         R2_unmapped="03-align/{sample}_R2.UMI.ODN.trimmed.unmapped.fastq.gz"
         threads: 6
         log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
         conda: "guideseq"
@@ -393,14 +394,66 @@ rule call_IS:
         """
 
 
+############ RESCUE R2 READS ###################
+rule rescue_R2:
+  input: 
+   R2_short=rules.filter_reads.output.R2short,
+   R2_unmapped=rules.alignOnGenome.output.R2_unmapped
+  output: sam=temp("03-align/{sample}_R2rescued.UMI.ODN.trimmed.filtered.sam")
+  threads: 6
+  conda: "guideseq"
+  log: "03-align/{sample}_R2rescued.UMI.ODN.trimmed.filtered.align.log"
+  params: index=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["index"]
+  shell: """
+    bowtie2 -p {threads} --no-unal \
+    -x {params.index} \
+    -U {input.R2_short} {input.R2_unmapped} -S {output.sam} 2> {log}
+      """
+
+rule sort_rescued_R2:
+  input: rules.rescue_R2.output
+  output: "03-align/{sample}_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam"
+  conda: "guideseq"
+  threads:6
+  params: minMAPQ=config["minMAPQ"]
+  shell: """
+    samtools view -b -h  {input} -e '((mapq ==1 && [AS] == [XS]) || (mapq >={params.minMAPQ}))' | samtools sort - > {output}
+    samtools index {output}
+  """
+
+rule callIS_R2rescued:
+  input: rules.sort_rescued_R2.output
+  output: umi="04-IScalling/{sample}_R2rescued.reads_per_UMI_per_IS.bed", tmp=temp("04-IScalling/{sample}_rescueR2.bed")
+  threads: 1
+  conda: "guideseq"
+  log:
+  params: UMI=config["UMI_pattern"]
+  shell: """
+  
+      UMI_length=$(expr length {params.UMI})
+
+      bedtools bamtobed -i {input} > {output.tmp}
+      
+      # read R2 contains the genome/ODN junction
+      
+      ##################################################################
+      # count number of reads per UMI and per IS (pos and strand separated)
+      ##################################################################
+
+      awk 'BEGIN{{OFS="\\t";FS="\\t"}} {{split($4,a,"_"); if($6=="+") print $1,$2,$2,a[1],a[2],a[3],$5,$6,$3-$2; else print $1,$3-1,$3-1,a[1],a[2],a[3],$5,$6,$3-$2}}' {output.tmp} | sort -k1,1 -k2,3n -k6,6 -k5,5 -k8,8 | bedtools groupby -g 1,2,3,6,5,8 -c 4,7 -o count_distinct,median  > {output.umi}
+      
+      """
+
+#######################
+
 rule correct_UMI:
-    input: bed=rules.call_IS.output.umi
+    input: bed=rules.call_IS.output.umi, bed_rescued=rules.callIS_R2rescued.output.umi
     output: "04-IScalling/{sample}.reads_per_UMI_per_IS_corrected.bed"
     conda: "guideseq"
     threads: 2
-    params: hamming=config["UMI_hamming_distance"], filter = config["UMI_filter"],  UMI=config["UMI_pattern"], method = config["UMI_deduplication"]
+    params: hamming=config["UMI_hamming_distance"], filter = config["UMI_filter"],  UMI=config["UMI_pattern"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"]
     shell: """
-        Rscript ../00-pipeline/correct_umi.R {input} {params.UMI} {params.filter} {params.hamming} {params.method} {output}
+        Rscript ../00-pipeline/correct_umi.R {input.bed} {params.UMI} {params.filter} {params.hamming} {params.method} {output} {params.rescueR2}
         """
 
 

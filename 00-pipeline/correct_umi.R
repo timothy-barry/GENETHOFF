@@ -20,7 +20,16 @@ args <- commandArgs(trailingOnly = T)
   hamming_threshold <- as.numeric(args[4])
   method <- str_to_lower(args[5])
   output <- args[6]
-
+  rescueR2 <- args[7]
+  
+  
+  ## If R2 reads were rescued from unmapped or too short pairs, merge them with PE read alignments
+if(rescueR2=="TRUE"){
+  rescuedR2_file <- str_replace(args[1],".reads_per_UMI_per_IS.bed","_R2rescued.reads_per_UMI_per_IS.bed")
+  bed_rescuedR2 <- read.delim(rescuedR2_file,header=F)
+  
+  bed <- bind_rows(bed,bed_rescuedR2)
+}
 
 ## ------------------------------------------- ##
 ## for debug
@@ -28,6 +37,9 @@ args <- commandArgs(trailingOnly = T)
 # motif <- "NNWNNWNN"
 # hamming_threshold <- 1
 ## ------------------------------------------- ##
+  
+
+  
   
   
 
