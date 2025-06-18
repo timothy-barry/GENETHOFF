@@ -34,11 +34,11 @@
   min_predicted_distance <- as.numeric(args[7])
 
 # debug
-# summary_files = "05-Report/hDMD_25uM_dsODN_G_summary.xlsx 05-Report/GUIDE_ODN_only_summary.xlsx 05-Report/293T_Let7c1_60uM_dsODN_iG_summary.xlsx 05-Report/293T_Let7c1_80uM_dsODN_iG_summary.xlsx 05-Report/hDMD_Let7c1_25uM_dsODN_iG_summary.xlsx 05-Report/iGUIDE_ODN_only_summary.xlsx"
+# summary_files = "05-Report/mock_summary.xlsx 05-Report/HBA_summary.xlsx"
 # sampleInfo <- read.delim("sampleInfo.csv",sep=";")
 # config=read_yaml("guideSeq_GNT.yml")
-# predicted_files = "06-offPredict/GRCh38_ATGGATCTGAGGTAGAAAGG_NGG_3.csv"
-# max_clusters = 200
+# predicted_files = "06-offPredict/GRCh38_GGGTTCTCTCTGAGTCTGTG_NGG_3.csv"
+# max_clusters = 100
 # minUMI_alignments_figure = 1
 # min_predicted_distance = 100
 
@@ -143,7 +143,8 @@ stats_summary <- lapply(seq_along(summary), function(x){
     "both PCRs" = length(which(N_orientations_PCR==2)),
     "both Strands" = length(which(N_orientations_cluster==2)),
     "crRNA matched"= length(which(!is.na(Alignment))),
-    "multiple Cuts" = length(which(N_IS_cluster>3)))
+    "multiple Cuts" = length(which(N_IS_cluster>3)),
+    "In Oncogene" = length(which(str_detect(Is.Oncogene,pattern = "Yes|yes") | str_detect(Is.Tumor.Suppressor.Gene,pattern = "Yes|yes"))))
 }
 )
 
@@ -340,7 +341,7 @@ fig_cluster_venn <- lapply(data_cluster_venn, function(x){
     
     UpSetR::upset(number.angles = 45,UpSetR::fromList(x),text.scale = 1.5,
                   order.by = "freq",
-                  nsets = 6, 
+                  nsets = 7, 
                   empty.intersections = T,
                   queries = list(list(query = UpSetR::intersects,
                                       params = list("Have gRNA match",
@@ -615,7 +616,8 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
 
   dt[, Symbol_html := str_replace_all(Symbol, ", ", " <br>")]
   dt[, position_html := str_replace_all(position, ", ", " <br>")]
-  
+  dt[, Is.Oncogene_html := str_replace_all(Is.Oncogene, ", ", " <br>")]
+  dt[, Is.Tumor.Suppressor.Gene_html := str_replace_all(Is.Tumor.Suppressor.Gene, ", ", " <br>")]
   
   
   dt$predicted_alignment_html <- cell_spec(dt$predicted, background = ifelse(dt$predicted == "yes", "#129749", "white"))
@@ -645,8 +647,10 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
            predicted= predicted_alignment_html,
            bulge,
            PCR,
-           multiHit,
-           n_UMI_multiSum) %>% 
+           #multiHit,
+           #n_UMI_multiSum,
+           Is.Oncogene = Is.Oncogene_html,
+           Is.Tumor.Suppressor.Gene = Is.Tumor.Suppressor.Gene_html) %>% 
     unite(col = "gRNA<br>position",chromosome,cut_gRNa_alignment,sep = ":") %>% 
     unite("Mismatch_indels",N_mismatches, n_indels,sep = "_",remove = T) 
   

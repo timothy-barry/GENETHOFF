@@ -143,7 +143,7 @@ kbl(stats_summary %>%  arrange(library) %>% left_join(alignment_table,by="librar
                       caption = "Table 4",
     format.args = list(big.mark = ",")) %>%
         kable_classic_2(full_width = T,html_font = "helvetica") %>% 
-        add_header_above(c(" " = 4, "Clusters" = 6)) %>% 
+        add_header_above(c(" " = 4, "Clusters" = 7)) %>% 
         kable_styling(bootstrap_options = c("condensed","hover","stripped"),
                       font_size = 12,
                       fixed_thead = T)

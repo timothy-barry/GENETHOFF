@@ -21,6 +21,7 @@ args <- commandArgs(trailingOnly = T)
 annotation <- args[1]
 files <- args[2]
 output<- args[3]
+onco_list <- args[4]
 
 
 ###########################################################
@@ -77,12 +78,42 @@ if(exists("cluster_annotated") && nrow(cluster_annotated)>0){
   
   
   
+  ## Add oncogene / tumors suppressing gene annotation
   
+  # human list examples : https://bioinfo.uth.edu/TSGene/download.cgi & https://bioinfo-minzhao.org/ongene/download.html 
+  
+  if(onco_list!=""){
+    
+    onco_list_df <- read.delim(onco_list,sep="\t") 
+    
+    if(all(colnames(onco_list_df) %in% c("ensembl.transcriptID","Is.Oncogene","Is.Tumor.Suppressor.Gene") & nrow(onco_list_df)>0)){
+      
+      ## this file must contain "ensembl.transcriptID", column "Is.Oncogene" and "Is.Tumor.Suppressor.Gene" as in https://www.oncokb.org/cancer-genes
+      
+      onco_list_df <- onco_list_df %>%
+        distinct(ensembl.transcriptID,Is.Oncogene,Is.Tumor.Suppressor.Gene)
+      
+      results_granges_df <- results_granges_df %>%
+        left_join(onco_list_df, by = c("annot.transcript_id" = "ensembl.transcriptID") ) %>% 
+        select(-annot.transcript_id) %>%  distinct() %>% 
+        replace_na(replace = list(Is.Oncogene="no",Is.Tumor.Suppressor.Gene="no"))
+    } else{
+      
+      errorCondition("Oncogene list is empty or is not correctly formatted. 
+                     \nColnames must be : 'ensembl.transcriptID','Is.Oncogene','Is.Tumor.Suppressor.Gene'")
+      
+    }
+    } else {
+    warning("Oncogene list was empty. Annotating with NAs")
+    results_granges_df <- results_granges_df %>% mutate(Is.Oncogene = NA,Is.Tumor.Suppressor.Gene=NA )
+  }
+  
+
   
   # collapse annotation per cluster -----------------------------------------------------
   results_granges_df_annot <- results_granges_df %>%
-    distinct(clusterID,annot.type,annot.gene_id,annot.gene_name,annot.gene_biotype)%>%
-    group_by(clusterID,annot.gene_id,annot.gene_name,annot.gene_biotype) %>%
+    distinct(clusterID,annot.type,annot.gene_id,annot.gene_name,annot.gene_biotype,Is.Oncogene,Is.Tumor.Suppressor.Gene)%>%
+    group_by(clusterID,annot.gene_id,annot.gene_name,annot.gene_biotype,,Is.Oncogene,Is.Tumor.Suppressor.Gene) %>%
     summarise(pos =toString(annot.type)) %>% 
     mutate(position=case_when(str_detect(pos,"exon") ~ "exon", TRUE ~ "intron")) %>%
     dplyr::select(-pos) %>% 
@@ -90,41 +121,16 @@ if(exists("cluster_annotated") && nrow(cluster_annotated)>0){
     summarise(gene_ensemblID = toString(annot.gene_id),
               Symbol = toString(annot.gene_name),
               gene_type = toString(annot.gene_biotype),
-              position = toString(position))
+              position = toString(position),
+              Is.Oncogene = toString(Is.Oncogene),
+              Is.Tumor.Suppressor.Gene = toString(Is.Tumor.Suppressor.Gene))
   
   
-  
-  
- 
-  
-  
+
   # Annotate ------------------------------------------------------------------
   
   results_granges_df_annot <- results_df %>%  left_join(results_granges_df_annot, by = "clusterID")
   
-  
-  # Annotate clusters that have a similar alignment pattern --> multihits -------------
-  
-  
-  multihits <- results_granges_df_annot %>% 
-    filter(!is.na(Alignment))  %>%    #keep clusters with gRNa match
-    distinct(clusterID,Alignment)%>% 
-    arrange(Alignment) %>% 
-    mutate(multi_cluster = as.numeric(factor(Alignment))) %>%     # assign ID to clusters with identical alignment pattern
-    group_by(multi_cluster) %>% 
-    mutate(SimilarAlignmentCount = n_distinct(clusterID)) %>%     # count how many clusters share the same alignment pattern
-    distinct(clusterID,multi_cluster,SimilarAlignmentCount)       # select columns for annotation
-  
-  
-  
-  results_granges_df_annot <- results_granges_df_annot %>% 
-    left_join(multihits, by = "clusterID") %>% 
-    group_by(multi_cluster) %>% 
-    mutate(n_UMI_multiSum = sum(N_UMI_cluster),                 # calculate sum of UMI counts per ID. As we don't know which site is the correct one, we sum up all UMI from all site with same pattern
-           multiHit = SimilarAlignmentCount>1)                  # if there are more than 1 site per ID, it's a multihit
-  
-  
-
   # Save to csv file  -----------------------------------------------------------------
 
   

@@ -579,9 +579,9 @@ rule annotate_sites:
     output: "05-Report/{sample}_summary.xlsx"
     conda: "guideseq"
     threads: 4
-    params: species=lambda wildcards: samples["Genome"][wildcards.sample]
+    params: species=lambda wildcards: samples["Genome"][wildcards.sample], oncoList=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["oncogene_list"]
     shell: """
-        Rscript ../00-pipeline/annotate_cuting_sites.R {params.species} {input.rdata} {output}
+        Rscript ../00-pipeline/annotate_cuting_sites.R {params.species} {input.rdata} {output} {params.oncoList}
         """
 
 

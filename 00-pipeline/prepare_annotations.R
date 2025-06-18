@@ -18,15 +18,10 @@ file <- args[2]
   gtf <- gtf[gtf$type %in% c("gene","exon")]
   
   # select only columns of interest
-  mcols(gtf) <- gtf %>% data.frame %>% dplyr::select(gene_id,gene_name,gene_biotype,type) %>% mutate(gene_name = case_when(is.na(gene_name)~ gene_id,
-                                                                                                                           TRUE ~ gene_name))
+  mcols(gtf) <- gtf %>%
+    data.frame %>% 
+    dplyr::select(gene_id,gene_name,transcript_id,gene_biotype,type) %>% 
+    mutate(gene_name = case_when(is.na(gene_name)~ gene_id,TRUE ~ gene_name))
   
   saveRDS(object = gtf, file = paste("../02-ressources/",species,".rds",sep = "" ))
   
-
-
-
-
-
-
-
