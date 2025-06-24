@@ -1,4 +1,3 @@
-name: guideseq_tools
 channels:
   - conda-forge
   - bioconda

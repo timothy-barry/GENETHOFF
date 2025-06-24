@@ -614,7 +614,24 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
     dt[, alignment_html := paste("gRNA: ",pam_gRNA_html," ", seq_gRNA_html, " <br>gDNA: ", pam_gDNA_html," ",seq_gDNA_html,   sep = "")]
   }
 
-  dt[, Symbol_html := str_replace_all(Symbol, ", ", " <br>")]
+  convert_to_text_spec <- function(gene_symbols) {
+    if(!is.na(gene_symbols)){
+      base_url <- "http://www.genecards.org/cgi-bin/carddisp.pl?gene="
+      symbols <- unlist(strsplit(gene_symbols, ","))
+      text_spec_list <- lapply(symbols, function(symbol) {
+        text_spec(symbol, link = paste0(base_url, symbol))
+      })
+      # do.call(c, text_spec_list)
+      toString(text_spec_list)} 
+    else {
+      ""
+    }
+    
+  }
+  
+  dt[,gene_links := sapply(Symbol, convert_to_text_spec, simplify = TRUE)]
+  dt[, Symbol_html := str_replace_all(gene_links, ", ", " <br>")]
+  
   dt[, position_html := str_replace_all(position, ", ", " <br>")]
   dt[, Is.Oncogene_html := str_replace_all(Is.Oncogene, ", ", " <br>")]
   dt[, Is.Tumor.Suppressor.Gene_html := str_replace_all(Is.Tumor.Suppressor.Gene, ", ", " <br>")]

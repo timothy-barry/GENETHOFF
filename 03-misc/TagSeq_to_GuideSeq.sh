@@ -5,11 +5,13 @@
   # fasterq-dump --split-3 SRR13258531 SRR13258532 SRR13258533 SRR13258534
 
 
+## requires cutadapt and sra-toolkit
+
 for library in *_1.fastq; do ## change pattern if necessary
-  
   lib="${library%_1.fastq}"
   echo "processing " $lib
   
+  conda activate BI_tools #environment with cutadapt
   ## get reads with linker in R1
   cutadapt -j 24 -g "^NNNNNNNNNNNNNNNNACTACTAATACGACT"  \
     -O 31 \
@@ -29,13 +31,21 @@ for library in *_1.fastq; do ## change pattern if necessary
     -O 31 \
     -e 0 \
     --no-indels \
-    -o $lib"_R1.fastq.gz"  \
+    -o $lib"_R1.fastq"  \
     $lib"_R1temp.fastq.gz"  > $lib"_trimming_R1.log"
   
-  ## Use the same barcode for I1 as in I2
-  cutadapt --length 8 -j 12 $lib"_I2.fastq.gz"  -o $lib"_I1.fastq.gz"
-  
+  ## Make a fake I1 file as it doesn't exist in the SRA deposite
+  # retreive the barcode from the SRA deposite
+  conda activate sra-tool # environment with SRA toolkit
+  index=$(sra-stat --quick $lib | awk 'BEGIN{FS="|"} {print $2}')
+  echo $lib" barcode I1: "$index
+  ~/projects/add_pattern_to_sequence.sh $index replace  $lib"_R1.fastq" > $lib"_I1.fastq"
+
+  conda activate BI_tools #environment with cutadapt
+  seqkit seq -j 12 -o $lib"_R1.fastq.gz" $lib"_R1.fastq"
+  seqkit seq -j 12 -o $lib"_I1.fastq.gz" $lib"_I1.fastq"
 done
+
 
 rm *temp*
 
