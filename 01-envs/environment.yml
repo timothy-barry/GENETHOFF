@@ -13,7 +13,7 @@ dependencies:
   - seqkit=2.10.0
   - bowtie2=2.5.4
   - openjdk=23.0.2
-  - r-base=4.4.1
+  - r-base=4.4.3
   - r-data.table
   - r-htmltools
   - r-rmarkdown

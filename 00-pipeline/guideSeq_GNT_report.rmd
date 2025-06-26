@@ -167,7 +167,7 @@ kbl(stats_summary %>%  arrange(library) %>% left_join(alignment_table,by="librar
 >
 > Clusters with more than **`r config$minUMIPerIS`** total UMIs were considered.
 
-```{r,results='markup',fig.width=12, fig.height=6,fig.align='center',fig.format='png', echo=FALSE}
+```{r,results='markup',fig.width=12, fig.height=6,fig.align='center',fig.format='png', echo=FALSE, eval=FALSE}
 print(fig_cluster_venn)
 
 ```

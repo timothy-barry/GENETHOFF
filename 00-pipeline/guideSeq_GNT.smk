@@ -104,6 +104,21 @@ else:
     print(samplesTable[columns_to_check])
     sys.exit(1)
 
+#### Check that the protocole defined in the sample datasheet (guideSeq, iGuideSeq, tagSeq, ...) has a corresponding entry in the configuration file for sequence trimming.
+
+unique_protocols = samplesTable['type'].unique()
+
+yaml_protocols = config.keys()
+
+missing_protocols = [protocol for protocol in unique_protocols if protocol not in yaml_protocols]
+
+if not missing_protocols:
+    print("")
+else:
+    print(f"\n{RED}!! The following protocols are not defined configuration file:{RESET}", missing_protocols)
+    sys.exit(1)
+
+
 
 
 
@@ -127,7 +142,11 @@ rule get_chrom_length:
     conda: "guideseq"
     params: lambda wildcards: config["genome"][wildcards.genome]["fasta"]+".fai"
     shell: """
-        samtools faidx {input}
+        if [ ! -e {params} ]
+        then
+          samtools faidx {input}  ## you must have write access to path
+        fi
+        
         ln -s  {params} {output}
         """
 
