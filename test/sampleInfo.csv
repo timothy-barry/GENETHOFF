@@ -1,3 +1,4 @@
-sampleName;Cell_Type;Genome;gRNA_name;orientation;replicate;gRNA_sequence;Cas;PAM_sequence;Cut_Offset;type;index1;index2
-VEGFA_s1_K562;K562;GRCh38;VEGFA_s1;positive;;GGGTGGGGGGAGTTTGCTCC;Cas;NGG;-4;guideseq;AGGCAGAA;CTAAGCCT
-VEGFA_s1_K562;K562;GRCh38;VEGFA_s1;negative;;GGGTGGGGGGAGTTTGCTCC;Cas;NGG;-4;guideseq;TCCTGAGC;CTAAGCCT
+sampleName;Cell_Type;Genome;gRNA_name;orientation;replicate;gRNA_sequence;Cas;PAM_sequence;PAM_side;Cut_Offset;type;index1;index2
+VEGFA_s1_K562_pos;K562;GRCh38;VEGFA_s1;positive;;GGGTGGGGGGAGTTTGCTCC;Cas;NGG;3;-4;guideseq;AGGCAGAA;CTAAGCCT
+VEGFA_s1_K562_neg;K562;GRCh38;VEGFA_s1;negative;;GGGTGGGGGGAGTTTGCTCC;Cas;NGG;3;-4;guideseq;TCCTGAGC;CTAAGC
+
