@@ -80,9 +80,6 @@ pam <- DNAString(args[6])
 pam_length <- nchar(pam)
 
 
-
-
-
 max_edits <- as.numeric(args[8])
 
 bulges <- as.logical(toupper(args[9]))
@@ -547,12 +544,12 @@ if(nrow(align_stat)>0){
   
   
   
-  cluster_annotated <- cluster_annotated %>%
+  clusters_grna_match <- cluster_annotated %>%
     left_join(modal_cut_position, by = c("clusterID","chromosome"))
   
-  save(cluster_annotated, fasta, grna, bed_collapsedUMI, clusters, watson,crick,IS_in_clusters, file = args[11])
+  save(clusters_grna_match, grna,  file = args[11])
 } else {
-  save(fasta,grna, bed_collapsedUMI, clusters, watson,crick, file = args[11])
+  save(grna, file = args[11])
   
 }
 

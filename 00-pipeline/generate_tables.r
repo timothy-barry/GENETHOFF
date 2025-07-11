@@ -16,7 +16,7 @@
   library(ggrepel,quietly = T,warn.conflicts = F,verbose = F)
   library(data.table,quietly = T,warn.conflicts = F,verbose = F)
   library(DT, quietly = T,warn.conflicts = F,verbose = F)
-  library(UpSetR, quietly = T,warn.conflicts = F,verbose = F)  
+  #library(UpSetR, quietly = T,warn.conflicts = F,verbose = F)  
   
 
 
@@ -33,15 +33,17 @@
   minUMI_alignments_figure <- as.numeric(args[6])
   min_predicted_distance <- as.numeric(args[7])
 
-# debug
-# summary_files = "05-Report/mock_summary.xlsx 05-Report/HBA_summary.xlsx"
-# sampleInfo <- read.delim("sampleInfo.csv",sep=";")
-# config=read_yaml("guideSeq_GNT.yml")
-# predicted_files = "06-offPredict/GRCh38_GGGTTCTCTCTGAGTCTGTG_NGG_3.csv"
-# max_clusters = 100
-# minUMI_alignments_figure = 1
-# min_predicted_distance = 100
+## debug
+# 
+#   summary_files= "results/EBS_K562_summary.xlsx results/EBS_hDMD_summary.xlsx results/g16_K562_summary.xlsx results/VEGFA_s1_K562_summary.xlsx results/mock_K562_summary.xlsx"
+# sampleInfo= read.delim("sampleInfo.csv",sep=";")
+# config = read_yaml("guideSeq_GNT.yml")
+# predicted_files ="06-offPredict/GRCh38_CAGATAACTGGGCCAACCAT_NNN_3.csv 06-offPredict/GRCh38_CAGATAACTGGGCCAACCAT_NGG_3.csv 06-offPredict/GRCh38_TCTTCCGGAACAAAGTTGCT_NGG_3.csv 06-offPredict/GRCh38_GGGTGGGGGGAGTTTGCTCC_NGG_3.csv"
+# max_clusters=100
+# minUMI_alignments_figure=1
+# min_predicted_distance=100
 
+  
 
 # Load demux stat -------------------------------------------------------------------------
 
@@ -57,9 +59,9 @@
     select(file,num_seqs) %>% 
     mutate(library = str_match(file,"/(.+)_R1")[,2]) %>% 
     mutate(step = case_when(str_detect(file, "_R1.fastq.gz")~"Demultiplexed",
-                            str_ends(file, "R1.ODN.fastq.gz")~"ODN checked",
+                            str_ends(file, "R1.ODN.fastq.gz")~"ODN presence",
                             str_ends(file, "R1.ODN.UMI.trimmed.fastq.gz")~NA,
-                            str_ends(file, "R1.UMI.ODN.trimmed.filtered.fastq.gz")~"Trimmed-filtered",
+                            str_ends(file, "R1.UMI.ODN.trimmed.filtered.fastq.gz")~"Trimmed & filtered",
                             TRUE ~ NA)) %>% 
     filter(!is.na(step)) %>% 
     select(-file) %>% 
@@ -70,13 +72,15 @@
 
 
 
-## Load summary excel file -------------------------------------------------------
+# Load summary excel file -------------------------------------------------------
   summary_files <- unlist(str_split(summary_files," "))
   summary <- lapply(summary_files,read_excel)
   
   summary <- lapply(summary, function(x){
-    
-    x %>% mutate(chromosome = as.character(chromosome))
+
+    x %>%
+      mutate(chromosome = case_when(!str_starts(chromosome ,"chr") ~ paste("chr",chromosome ,sep=""), 
+                           TRUE ~ chromosome))
   })
   
   names(summary) <- str_remove(basename(summary_files),"\\_summary.xlsx")
@@ -89,39 +93,41 @@
   
   summary <- lapply(summary,function(x){
     
-    best <- x %>% 
+    best <- x %>%
+      filter(!is.na(Alignment)) %>% ## remove alignments without gRNA match
+      arrange(desc(N_UMI_cluster)) %>% 
+      mutate(Rank = dense_rank(x = -N_UMI_cluster)) %>% 
       slice_min(n = 1,with_ties = T, order_by = N_edits) %>% 
       slice_min(n = 1,with_ties = T, order_by = PAM_indel_count) %>% 
       #filter(N_edits==0) %>% 
-      select(library,clusterID) %>% 
+      select(clusterID,Rank) %>% 
       mutate(best=TRUE)
     
     abundance <- x  %>% 
       filter(!is.na(Alignment)) %>% ## remove alignments without gRNA match
-      left_join(best,by = c("clusterID","library")) %>%
+      left_join(best,by = c("clusterID")) %>%
       mutate(Relative_abundance = round(N_UMI_cluster / sum(N_UMI_cluster) *100,digits = 2)) %>% 
-      select(library,clusterID, best,Relative_abundance )
+      select(clusterID, best,Relative_abundance, Rank )
     
     x <-x %>% left_join(abundance) 
     return(x)
     
-    
   })
 
-## get best match informations by library:
+## get best match information by library:
   best_aligns <- summary %>%  
-    bind_rows() %>% 
+    bind_rows(.id="library") %>% 
     filter(best==T) %>%
     arrange(library) %>% 
     select(library,
            clusterID,
-           chromosome,
+           chromosome ,
            cut_modal_position,
            cut_gRNa_alignment,
            Edits_gRNA = N_edits,
            Edits_PAM=PAM_indel_count,
            N_UMI_cluster,
-           Relative_abundance)
+           Relative_abundance, Rank)
 
 
 
@@ -131,31 +137,27 @@
 
 # Get stats -------------------------------------------------------------------------
 
-stats_summary <- lapply(seq_along(summary), function(x){
+stats_summary <- lapply(summary, function(x){
   
-  df <- summary[[x]]
-  
-  df %>% summarise(
-    Alignments = sum(N_reads_cluster),
+    x %>% summarise(
+    Reads = sum(N_reads_cluster),
     UMIs = sum(N_UMI_cluster),
     Insertions = sum(N_IS_cluster),
-    total = n(),
-    "both PCRs" = length(which(N_orientations_PCR==2)),
-    "both Strands" = length(which(N_orientations_cluster==2)),
-    "crRNA matched"= length(which(!is.na(Alignment))),
-    "multiple Cuts" = length(which(N_IS_cluster>3)),
-    "In Oncogene" = length(which(str_detect(Is.Oncogene,pattern = "Yes|yes") | str_detect(Is.Tumor.Suppressor.Gene,pattern = "Yes|yes"))))
+    Clusters = n(),
+    "With gRNA match .."= length(which(!is.na(Alignment))),
+    ".. 2 PCR orientations" = length(which(!is.na(Alignment) & N_orientations_PCR==2)),
+    ".. 2 ODN orientations" = length(which(!is.na(Alignment) & N_orientations_cluster==2)),
+    #"& with >3 sites" = length(which(!is.na(Alignment) & N_IS_cluster>3)),
+    ".. In Oncogene" = length(which(!is.na(Alignment) & str_detect(Onco_annotation,"[A-Za-z]")))) %>% 
+    pivot_longer(cols =starts_with(".."),names_to = " And ..", values_to = "count") 
 }
 )
-
-names(stats_summary) <- names(summary)
 
 stats_summary <- stats_summary %>% bind_rows(.id="library")
 
 
 
-
-# Load predictions ------------------------------------------------------------------
+# Annotate predictions ------------------------------------------------------------------
 cat("Reading predicted cutting sites\n")
 predicted_files <- unlist(str_split(predicted_files," "))
 predict_gRNA <- lapply(predicted_files,data.table::fread  )
@@ -163,8 +165,7 @@ names(predict_gRNA) <- str_remove(basename(predicted_files),"\\.csv")
 
 
 
-# Perform analysis for each library ------------------------------------------------------------------
-
+# Perform analysis for each library
 
 summary_pred_bulge <- lapply(seq_along(summary), function(x){
   lib_name <- names(summary)[x]
@@ -193,8 +194,9 @@ summary_pred_bulge <- lapply(seq_along(summary), function(x){
         
         if(nrow(predict_gRNA[[grna_name]])>0){
           
-          predict <- predict_gRNA[[grna_name]] %>% 
-            mutate(Chromosome = str_remove_all(Chromosome,"_.+$"))
+          predict <- predict_gRNA[[grna_name]]  %>% 
+            mutate(Chromosome = case_when(!str_starts(Chromosome,"chr") ~ paste("chr",str_remove_all(Chromosome,"_.+$"),sep=""), 
+                                          TRUE ~ Chromosome))
           
           
           
@@ -263,257 +265,116 @@ summary_pred_bulge <- lapply(seq_along(summary), function(x){
           
           # annotate table of clusters with prediction / bulges
           df <- df %>% left_join(x3, by = "clusterID")
+          
+          # update xls file with prediction annotation
+          df_list <- list(df)
+          names(df_list) <- lib_name
+          writexl::write_xlsx(df_list,path = summary_files[x],col_names = T,format_headers = T)
+          
           return(df)
           
           
         }
       }
     }
+    
   }
+  
 }
 )
 
 names(summary_pred_bulge) <- names(summary)
 
+# Make figures ----------------------------------------------------------------------
 
-# figure 3 --------------------------------------------------------------------------
+## rank-abundance curve ----
 
-data_fig3 <- lapply(summary_pred_bulge, function(x){
-  
-  x %>% group_by(chromosome,"has_gRNA?"=!is.na(Alignment)) %>% 
-    summarise(clusters = n(), reads = sum(N_reads_cluster), UMI = sum(N_UMI_cluster))
-}
-)
-
-# filter only chromosomes
-data_fig3 <- data_fig3 %>%
-  bind_rows(.id="library") %>% 
-  filter(str_starts(chromosome,"[0-9XYM]") | str_starts(chromosome,"chr"))
-
-
-# change MT to M
-data_fig3 <- data_fig3 %>% 
-  mutate(chromosome = recode(chromosome, "MT" = "M"))
-
-
-#convert ensemble to UCSC
-if(!any(str_starts(data_fig3$chromosome,"chr"))){
-  data_fig3 <- data_fig3 %>%
-    mutate(chromosome = paste("chr",chromosome,sep=""))
-}
-
-
-
-data_fig3 <- data_fig3 %>% 
-  mutate(chromosome = factor(chromosome, levels = paste("chr",c(1:30,"X","Y","M"),sep="")),
-         "has_gRNA?"= factor(`has_gRNA?`,levels = c("TRUE","FALSE")))
-
-
-fig3 <- ggplot(data_fig3, aes( chromosome, clusters,fill = `has_gRNA?`)) +
-  geom_col(col = "black") +
-  facet_wrap(~library, ncol = 3, scales = "free_y") + 
-  coord_polar() +
-  theme_bw(base_size = 12)+
-  scale_fill_manual(values = c("green4","grey")) +
-  theme(panel.grid.major.x = element_line(linetype = 2,colour = "grey40"),axis.text =  element_text(color = "black"))
-
-
-
-# figure upset plot -----------------------------------------------------------------
-
-data_cluster_venn <- lapply(summary, function(x){
-  
-  list("Have gRNA match"=x$clusterID[!is.na(x$Alignment)],
-       "Detected in 2 PCR directions"=x$clusterID[x$N_orientations_PCR==2],
-       "Contains > 3 cut sites"=x$clusterID[x$N_IS_cluster>3],
-       "Contains > 10 UMIs"=x$clusterID[x$N_UMI_cluster>10],
-       "Have 2 ODN orientations"=x$clusterID[x$N_orientations_cluster==2])
-}
-)
-
-
-
-fig_cluster_venn <- lapply(data_cluster_venn, function(x){
-  
-  not_empty <- names(x)[which(sapply(x,length)>0)]
-  
-  if(all(names(x) %in% not_empty)){
-    
-    UpSetR::upset(number.angles = 45,UpSetR::fromList(x),text.scale = 1.5,
-                  order.by = "freq",
-                  nsets = 7, 
-                  empty.intersections = T,
-                  queries = list(list(query = UpSetR::intersects,
-                                      params = list("Have gRNA match",
-                                                    "Contains > 3 cut sites",
-                                                    "Contains > 10 UMIs",
-                                                    "Have 2 ODN orientations"),
-                                      color= "red", active = T),
-                                 list(query = UpSetR::intersects, params = list(names(x)),
-                                      color= "red", active = T))
-    ) 
-  } else { 
-    
-    cat.keep <- c("Have gRNA match",
-                  "Contains > 3 cut sites",
-                  "Contains > 10 UMIs",
-                  "Have 2 ODN orientations")
-    
-    if(all( cat.keep %in% not_empty)){
-      UpSetR::upset(number.angles = 45,UpSetR::fromList(x),text.scale = 1.5,
-                    order.by = "freq",
-                    nsets = 6, 
-                    empty.intersections = T,
-                    queries = list(list(query = UpSetR::intersects,
-                                        params = as.list(cat.keep),
-                                        color= "red", active = T)))
-      
-      
-    }else {
-      UpSetR::upset(number.angles = 45,UpSetR::fromList(x),text.scale = 1.5,
-                    order.by = "freq",
-                    nsets = 6, 
-                    empty.intersections = T)
-      
-    }
-    
-  }
-  
-}
-)
-
-
-
-# figure 3b --------------------------------------------------------------------------
-fig3b <- ggplot(data_fig3, aes( chromosome, UMI,fill = `has_gRNA?`)) +
-  geom_col(col = "black") +
-  facet_wrap(~library, ncol = 3, scales = "free_y") + 
-  coord_polar() +
-  theme_bw(base_size = 12)+
-  scale_fill_manual(values = c("green4","grey")) +
-  theme(panel.grid.major.x = element_line(linetype = 2,colour = "grey40"),axis.text =  element_text(color = "black"))
-
-
-
-
-
-
-# figure 4 --------------------------------------------------------------------------
-
-data_fig4 <- lapply(summary_pred_bulge, function(x){
+RankAbundance_data <- lapply(summary_pred_bulge, function(x){
   
   x %>%
-    filter(!is.na(Alignment)) %>% 
-    group_by(chromosome,predicted) %>%  
-    summarise(clusters = n(), reads = sum(N_reads_cluster), UMI = sum(N_UMI_cluster))
-}
+    filter(N_UMI_cluster>=minUMI_alignments_figure, !is.na(Alignment))
+  }
 )
 
-# filter only chromosomes
-data_fig4 <- data_fig4 %>%
+RankAbundance_data <- RankAbundance_data %>%
   bind_rows(.id="library") %>% 
-  filter(str_starts(chromosome,"[0-9XYM]") | str_starts(chromosome,"chr"))
-
-
-# change MT to M
-data_fig4 <- data_fig4 %>% 
-  mutate(chromosome = recode(chromosome, "MT" = "M"))
-
-
-#convert ensemble to UCSC
-if(!any(str_starts(data_fig4$chromosome,"chr"))){
-  data_fig4 <- data_fig4 %>%
-    mutate(chromosome = paste("chr",chromosome,sep=""))
-}
-
-data_fig4 <- data_fig4 %>% 
-  mutate(chromosome = factor(chromosome, levels = paste("chr",c(1:30,"X","Y","M"),sep="")),
-         predicted= factor(predicted,levels = c("yes","no")))
+  group_by(library) %>% 
+  mutate(rank_desc = row_number(dplyr::desc(N_UMI_cluster)))
 
 
 
-
-fig4 <- ggplot(data_fig4, aes( chromosome, clusters,fill=predicted)) +
-  geom_col(col = "black") +
-  facet_wrap(~library, ncol = 3, scales = "free_y") + 
-  coord_polar() +
-  theme_bw(base_size = 12)+
-  scale_fill_manual(values = c("green4","grey")) +
-  theme(panel.grid.major.x = element_line(linetype = 2,colour = "grey40"),axis.text =  element_text(color = "black"))
-
-# figure 4b --------------------------------------------------------------------------
-
-
-fig4b <- ggplot(data_fig4, aes( chromosome, UMI,fill=predicted)) +
-  geom_col(col = "black") +
-  facet_wrap(~library, ncol = 3, scales = "free_y") + 
-  coord_polar() +
-  theme_bw(base_size = 12)+
-  scale_fill_manual(values = c("green4","grey")) +
-  theme(panel.grid.major.x = element_line(linetype = 2,colour = "grey40"),axis.text =  element_text(color = "black"))
-
-
-
-# figure 5 --------------------------------------------------------------------------
-
-fig5 <- lapply(summary_pred_bulge, function(x){
-  
-  x %>% filter(N_UMI_cluster>=minUMI_alignments_figure, !is.na(Alignment))
-}
-)
-
-fig5_data <- fig5 %>% bind_rows(.id="library") %>% group_by(library) %>%  mutate(rank_desc = row_number(dplyr::desc(N_UMI_cluster)))
-
-
-
-fig5 <- ggplot(fig5_data, aes(rank_desc,N_UMI_cluster)) +
+fig_RankAbundance <- ggplot(RankAbundance_data, aes(rank_desc,N_UMI_cluster)) +
   geom_step(col = "black", direction = "hv") +
   geom_point(pch=19)+
   facet_wrap(~library, ncol = 3, scales = "free") + 
   theme_bw(base_size = 12)+
   scale_y_log10() + 
   scale_x_log10() + 
-  ggrepel::geom_text_repel(data = . %>% group_by(library) %>% slice_head(n=3), 
-                           aes(rank_desc,N_UMI_cluster,label=paste(chromosome,cut_gRNa_alignment,sep=":")),inherit.aes = F,col = "purple",cex=3,nudge_x = 1,nudge_y = 0.5,force = 5,direction= "x")+
-  geom_point(data = . %>% filter(N_edits==0,PAM_indel_count==0), aes(rank_desc,N_UMI_cluster),col = "red",cex= 2,inherit.aes = F)+
-  labs(x = "Ranked clusters by decreasing abundance", y = "UMI count per cluster",caption = paste("Only clusters with >=",minUMI_alignments_figure, "UMIs",sep=" "))+
+  ggrepel::geom_text_repel(data = . %>% 
+                             group_by(library) %>% 
+                             slice_head(n=3), 
+                           aes(rank_desc,N_UMI_cluster,label=paste(chromosome,cut_gRNa_alignment,sep=":")),
+                           inherit.aes = F,col = "purple",cex=3,nudge_x = 1,nudge_y = 0.5,force = 5,direction= "x")+
+  geom_point(data = . %>% 
+               filter(N_edits==0,PAM_indel_count==0), 
+             aes(rank_desc,N_UMI_cluster),col = "red",cex= 2,inherit.aes = F)+
+  labs(x = "Ranked clusters by decreasing abundance",
+       y = "UMI count per cluster",
+       caption = paste("Only clusters with >=",minUMI_alignments_figure, "UMIs",sep=" "))+
   scale_color_manual(values = c("black","green3"))
 
 
 
-# figure 6 --------------------------------------------------------------------------
 
 
-data_fig6 <- lapply(summary_pred_bulge, function(x){
+
+## Chromosome distribution --------------------------------------------------------------------------
+
+ChromDistr_data <- lapply(summary_pred_bulge, function(x){
   
-  x %>% filter(!is.na(Alignment))
+  x <- x %>% 
+    filter(!is.na(Alignment) & (str_starts(chromosome,"[0-9XYM]") | str_starts(chromosome,"chr"))) %>% 
+    group_by(chromosome,Predicted=predicted) %>% 
+    summarise(clusters = n(), reads = sum(N_reads_cluster), UMI = sum(N_UMI_cluster)) %>% 
+    mutate(chromosome = recode(chromosome, "MT" = "M")) 
+  
+  if(!any(str_starts(x$chromosome,"chr"))){
+    x <- x %>%
+      mutate(chromosome = paste("chr",chromosome,sep=""))
+  } else{
+    x
+  }
 }
 )
 
-data_fig6 <- data_fig6 %>% bind_rows(.id="library") 
+ChromDistr_data <- ChromDistr_data %>% bind_rows(.id="library")
 
-fig6 <- ggplot(data_fig6, aes(N_edits,fill = predicted)) +
-  geom_bar(col = "black", stat = ) +
+ChromDistr_data <- ChromDistr_data %>% 
+  mutate(chromosome = factor(chromosome, levels = paste("chr",c(1:30,"X","Y","M"),sep="")),
+         Predicted = factor(Predicted, levels = c("yes","no")))
+
+
+# figures
+fig_ChromDistr_clusters <- ggplot(ChromDistr_data, aes( chromosome, clusters,fill = Predicted)) +
+  geom_col(col = "black") +
   facet_wrap(~library, ncol = 3, scales = "free_y") + 
+  coord_polar() +
   theme_bw(base_size = 12)+
-  scale_x_continuous(breaks = c(0:10))+
-  scale_fill_manual(values = c("black","green3"))
+  scale_fill_manual(values = c("green4","grey")) +
+  theme(panel.grid.major.x = element_line(linetype = 2,colour = "grey40"),axis.text =  element_text(color = "black"))
 
 
-
-# figure 6b --------------------------------------------------------------------------
-
-
-fig6b <- ggplot(data_fig6, aes(as.numeric(PAM_indel_count),fill = predicted)) +
-  geom_bar(col = "black", stat = ) +
+fig_ChromDistr_UMI <- ggplot(ChromDistr_data, aes( chromosome, UMI,fill = Predicted)) +
+  geom_col(col = "black") +
   facet_wrap(~library, ncol = 3, scales = "free_y") + 
+  coord_polar() +
   theme_bw(base_size = 12)+
-  scale_x_continuous(breaks = c(0:10))+
-  scale_fill_manual(values = c("black","green3"))
+  scale_fill_manual(values = c("green4","grey")) +
+  theme(panel.grid.major.x = element_line(linetype = 2,colour = "grey40"),axis.text =  element_text(color = "black"))
 
 
 
-# figure 7 ------------------------------
+# Distribution of UMI around cut best cut site ------------------------------
 
 files <- list.files("04-IScalling/", pattern="UMIs_per_IS_in_Cluster.bed", full.names = T)
 names(files) <- str_remove(basename(files),".UMIs_per_IS_in_Cluster.bed")
@@ -538,18 +399,20 @@ IS_stat <- IS %>%
   mutate(UMI = case_when(V6 == "+"~UMI,
                          TRUE ~ -UMI))
 
-fig7 <- ggplot(IS_stat, aes(rel_dist_gRNA,UMI,fill = factor(sign(UMI)))) +
+
+
+fig_distrAroundBestSite <- ggplot(IS_stat, aes(rel_dist_gRNA,UMI,fill = factor(sign(UMI)))) +
   geom_vline(xintercept = 0, lty = 2,col = "black") +
   geom_col(show.legend = F) + 
   facet_wrap(~library+paste(chromosome,cut_gRNa_alignment,sep=":"),scales= "free_y",ncol = 3) +
   theme_bw() +
   geom_hline(yintercept = 0) +
   labs(x = "Distance to cut site (bp)", y = "log10(UMI)")+
-  scale_fill_discrete()
+  scale_fill_manual(values = c("blue3","red3"))
 
 
 
-# tables off targets ----------------------------------------------------------------
+# HTML tables for off targets ----------------------------------------------------------------
 
 
 tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
@@ -560,6 +423,7 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
   
   ## subset top n clusters by UMI count (defined in the configuration file)
   dt <-  df  %>% ungroup %>% 
+    mutate("UMIs (%)" = round(N_UMI_cluster / sum(N_UMI_cluster)*100,digits = 1),.after=N_UMI_cluster) %>% 
     filter(N_UMI_cluster > minUMI_alignments_figure) %>% 
     slice_max(n = max_clusters,order_by = N_UMI_cluster,with_ties = F) %>% 
     as.data.table(dt)
@@ -578,7 +442,9 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
   dt  <- dt %>% 
     rowwise() %>% 
     mutate(seq_gDNA_plot = compare_strings(seq_gDNA,seq_gRNA),
-           PAM_plot = compare_strings(pam_gDNA,pam_gRNA)) %>% ungroup %>% data.table()
+           PAM_plot = compare_strings(pam_gDNA,pam_gRNA)) %>%
+    ungroup %>%
+    data.table()
   
   ### FORMAT alignments to HTML to add some colors
   ## use a monospace font to keep equal character width
@@ -619,7 +485,7 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
       base_url <- "http://www.genecards.org/cgi-bin/carddisp.pl?gene="
       symbols <- unlist(strsplit(gene_symbols, ","))
       text_spec_list <- lapply(symbols, function(symbol) {
-        text_spec(symbol, link = paste0(base_url, symbol))
+        text_spec(symbol, link = paste0(base_url, str_trim(symbol,side = "both")),new_tab = TRUE)
       })
       # do.call(c, text_spec_list)
       toString(text_spec_list)} 
@@ -633,8 +499,7 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
   dt[, Symbol_html := str_replace_all(gene_links, ", ", " <br>")]
   
   dt[, position_html := str_replace_all(position, ", ", " <br>")]
-  dt[, Is.Oncogene_html := str_replace_all(Is.Oncogene, ", ", " <br>")]
-  dt[, Is.Tumor.Suppressor.Gene_html := str_replace_all(Is.Tumor.Suppressor.Gene, ", ", " <br>")]
+  dt[, Oncogene_html := str_replace_all(Onco_annotation, ",", " <br>")]
   
   
   dt$predicted_alignment_html <- cell_spec(dt$predicted, background = ifelse(dt$predicted == "yes", "#129749", "white"))
@@ -643,55 +508,54 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
   ## which columns to add to the alignment html file
   dt <- dt %>% 
     mutate("cut offset" = as.numeric(cut_modal_position) - as.numeric(cut_gRNa_alignment),
+           PAM_indel_count = as.numeric(PAM_indel_count),
            PCR = case_when(N_UMI_positive>0 & N_UMI_negative > 0 ~ "+/-",
                            N_UMI_positive>0 ~"+",
                            N_UMI_negative>0 ~"-",
                            TRUE ~ NA)) %>% 
-    select(library,
-           chromosome,
+    select(chromosome,
            cut_gRNa_alignment, 
            `cut offset`,
-           alignment=alignment_html,
+           Alignment=alignment_html,
            UMIs=N_UMI_cluster,
-           reads=N_reads_cluster,
+          `UMIs (%)`,
+           Reads=N_reads_cluster,
            "Edits crRNA"=N_edits, 
-           N_mismatches,
-           n_indels,
+           #N_mismatches,
+           #n_indels,
            #soft_trim,
            "Edits pam"= PAM_indel_count,
            Symbol=Symbol_html,
            Position=position_html,
-           predicted= predicted_alignment_html,
-           bulge,
+           Predicted= predicted_alignment_html,
+           #bulge,
            PCR,
            #multiHit,
            #n_UMI_multiSum,
-           Is.Oncogene = Is.Oncogene_html,
-           Is.Tumor.Suppressor.Gene = Is.Tumor.Suppressor.Gene_html) %>% 
-    unite(col = "gRNA<br>position",chromosome,cut_gRNa_alignment,sep = ":") %>% 
-    unite("Mismatch_indels",N_mismatches, n_indels,sep = "_",remove = T) 
+           Oncogene = Oncogene_html) %>% 
+    unite(col = "Position",chromosome,cut_gRNa_alignment,sep = ":") 
+    #unite("Mismatch_indels",N_mismatches, n_indels,sep = "_",remove = T) %>% 
+    
   
   
   
   ## Make kable static table
   
-  kb <- kbl(dt %>% select(-library),
+  kb <- kbl(dt,
             escape = F,
-            align=c("r","r","r","r","r",rep('c', 12))) %>%
+            align=c(rep("r",6),rep('c', 7))) %>%
     kable_classic_2(full_width = F,html_font = "helvetica") %>%
     kable_styling(bootstrap_options = c("condensed","hover","stripped"),
                   font_size = 12,
                   fixed_thead = T) %>%
-    column_spec(1:15,extra_css = "vertical-align:middle;")
+    column_spec(1:(ncol(dt)),extra_css = "vertical-align:middle;")
   
-  save_kable(kb,file = paste("05-Report/report-files/",names(summary_pred_bulge)[x],"_offtargets.html",sep=""),self_contained=T)
-  
-  
+  save_kable(kb,file = paste("results/report-files/",names(summary_pred_bulge)[x],"_offtargets.html",sep=""),self_contained=T)
   
   
   # Make DT dynamic table
   
-  dt2 <- DT::datatable(dt %>% select(-library),
+  dt2 <- DT::datatable(dt,
                        escape = F, 
                        extensions = 'Buttons',
                        rownames = FALSE,
@@ -700,13 +564,13 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
                        options = list(
                          pageLength = 20,
                          autoWidth = F,
-                         lengthMenu = list(20,50,-1),
+                         lengthMenu = list(c(20, 50, -1), c('20', '50', 'All')),
                          fixedHeader = TRUE,
                          dom = 'Blcfrtip',
                          buttons = c('copy', 'csv', 'excel'),
-                         columnDefs = list(list(className = 'dt-body-center', targets = c(6,7,8,9,10,11)),
+                         columnDefs = list(list(className = 'dt-body-center', targets = c(6,7,8,9,10)),
                                            list(className = 'dt-body-right', targets = c(0,1,2,3,4,5)),
-                                           list(className = 'dt-head-center', targets = c(0,1,2,3,4,5,6,7,8,9,10,11)),
+                                           list(className = 'dt-head-center', targets = seq(1:(ncol(dt)-1))),
                                            list(width = "2%", targets = 5)),
                          initComplete = DT::JS(
                            "function(settings, json) {",
@@ -715,25 +579,34 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
                             }"
                          )
                        )
-  ) %>% formatStyle(
-    'UMIs',
-    background = styleColorBar(dt$UMIs, 'steelblue'),
-    backgroundSize = '100% 90%',
+  ) %>% 
+    formatStyle(
+    'UMIs',valueColumns = "UMIs",
+    background = styleColorBar(data = dt$UMIs, 'steelblue'),
+    backgroundSize = '95% 90%',
     backgroundRepeat = 'no-repeat',
     backgroundPosition = 'center'
-  )%>% formatStyle(
-    'reads',
-    background = styleColorBar(dt$reads, 'steelblue'),
-    backgroundSize = '100% 90%',
+  )%>% 
+    formatStyle(
+      'UMIs (%)',
+      background = styleColorBar(data = dt$`UMIs (%)`,'steelblue'),
+      backgroundSize = '95% 90%',
+      backgroundRepeat = 'no-repeat',
+      backgroundPosition = 'center'
+    )%>%
+    formatStyle(
+    'Reads',
+    background = styleColorBar(dt$Reads, 'orange'),
+    backgroundSize = '95% 90%',
     backgroundRepeat = 'no-repeat',
     backgroundPosition = 'center'
   )
   
   
   
-  htmlwidgets::saveWidget(widget = dt2, file = paste("05-Report/report-files/",names(summary_pred_bulge)[x],"_offtargets_dynamic.html",sep=""),selfcontained = T)
+  htmlwidgets::saveWidget(widget = dt2, file = paste("results/report-files/",names(summary_pred_bulge)[x],"_offtargets_dynamic.html",sep=""),selfcontained = T)
   
-  return(paste("05-Report/report-files/",names(summary_pred_bulge)[x],"_offtargets_dynamic.html",sep="")) # name the output in list
+  return(paste("results/report-files/",names(summary_pred_bulge)[x],"_offtargets_dynamic.html",sep="")) # name the output in list
   
 })
 
@@ -743,7 +616,7 @@ names(tables_off) <- names(summary_pred_bulge)
 
 # Save report data ------------------------------------------------------------------
 
-save(list = c("tables_off", "summary_pred_bulge","sampleInfo", "stats", "stats_summary","best_aligns", grep(x=ls(),"fig",value = T)), file = "05-Report/report.rdata")
+save(list = c("tables_off", "summary_pred_bulge","sampleInfo", "stats", "stats_summary","best_aligns", grep(x=ls(),"fig",value = T)), file = "results/report.rdata")
 
 
 

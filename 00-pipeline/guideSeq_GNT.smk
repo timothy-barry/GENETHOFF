@@ -48,7 +48,7 @@ missing_files = [file_key for file_key, status in results.items() if "\033[91mâ
 if missing_files:
     raise FileNotFoundError(f"Missing files: {', '.join(missing_files)}")
 else:
-  print("\n\033[92m All files were found ... continue processing\033[0m\n" )
+  print("\n\033[92m All required files were found ... continue processing\033[0m\n" )
 
 
 ###############################################################
@@ -130,9 +130,9 @@ else:
 
 rule target:
     input: 
-     expand("06-offPredict/{gen}_{grna}_{pam}_{side}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs,side=sides),
-     ["05-Report/{sample}_summary.xlsx".format(sample=sample) for sample in samples_unique],
-     os.path.basename(os.getcwd())+"_report.html"
+     #expand("06-offPredict/{gen}_{grna}_{pam}_{side}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs,side=sides),
+     ["results/{sample}_summary.xlsx".format(sample=sample) for sample in samples_unique],
+     "results/"+os.path.basename(os.getcwd())+"_report.html"
      
 
 rule get_chrom_length:
@@ -203,7 +203,7 @@ rule demultiplex_library:
      R2=temp(["00-demultiplexing/{sample}-1_R2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
      I3=temp(["00-demultiplexing/{sample}-1_I3.fastq.gz".format(sample=sample) for sample in samples["sampleName"]])
     conda: "guideseq"
-    log: R1= "00-demultiplexing/demultiplexing_R1.log", R2= "00-demultiplexing/demultiplexing_R2.log"
+    log: R1= "logs/demultiplexing_R1.log", R2= "logs/demultiplexing_R2.log"
     threads: 6
     shell: """
         
@@ -235,7 +235,7 @@ rule trim_ODN:
    R2=temp("01-trimming/{sample}_R2.ODN.fastq.gz"),
    I3=temp("01-trimming/{sample}_I3.ODN.fastq.gz")
   threads: 6
-  log:"01-trimming/{sample}.odn.log"
+  log:"logs/{sample}.odn.log"
   conda: "guideseq"
   message: "removing ODN sequence, discard reads without ODN sequence {wildcards.sample}"
   params: ODN_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_leading"],
@@ -243,7 +243,7 @@ rule trim_ODN:
   shell: """
         cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log}
         
-        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2} > {log}
+        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2} 
         
         """
   
@@ -255,13 +255,14 @@ rule add_UMI:
      R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz"),
      I3=temp("01-trimming/{sample}_I3.ODN.UMI.fastq.gz")
     threads:6
+    log:"logs/{sample}.UMI.log"    
     conda: "guideseq"
     params: UMI=config["UMI_pattern"] ## bp in 3' of index to considere as UMI
     shell: """
         UMI_length=$(expr length {params.UMI})
         
-        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R1} {input.I3} {input.R1} > /dev/null
-        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2} > /dev/null
+        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R1} {input.I3} {input.R1} > {log}
+        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2} > {log}
         """
 
 
@@ -271,7 +272,7 @@ rule trim_reads:
     output: R1=temp("01-trimming/{sample}_R1.ODN.UMI.trimmed.fastq.gz"), 
      R2=temp("01-trimming/{sample}_R2.ODN.UMI.trimmed.fastq.gz")
     threads: 6
-    log: "01-trimming/{sample}.trailing.log"
+    log: "logs/{sample}.trailing.log"
     conda: "guideseq"
     message: "trimming ODN and adaptor sequences in reads"
     params: R2_trailing_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_trailing"],
@@ -294,7 +295,7 @@ rule filter_reads:
     output:  R1="02-filtering/{sample}_R1.UMI.ODN.trimmed.filtered.fastq.gz", R2="02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.fastq.gz",
      R1short=temp("02-filtering/{sample}_R1.UMI.ODN.trimmed.tooshort.fastq.gz"), R2short=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.tooshort.fastq.gz")
     threads: 6
-    log: "02-filtering/{sample}.filter.log"
+    log: "logs/{sample}.filter.log"
     params: length=config["minLength"]
     conda: "guideseq"
     message: "remove pairs if one mate is shorter than x bp"
@@ -316,7 +317,7 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
         output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"),
          R2_unmapped="03-align/{sample}_R2.UMI.ODN.trimmed.unmapped.fastq.gz"
         threads: 6
-        log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
+        log: "logs/{sample}.UMI.ODN.trimmed.filtered.align.log"
         conda: "guideseq"
         message: "Aligning PE reads on genome with Bowtie2"
         params: index=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["index"],
@@ -339,7 +340,7 @@ elif (config["aligner"]  == "bwa") :
         input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2
         output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"), unfilterdsam=temp("03-align/{sample}.UMI.ODN.trimmed.unfiltered.sam")
         threads: 6
-        log: "03-align/{sample}.UMI.ODN.trimmed.filtered.align.log"
+        log: "logs/{sample}.UMI.ODN.trimmed.filtered.align.log"
         conda: "guideseq"
         message: "Aligning PE reads on genome with BWA mem"
         params:  index=config["genome"][lambda wildcards:samples["Genome"][wildcards.sample]]["index"]
@@ -394,7 +395,6 @@ rule call_IS:
      umi="04-IScalling/{sample}.reads_per_UMI_per_IS.bed"
     threads: 1
     conda: "guideseq"
-    log:
     params: UMI=config["UMI_pattern"]
     shell: """
     
@@ -421,7 +421,7 @@ rule rescue_R2:
   output: sam=temp("03-align/{sample}_R2rescued.UMI.ODN.trimmed.filtered.sam")
   threads: 6
   conda: "guideseq"
-  log: "03-align/{sample}_R2rescued.UMI.ODN.trimmed.filtered.align.log"
+  log: "logs/{sample}_R2rescued.UMI.ODN.trimmed.filtered.align.log"
   params: index=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["index"]
   shell: """
     bowtie2 -p {threads} --no-unal \
@@ -445,7 +445,6 @@ rule callIS_R2rescued:
   output: umi="04-IScalling/{sample}_R2rescued.reads_per_UMI_per_IS.bed", tmp=temp("04-IScalling/{sample}_rescueR2.bed")
   threads: 1
   conda: "guideseq"
-  log:
   params: UMI=config["UMI_pattern"]
   shell: """
   
@@ -481,7 +480,6 @@ rule Collapse_UMI_IS:
     output: collapse="04-IScalling/{sample}.UMIs_per_IS_in_Cluster.bed"
     threads: 1
     conda: "guideseq"
-    log:
     params: window=config["ISbinWindow"], minMAPQ=config["minMAPQ"],minReadsPerUMI=config["minReadsPerUMI"],minUMIPerIS=config["minUMIPerIS"]
     shell: """
         
@@ -579,7 +577,6 @@ rule report_data:
     input: fasta=rules.get_fasta_around_is.output.fa, cluster=rules.get_fasta_around_is.output.cluster, bed=rules.Collapse_UMI_IS.output.collapse, statfq=rules.get_stats_fq.output,statal=rules.alignOnGenome.log
     output: "05-Report/{sample}.rdata"
     conda: "guideseq"
-    log:
     threads: 4
     params: gRNA_seq=lambda wildcards:samples["gRNA_sequence"][wildcards.sample], 
      gRNA_name=lambda wildcards:samples["gRNA_name"][wildcards.sample],
@@ -595,7 +592,7 @@ rule report_data:
 
 rule annotate_sites:
     input: rdata=rules.report_data.output, annot=["../02-ressources/{genome}.rds".format(genome=genome) for genome in genomes_unique]
-    output: "05-Report/{sample}_summary.xlsx"
+    output: "results/{sample}_summary.xlsx"
     conda: "guideseq"
     threads: 4
     params: species=lambda wildcards: samples["Genome"][wildcards.sample], oncoList=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["oncogene_list"]
@@ -605,9 +602,9 @@ rule annotate_sites:
 
 
 rule report:
-    input: summaries= ["05-Report/{sample}_summary.xlsx".format(sample=sample) for sample in samples_unique],
+    input: summaries= ["results/{sample}_summary.xlsx".format(sample=sample) for sample in samples_unique],
      predictions=expand("06-offPredict/{gen}_{grna}_{pam}_{side}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs,side=sides)
-    output: report_rdata= "05-Report/report.rdata"
+    output: report_rdata= "results/report.rdata"
     conda: "guideseq"
     threads: 1
     params: sampleInfo=config["sampleInfo_path"], 
@@ -616,14 +613,14 @@ rule report:
      min_predicted_distance=config["min_predicted_distance"],
      max_clusters=config["max_clusters"]
     shell: """
-        mkdir -p 05-Report/report-files/;
+        mkdir -p results/report-files/;
         Rscript ../00-pipeline/generate_tables.r "{input.summaries}" {params.sampleInfo} {params.config} "{input.predictions}" {params.max_clusters} {params.minUMI_alignments_figure} {params.min_predicted_distance}
         """
       
       
 rule make_report:
     input:  rules.report.output.report_rdata
-    output: report_html=os.path.basename(os.getcwd())+"_report.html"
+    output: report_html="results/"+os.path.basename(os.getcwd())+"_report.html"
     conda: "guideseq"
     params: config_path=config_file_path
     threads: 1
@@ -635,6 +632,8 @@ rule make_report:
 onsuccess:
     print("Workflow finished, no error")
     shell("conda run -n guideseq echo 'You rock baby !' | cowpy -e greedy")
+    if config["clean_intermediates_files"] == "TRUE":
+      shell("rm -r 0*/")
 
 onerror:
     print("An error occurred")
