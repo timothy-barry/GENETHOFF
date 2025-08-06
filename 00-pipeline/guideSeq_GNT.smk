@@ -1,3 +1,13 @@
+# Guillaume CORRE @ GENETHON 2025
+# Snakemake for the processing of GUIDE-seq NGS datasets.
+
+## RUN the pipeline in the project folder.
+## snakemake -s PATH/TO/pipeline.snakamake -k -j 12 --use-conda -n
+
+###############################################################
+# Import python modules
+###############################################################
+
 import re
 import os
 from glob import glob
@@ -52,12 +62,18 @@ else:
 
 
 ###############################################################
-## Load the sample information files as a TSV file.
+## Load the sample information files as a TSV file or excel
 ###############################################################
 if not os.path.isfile(config["sampleInfo_path"]):
     raise SystemExit("\n  No Sample Data Sheet file found in current directory \n")
 
-samplesTable = pd.read_table(config["sampleInfo_path"],sep=";").set_index("sampleName", drop=False)
+sample_datasheet=config["sampleInfo_path"]
+
+# if sample_datasheet ends with xlsx,
+if sample_datasheet.endswith("xlsx"):
+  samplesTable =pd.read_excel(sample_datasheet).set_index("sampleName", drop=False)
+else:
+  samplesTable = pd.read_table(sample_datasheet,sep=";").set_index("sampleName", drop=False)
 
 #check the validity of the sample Data Sheet (Path is relative to pipeline file, not current folder)
 validate(samplesTable, "samples.schema.yaml")
@@ -104,7 +120,10 @@ else:
     print(samplesTable[columns_to_check])
     sys.exit(1)
 
-#### Check that the protocole defined in the sample datasheet (guideSeq, iGuideSeq, tagSeq, ...) has a corresponding entry in the configuration file for sequence trimming.
+
+###############################################################
+# Check that the protocole defined in the sample datasheet (guideSeq, iGuideSeq, tagSeq, ...) has a corresponding entry in the configuration file for sequence trimming.
+###############################################################
 
 unique_protocols = samplesTable['type'].unique()
 
@@ -123,10 +142,8 @@ else:
 
 
 ###############################################################
-## RUN the pipeline in the project folder.
-## snakemake -s ../00-pipeline/guideSeq_GNT.smk -k -j 12 --use-conda -n
+# THIS IS THE WORKFLOW
 ###############################################################
-
 
 rule target:
     input: 

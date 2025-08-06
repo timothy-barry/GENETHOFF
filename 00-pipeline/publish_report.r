@@ -1,3 +1,8 @@
+# ========================================================= #
+# Guillaume CORRE @ GENETHON 2025
+# This script is used to publish the GUIDE-seq report in HTML format.
+# It is used in the snakemake pipeline for GUIDE-seq analysis.
+# ========================================================= #
 
 # Set global options
 options(tidyverse.quiet = TRUE,warn = -1,verbose = F,conflicts.policy = list(warn = FALSE))

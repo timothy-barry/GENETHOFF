@@ -38,7 +38,7 @@ The GUIDE-Seq (Genome-wide Unbiased Identification of Double-strand breaks Enabl
 
 Working directory : **`r dirname(config_path)`**
 
-Pipeline version: ***To Be Extracted from pipeline file name when release*** **(2025/01/16)**
+Pipeline version: **`r config$version`**
 
 The analysis was performed **`r ifelse(config$tolerate_bulges==TRUE, "with","without")`** bulge tolerance.
 

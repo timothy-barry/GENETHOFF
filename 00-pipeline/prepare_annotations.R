@@ -1,3 +1,9 @@
+# ========================================================= #
+# Guillaume CORRE @ GENETHON 2025
+# This script is used to prepare gene annotations from a GTF file.
+# It is used in the snakemake pipeline for GUIDE-seq analysis.
+# ========================================================= #
+
 options(tidyverse.quiet = TRUE,warn = -1,verbose = F,warn = -10,conflicts.policy = list(warn = FALSE))
 
 

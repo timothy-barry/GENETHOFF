@@ -1,4 +1,8 @@
-
+# ========================================================= #
+# Guillaume CORRE @ GENETHON 2025
+# This script is used to annotate cutting sites from GUIDE-seq data with gene and oncogenes
+# It is used in the snakemake pipeline for GUIDE-seq analysis.
+# ========================================================= #
 
 # Set R options
 options(tidyverse.quiet = TRUE,warn = -1,verbose = F,warn = -10,conflicts.policy = list(warn = FALSE))

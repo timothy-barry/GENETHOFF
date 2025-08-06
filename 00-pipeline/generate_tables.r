@@ -1,5 +1,8 @@
-## this script preprares tables and figures for the final report
-## it also generates alignment html files
+# ========================================================= #
+# Guillaume CORRE @ GENETHON 2025
+# This script is used to generate HTML tables and figures for GUIDE-seq data analysis.
+# It is used in the snakemake pipeline for GUIDE-seq analysis.
+# ========================================================= #
 
 # Set options for R environment
   options(tidyverse.quiet = TRUE,warn = -1,verbose = F,warn = -10,conflicts.policy = list(warn = FALSE))
