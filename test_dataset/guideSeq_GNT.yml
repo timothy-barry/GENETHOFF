@@ -2,8 +2,9 @@
 author: "Guillaume CORRE, PhD"
 affiliation: "Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay University, Evry, France"
 contact: "gcorre@genethon.fr"
-version: 0.1
+version: 'V1.0'
 
+clean_intermediates_files: 'FALSE'
 
 ## Library informations
 sampleInfo_path: "sampleInfo.csv"
@@ -14,7 +15,6 @@ R2: "Undetermined_S0_L001_R2_001.fastq.gz"
 I1: "Undetermined_S0_L001_I1_001.fastq.gz"
 I2: "Undetermined_S0_L001_I2_001.fastq.gz"
 
-rescue_R2: "TRUE"
 
 ################################################
 ## path to references
@@ -23,7 +23,7 @@ genome:
     fasta: "/media/References/Human/ensembl/GRCh38/Sequences/Homo_sapiens.GRCh38.dna.primary_assembly.fa"
     index: "/media/References/Human/ensembl/GRCh38/Indexes/Bowtie2/Homo_sapiens.GRCh38.dna.primary_assembly" # path to index created during the run if not existing yet
     annotation: "/media/References/Human/ensembl/GRCh38/Annotations/Homo_sapiens.GRCh38.113.chr.gtf.gz"
-    oncogene_list: "/media/References/Human/ensembl/GRCh38/Annotations/OncoList_OncoKB_05-20-2025.tsv"
+    oncogene_list: "/media/References/Human/ensembl/GRCh38/Annotations/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
   mouse:
     fasta: ""
     index: ""
@@ -39,27 +39,29 @@ minLength: 25 ## Minimal read length after trimming, before alignment
 aligner: "bowtie2"   ## Aligner to use (bowtie2 or bwa)
 minFragLength: 100         # Minimal fragment length after alignment
 maxFragLength: 1500        # Maximal fragment length after alignment 
+rescue_R2: "TRUE"     # Rescur R2 reads if R1 is too short or the pair doesn't align properly.
+
 ################################################
 
 ################################################
 # post alignment
-minMAPQ: 20                      # Min MAPQ score to keep alignments -> !!! multihits have a MAPQ close to 1. Value greater than 1 will discard Offtargets with exact same sequence.
+minMAPQ: 20                      # Min MAPQ score to keep alignments 
 UMI_hamming_distance: 1         # min distance to cluster UMI using network-based deduplication, use [0] to keep raw UMIs
 UMI_deduplication: "Adjacency"  # method to correct UMI (cluster or Adjacency)
 UMI_pattern: "NNWNNWNN"  
-UMI_filter: "FALSE"               # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
+UMI_filter: "TRUE"              # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
 ################################################
 
 
 ################################################
 ## Off targets calling
 tolerate_bulges: "TRUE"           # whether to include gaps in the gRNA alignment (this will change the gap penalty during SW pairwise alignment)
-max_edits_crRNA: 6              # filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)
-ISbinWindow: 100                # insertion sites closer than 'ISbinWindow' will be clustered together
-minReadsPerUMI: 0               # 0 to keep all UMIs, otherwise min number of reads per UMIs
-minUMIPerIS: 0                  # 0 to keep all IS, otherwise min number of UMI per IS
-slopSize: 50                    # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)
-min_predicted_distance: 100     # distance between cut site and predicted cut site to consider as predicted
+max_edits_crRNA: 6                # filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)
+ISbinWindow: 100                  # insertion sites closer than 'ISbinWindow' will be clustered together
+minReadsPerUMI: 4                 # Min number of reads per UMIs (>=)
+minUMIPerIS: 4                      # Min number of UMI per IS (>=)
+slopSize: 50                      # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)
+min_predicted_distance: 100       # distance between cut site and predicted cut site to consider as predicted
 ################################################
 
 ################################################
@@ -104,5 +106,27 @@ iguideseq:
   negative:
     R1_trailing: "TCGCGTATACCGTTATTAACATATGACAACTCAA"
     R2_leading: "TTGAGTTGTCATATGTTAATAACGGTATACGCGA"
+    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
+    
+    
+    
+olitagseq:
+  positive:
+    R1_trailing: "GGGGTTTAATTGAGTTGTCATATGTT"
+    R2_leading: "AACATATGACAACTCAATTAAACCCC"
+    R2_trailing: "TCCGCTCCCTCG"
+  negative:
+    R1_trailing: "CCCATACCGTTATTAACATATGAC"
+    R2_leading: "GTCATATGTTAATAACGGTATGGG"
+    R2_trailing: "TCCGCTCCCTCG"
+
+tagseq:
+  positive:
+    R1_trailing: "TGCGATAACACGCATTTCGCATAA"
+    R2_leading: "CTTATGCGAAATGCGTGTTATCGCA"
+    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
+  negative:
+    R1_trailing: "ATCTCTGAGCCTTATGCGAAATGC"
+    R2_leading: "CGCATTTCGCATAAGGCTCAGAGAT"
     R2_trailing: "AGATCGGAAGAGCGTCGTGT"
 ################################################
