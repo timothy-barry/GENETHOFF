@@ -13,6 +13,7 @@ dependencies:
   - seqkit=2.10.0
   - bowtie2=2.5.4
   - openjdk=23.0.2
+  - openpyxl
   - r-base=4.4.3
   - r-data.table
   - r-htmltools
