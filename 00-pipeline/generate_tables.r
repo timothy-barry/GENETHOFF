@@ -96,7 +96,7 @@
   
   summary <- lapply(summary,function(x){
     
-    best <- x %>%
+    best_df <- x %>%
       filter(!is.na(Alignment)) %>% ## remove alignments without gRNA match
       arrange(desc(N_UMI_cluster)) %>% 
       mutate(Rank = dense_rank(x = -N_UMI_cluster)) %>% 
@@ -108,7 +108,7 @@
     
     abundance <- x  %>% 
       filter(!is.na(Alignment)) %>% ## remove alignments without gRNA match
-      left_join(best,by = c("clusterID")) %>%
+      left_join(best_df,by = c("clusterID")) %>%
       mutate(Relative_abundance = round(N_UMI_cluster / sum(N_UMI_cluster) *100,digits = 2)) %>% 
       select(clusterID, best,Relative_abundance, Rank )
     

@@ -1,18 +1,15 @@
 ---
 title: "Documentation"
-date: "2025-06-27"
+date: "2025-08-07"
 author: "CORRE Guillaume"
 output: 
     rmdformats::readthedown:
       keep_md: yes
       highlight: kate
       toc: 3
-bibliography: references.bib
 ---
 
 
-
-# Introduction
 
 # Installation
 
@@ -29,7 +26,8 @@ GNT_GuideSeq
 ├── 00-pipeline/
 ├── 01-envs/
 ├── 02-resources/
-├── test/
+├── 03-misc/
+├── test_dataset/
 ```
 
 ## Conda environments
@@ -50,10 +48,15 @@ conda update -n base -c conda-forge conda
 conda install mamba -c conda-forge # faster packages manager
 ```
 
+Install the workflow manager snakemake in the base environment
+
+``` bash
+mamba install snakemake openpyxl # worflow manager 
+```
+
 Create the environment in your favorite path (-p) from the `environment.yaml` file:
 
 ``` bash
-# cd to git repository folder
 cd GNT_GuideSeq/
 
 mamba env create -f 01-envs/environment.yml
@@ -69,12 +72,6 @@ mamba env list
 mamba list -n guideseq
 ```
 
-Install the workflow manager snakemake in the base environment
-
-``` bash
-mamba install snakemake # worflow manager 
-```
-
 ## Reference genomes
 
 The pipeline uses the bowtie2 program to align reads on the reference genome (@langmead2018).
@@ -86,17 +83,18 @@ For efficient genome alignment, you can use a pre-built index for Bowtie2. These
 If you decide to build the index, we recommend to **not** use haplotypes, scaffolds and unplaced chromosomes to avoid unnecessary multihits alignments. Instead, use the "primary Assembly" version from ensembl or gencode for example. Manually remove unwanted chromosomes if necessary using the seqkit program:
 
 ``` bash
-conda activate guideseq # load the 'guideseq' environment
+conda activate guideseq # load the 'guideseq' environment to access tools
 
+# keep only chromosomes, dicard scaffolds
 seqkit grep  -r -p '^[chr]?[0-9XYM]+' Homo_sapiens.GRCh38.dna.primary_assembly.fa > your_clean_fasta
-
-conda activate           # return to "base" environment
 ```
 
 Then use the bowtie2 command line:
 
 ``` bash
 bowtie2-build -@ {threads} {your_clean_fasta} {index_prefix}
+
+conda activate           # return to "base" environment
 ```
 
 The index prefix path will be used in the configuration file.
@@ -113,15 +111,13 @@ Both the GTF and fasta reference files should be downloaded from the same source
 
 Off-targets sites can be annotated with an oncogene list if provided in the configuration file, otherwise, `NA` will be added.
 
-We provide an example in the `02-ressources/` folder. This file is derived from the [oncoKB cancer gene list](https://www.oncokb.org/cancer-genes).
+We provide an example in the `02-ressources/` folder. This file is derived from the [oncoKB cancer gene list](https://www.oncokb.org/cancer-genes). A script is also available in `03-misc` to convert file downloaded from oncoKB website to compatible file format.
 
 User can provide its own annotation file but it must contain the following columns separated by tabs:
 
 -   Ensembl **transcript** ID (ie ENST00000318560, without version)
 
--   Is.Oncogene (Yes/No)
-
--   Is.Tumor.Suppressor.Gene (Yes/No)
+-   Onco_annotation (collapsed strings, ex : "oncogene \| TSG")
 
 ## Prediction tool
 
@@ -141,10 +137,10 @@ In order to run the analysis, 4 elements are mandatory:
 
 ## Prepare samples data sheet (SDS) {#prepare-samples-data-sheet-sds}
 
-The sample data-sheet (SDS) is a simple delimited file ( ; ) that contains information about each sample to process in the run. An example is proposed in `./test/sampleInfo.csv`.
+The sample data-sheet (SDS) is a simple file provided as delited ( ; ) or xlsx format that contains information about each sample to process in the run. An example is proposed in ``` ./test_dataset/sampleInfo.csv and``./test_dataset/sampleInfo.xlsx ```.
 
 | sampleName | CellType | Genome | gRNA_name | gRNA_sequence | orientation | Cas | PAM_sequence | PAM_side | Cut_Offset | type | index1 | index2 |
-|------|------|------|------|------|------|------|------|--|------|------|------|------|
+|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | VEGFA_s1_K562_pos | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | positive | Cas9 | NGG | 3 | -4 | guideseq | AGGCAGAA | CTAAGCCT |
 | VEGFA_s1_K562_neg | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | negative | Cas9 | NGG | 3 | -4 | guideseq | TCCTGAGC | CTAAGCCT |
 
@@ -191,7 +187,7 @@ If any of the above conditions are not met, an error will be raised, and the pip
 Using the test SDS above, if you want to merge both positive and negative libraries, give the same sample name to both rows. As they use the same genome, gRNA, Cas & method, they will be aggregated in a single library.
 
 | sampleName | CellType | Genome | gRNA_name | gRNA_sequence | orientation | Cas | PAM_sequence | PAM_side | Cut_Offset | type | index1 | index2 |
-|------|------|------|------|------|------|------|------|-------|------|------|------|------|
+|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | VEGFA_s1_K562 | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | positive | Cas9 | NGG | 3 | -4 | guideseq | AGGCAGAA | CTAAGCCT |
 | VEGFA_s1_K562 | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | negative | Cas9 | NGG | 3 | -4 | guideseq | TCCTGAGC | CTAAGCCT |
 
@@ -205,9 +201,9 @@ To be documented
 
 The configuration file is a yaml formatted file with key-value dictionary used to fine-tune the pipeline behavior. Settings will apply to [**all samples of the run**]{.underline}.
 
-An example of configuration file is proposed in `./test/guideSeq.yaml`
+An example of configuration file is proposed in `./test_dataset/guideSeq_GNT.yml`
 
-[config file must be present in working directory when starting the pipeline.]{.underline}
+[config file must be present in the working directory when starting the pipeline.]{.underline}
 
 ### Metadata
 
@@ -217,6 +213,15 @@ Author and affiliation will be printed on the final report.
 author: "Guillaume CORRE, PhD"
 affiliation: "Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay University, Evry, France"
 contact: "gcorre@genethon.fr"
+version: 'V1.0'
+```
+
+### Remove intermediate files
+
+Whether to remove all intermediate files after run completion.
+
+``` yaml
+clean_intermediates_files: 'TRUE'
 ```
 
 ### Path to Sample Data Sheet and read files
@@ -250,7 +255,7 @@ genome:
     fasta: "/PATH_TO_REFERENCE/GRCh38/Sequences/GRCh38.primary_assembly.genome.fa"
     index: "/PATH_TO_REFERENCE/GRch38/Indexes/Bowtie2/GRCh38.primary_assembly.genome" 
     annotation: "/PATH_TO_REFERENCE/GRCh38/Annotations/gencode.v46.annotation.gtf.gz"
-    oncogene_list: "/media/References/Human/ensembl/GRCh38/Annotations/OncoList_OncoKB_05-20-2025.tsv"
+    oncogene_list: "/PATH_TO_REFERENCE/GRCh38/Annotations/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
   GRCm39:
     fasta: "/PATH_TO_REFERENCE/GRCm39/Sequences/GRCm39.primary_assembly.genome.fa"
     index: "/PATH_TO_REFERENCE/GRCm39/Indexes/Bowtie2/GRCm39.primary_assembly.genome" 
@@ -265,7 +270,6 @@ After adaptor & ODN triming and before alignment to the reference genome, reads 
 ``` yaml
 ################################################
 minLength: 25 ## Minimal read length after trimming, before alignment
-rescue_R2: "TRUE" # keep R2 from unaligned pairs or pairs with too short R1 reads and align them as single-end reads.
 ################################################
 ```
 
@@ -279,6 +283,7 @@ Define which aligner to use and the range of fragment size.
 aligner: "bowtie2"   ## Aligner to use (bowtie2 only for now)
 minFragLength: 100         # Minimal fragment length after alignment
 maxFragLength: 1500        # Maximal fragment length after alignment 
+rescue_R2: "TRUE" # keep R2 from unaligned pairs or pairs with too short R1 reads and align them as single-end reads.
 ################################################
 ```
 
@@ -292,11 +297,12 @@ Here, you can also define if you want to tolerate bulges in the alignment betwee
 ################################################
 ## Off targets calling
 tolerate_bulges: "TRUE"           # whether to include gaps in the gRNA alignment (this will change the gap penalty during SW pairwise alignment)
-max_edits_crRNA: 6              # filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)
-ISbinWindow: 100                # insertion sites closer than 'ISbinWindow' will be clustered together
-minReadsPerUMI: 0               # 0 to keep all UMIs, otherwise min number of reads per UMIs
-minUMIPerIS: 0                  # 0 to keep all IS, otherwise min number of UMI per IS
-slopSize: 50                    # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)
+max_edits_crRNA: 6                # filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)
+ISbinWindow: 100                  # insertion sites closer than 'ISbinWindow' will be clustered together
+minReadsPerUMI: 4                 # Min number of reads per UMIs (>=)
+minUMIPerIS: 4                      # Min number of UMI per IS (>=)
+slopSize: 50                      # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)
+min_predicted_distance: 100       # distance between cut site and predicted cut site to consider as predicted
 ################################################
 ```
 
@@ -307,12 +313,14 @@ Due to potential sequencing errors, additionnal UMIs may be detected and a corre
 For each cluster of Off Targets, a similarity matrix between all UMIs detected is calculated and similar UMI collapsed together if the editing distance is smaller than `UMI_hamming_distance` . The Adjacency method described in UMI-tools (@Smith2017) is used by default (see <https://umi-tools.readthedocs.io/en/latest/the_methods.html> for details).
 
 ``` yaml
+################################################
 # post alignment
-minMAPQ: 20                      # Min MAPQ score to keep alignments -> !!! multihits have a MAPQ close to 1. Multi are kept if AS == XS.
+minMAPQ: 20                      # Min MAPQ score to keep alignments 
 UMI_hamming_distance: 1         # min distance to cluster UMI using network-based deduplication, use [0] to keep raw UMIs
 UMI_deduplication: "Adjacency"  # method to correct UMI (cluster or Adjacency)
-UMI_pattern: "NNWNNWNN"         # UMI pattern
-UMI_filter: "TRUE"               # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
+UMI_pattern: "NNWNNWNN"  
+UMI_filter: "TRUE"              # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
+################################################
 ```
 
 ### Reporting
@@ -332,9 +340,9 @@ minUMI_alignments_figure: 1       # filter clusters with more than n UMI in the 
 ################################################
 SWoffFinder:
   path: "/opt/SWOffinder" ## Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)
-  # maxE: 6                 # Max edits allowed (integer). --> actually use the same value as max_edits_crRNA above for consistency between prediction and filtering of OT
-  # maxM: 6                 # Max mismatches allowed without bulges (integer). --> actually use the same value as max_edits_crRNA above for consistency between prediction and filtering of OT
-  maxMB: 4                # Max mismatches allowed with bulges (integer).
+  maxE: 6                 # Max edits allowed (integer).
+  maxM: 6                 # Max mismatches allowed without bulges (integer).
+  maxMB: 6                # Max mismatches allowed with bulges (integer).
   maxB: 3                 # Max bulges allowed (integer).
   window_size: 100
 ################################################
@@ -359,6 +367,7 @@ guideseq:
     R2_trailing: "AGATCGGAAGAGCGTCGTGT"
 
 
+
 iguideseq:
   positive:
     R2_leading: "ACATATGACAACTCAATTAAACGCGAGC"
@@ -369,16 +378,6 @@ iguideseq:
     R2_leading: "TTGAGTTGTCATATGTTAATAACGGTATACGCGA"
     R2_trailing: "AGATCGGAAGAGCGTCGTGT"
     
-    
-tagseq:
-  positive:
-    R1_trailing: "TGCGATAACACGCATTTCGCATAA"
-    R2_leading: "CTTATGCGAAATGCGTGTTATCGCA"
-    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
-  negative:
-    R1_trailing: "ATCTCTGAGCCTTATGCGAAATGC"
-    R2_leading: "CGCATTTCGCATAAGGCTCAGAGAT"
-    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
     
     
 olitagseq:
@@ -391,6 +390,15 @@ olitagseq:
     R2_leading: "GTCATATGTTAATAACGGTATGGG"
     R2_trailing: "TCCGCTCCCTCG"
 
+tagseq:
+  positive:
+    R1_trailing: "TGCGATAACACGCATTTCGCATAA"
+    R2_leading: "CTTATGCGAAATGCGTGTTATCGCA"
+    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
+  negative:
+    R1_trailing: "ATCTCTGAGCCTTATGCGAAATGC"
+    R2_leading: "CGCATTTCGCATAAGGCTCAGAGAT"
+    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
     
 ################################################
 ```
@@ -407,7 +415,7 @@ In order to start a run:
 
     -   add the configuration file ([Prepare the configuration file])
 
-    -   add the sequencing `undeterminded_R1/R2/I1/I2.fastq.gz` files (undemultiplexed) or symblic link.
+    -   add the sequencing `undeterminded_R1/R2/I1/I2.fastq.gz` files (undemultiplexed) or symblic link to the raw data.
 
 > Input fastq files should respect the following structure from original paper :
 >
@@ -426,7 +434,8 @@ Path/to/guideseq/
 ├── 00-pipeline/
 ├── 01-envs/
 ├── 02-resources/
-├── test/
+├── 03-misc/
+├── test_dataset/
 ├── My/folder/
     ├── guideSeq_GNT.yml
     ├── sampleInfo.csv
@@ -440,13 +449,12 @@ From inside your analysis folder, run the command below after adjusting for numb
 
 ``` bash
 snakemake -s ../00-pipeline/guideseq_GNT.smk \
-  -j 24 \         ## number of threads used
-  -k \            ## keep running on rule error
-  --use-conda \   ## use conda environment
-  -n  \            ## dry-run, will print rules without running them. Remove this argument if no error is returned
-  --report-after-run --report runtime_report.html # produce report with run-time
-  
-  
+  -j 24 \
+  -k \
+  --use-conda \ 
+  --report-after-run --report runtime_report.html  \
+  -n
+    
 # remove the -n argument to start the pipeline
 ```
 
@@ -492,40 +500,28 @@ Otherwise, an error will be raised and the origine of the problem reported by sn
  (__)      ||     ||  \/\
 ```
 
-Upon pipeline completion, your folder should now look like (test dataset provided in ./test) :
+Upon pipeline completion & if `'clean_intermediates_files: 'FALSE'`, your folder should now look like (test dataset provided in ./test) :
 
 ``` latex
 my_folder_name/
 ├── 00-demultiplexing
-│   ├── demultiplexing_R1.log
-│   └── demultiplexing_R2.log
 ├── 01-trimming
-│   ├── VEGFA_s1_K562_neg.odn.log
-│   ├── VEGFA_s1_K562_neg.trailing.log
-│   ├── VEGFA_s1_K562_pos.odn.log
-│   └── VEGFA_s1_K562_pos.trailing.log
 ├── 02-filtering
-│   ├── VEGFA_s1_K562_neg.filter.log
 │   ├── VEGFA_s1_K562_neg_R1.UMI.ODN.trimmed.filtered.fastq.gz
 │   ├── VEGFA_s1_K562_neg_R2.UMI.ODN.trimmed.filtered.fastq.gz
-│   ├── VEGFA_s1_K562_pos.filter.log
 │   ├── VEGFA_s1_K562_pos_R1.UMI.ODN.trimmed.filtered.fastq.gz
 │   └── VEGFA_s1_K562_pos_R2.UMI.ODN.trimmed.filtered.fastq.gz
 ├── 03-align
 │   ├── VEGFA_s1_K562_neg_R1.UMI.ODN.trimmed.unmapped.fastq.gz
-│   ├── VEGFA_s1_K562_neg_R2rescued.UMI.ODN.trimmed.filtered.align.log
 │   ├── VEGFA_s1_K562_neg_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
 │   ├── VEGFA_s1_K562_neg_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam.bai
 │   ├── VEGFA_s1_K562_neg_R2.UMI.ODN.trimmed.unmapped.fastq.gz
-│   ├── VEGFA_s1_K562_neg.UMI.ODN.trimmed.filtered.align.log
 │   ├── VEGFA_s1_K562_neg.UMI.ODN.trimmed.filtered.sorted.filtered.bam
 │   ├── VEGFA_s1_K562_neg.UMI.ODN.trimmed.filtered.sorted.filtered.bam.bai
 │   ├── VEGFA_s1_K562_pos_R1.UMI.ODN.trimmed.unmapped.fastq.gz
-│   ├── VEGFA_s1_K562_pos_R2rescued.UMI.ODN.trimmed.filtered.align.log
 │   ├── VEGFA_s1_K562_pos_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
 │   ├── VEGFA_s1_K562_pos_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam.bai
 │   ├── VEGFA_s1_K562_pos_R2.UMI.ODN.trimmed.unmapped.fastq.gz
-│   ├── VEGFA_s1_K562_pos.UMI.ODN.trimmed.filtered.align.log
 │   ├── VEGFA_s1_K562_pos.UMI.ODN.trimmed.filtered.sorted.filtered.bam
 │   └── VEGFA_s1_K562_pos.UMI.ODN.trimmed.filtered.sorted.filtered.bam.bai
 ├── 04-IScalling
@@ -542,32 +538,112 @@ my_folder_name/
 │   ├── VEGFA_s1_K562_pos.reads_per_UMI_per_IS_corrected.bed
 │   └── VEGFA_s1_K562_pos.UMIs_per_IS_in_Cluster.bed
 ├── 05-Report
-│   ├── report-files
-│   ├── report.rdata
 │   ├── VEGFA_s1_K562_neg.rdata
 │   ├── VEGFA_s1_K562_neg.stat
-│   ├── VEGFA_s1_K562_neg_summary.csv
-│   ├── VEGFA_s1_K562_neg_summary.xlsx
 │   ├── VEGFA_s1_K562_pos.rdata
-│   ├── VEGFA_s1_K562_pos.stat
-│   ├── VEGFA_s1_K562_pos_summary.csv
-│   └── VEGFA_s1_K562_pos_summary.xlsx
+│   └── VEGFA_s1_K562_pos.stat
 ├── 06-offPredict
 │   └── GRCh38_GGGTGGGGGGAGTTTGCTCC_NGG_3.csv
 ├── guideSeq_GNT.yml
+├── logs
+│   ├── demultiplexing_R1.log
+│   ├── demultiplexing_R2.log
+│   ├── VEGFA_s1_K562_neg.filter.log
+│   ├── VEGFA_s1_K562_neg.odn.log
+│   ├── VEGFA_s1_K562_neg_R2rescued.UMI.ODN.trimmed.filtered.align.log
+│   ├── VEGFA_s1_K562_neg.trailing.log
+│   ├── VEGFA_s1_K562_neg.UMI.log
+│   ├── VEGFA_s1_K562_neg.UMI.ODN.trimmed.filtered.align.log
+│   ├── VEGFA_s1_K562_pos.filter.log
+│   ├── VEGFA_s1_K562_pos.odn.log
+│   ├── VEGFA_s1_K562_pos_R2rescued.UMI.ODN.trimmed.filtered.align.log
+│   ├── VEGFA_s1_K562_pos.trailing.log
+│   ├── VEGFA_s1_K562_pos.UMI.log
+│   └── VEGFA_s1_K562_pos.UMI.ODN.trimmed.filtered.align.log
+├── results
+│   ├── report-files
+│   │   ├── VEGFA_s1_K562_neg_offtargets_dynamic_files
+│   │   │   ├── .... truncated
+│   │   ├── VEGFA_s1_K562_neg_offtargets_dynamic.html
+│   │   ├── VEGFA_s1_K562_neg_offtargets.html
+│   │   ├── VEGFA_s1_K562_pos_offtargets_dynamic_files
+│   │   │   ├── .... truncated
+│   │   ├── VEGFA_s1_K562_pos_offtargets_dynamic.html
+│   │   └── VEGFA_s1_K562_pos_offtargets.html
+│   ├── report.rdata
+│   ├── test_report.html
+│   ├── VEGFA_s1_K562_neg_summary.xlsx
+│   └── VEGFA_s1_K562_pos_summary.xlsx
 ├── sampleInfo.csv
-└── test_report.html
+├── test_datasheet.csv
+└── test_datasheet.xlsx
 ```
 
 ## Report
 
 A general report is generated. It summarizes all main QC and key features obtained from the run using graphical representations and tables.
 
-An example is available in the `./test/` folder.
+An example is available in the `./test_dataset/results` folder.
 
 ## Off-targets files
 
 For each sample, an Excel file containing all the OT information is created. This file includes numerous columns, some of which are particularly noteworthy. It lists all detected positions, even those without any gRNA matches. For each position, the file reports the total number of UMIs and reads, providing the same information for both positive and negative PCRs. Insertion sites are annotated to genes and oncogenes if they are defined in the configuration file. For OT sites with gRNA matches, a summary of indel and mismatch positions is also provided.
+
+Here is the data formatted into a markdown table:
+
+| Index | Header value | Description |
+|------------------------|------------------------|------------------------|
+| 1 | Chromosome | Chromosome ID where cluster is located |
+| 2 | Start_cluster | Genomic coordinates of the cluster |
+| 3 | end_cluster |  |
+| 4 | ClusterID | ID of cluster |
+| 5 | MedianMAPQ_cluster | Median of MAPQ score for alignments in the cluster [0, 42] |
+| 6 | N_IS_cluster | Number of unique cut positions in the cluster [1, +inf] |
+| 7 | N_orientations_cluster | Number of ODN integration orientation in the cluster [1, 2] |
+| 8 | N_orientation_PCR | Number of PCR orientation detected in the cluster [1, 2] |
+| 9 | N_UMI_cluster | Sum of UMIs for all sites in the cluster [1, +inf] |
+| 10 | N_reads_cluster | Sum of reads for all sites in the cluster [1, +Inf] |
+| 11 - 20 |  | Same as 5-10, broken down by PCR orientation |
+| 21 | Sequence_window | Nucleotide sequence of the cluster |
+| 22 | grna_orientation | Strand the gRNA sequence is matched [Watson, crick] |
+| 23 | Seq_gDNA | Sequence of the gDNA matching the gRNA |
+| 24 | Seq_gRNA | Sequence of the gRNA |
+| 25 | Alignment | Pairwise alignment representation between gRNA and gDNA |
+| 26-27 | Gibbs hybridization | Efficacy and dG_0 |
+| 28 | GC_content | GC% of the gDNA sequence matched |
+| 29 | Alignment_score | Alignment score for pairwise alignment of gRNA & gDNA |
+| 30 | Identity_pct | \% identity between gRNA & gDNA sequences |
+| 31 | N_edits | Total number of Edit in the alignment (mismatches + indels) |
+| 32 | mismatches_position_gRNA | Position of mismatches in the gRNA |
+| 33 | \- |  |
+| 34 | N_indels | Number of indels in the pairwise alignment |
+| 35 | Insertion_length | Total length of insertions in the pairwise alignment |
+| 36 | Start_insertion | Start, end and width of each insertion in the pairwise alignment |
+| 37 | End_insertion |  |
+| 38 | Width_insertion |  |
+| 39 - 43 |  | Start, end and width of each deletion in the pairwise alignment |
+| 44 | Pam_gDNA | PAM sequence identified in gDNA |
+| 45 | Pam_gRNA | Theoretical PAM sequence (sample datasheet) |
+| 46 | Pam_side | Which side is the PAM located (sample datasheet) [5, 3] |
+| 47 | PAM_indel_count | Number of indels in the PAM sequence |
+| 48 | PAM_indel_pos | Position of indels in the PAM sequence |
+| 49 | Cut_gRNA_alignment | Theoretical cut site from pairwise alignment and offset (sample datasheet) |
+| 50 | Start_IS | Genomic Position, abundance and relative abundance of the most abundant cut site in the cluster |
+| 51 | Count_UMI |  |
+| 52 | UMI_proportion |  |
+| 53 | Cut_modal_position | Cut site with the higher UMI counts in the cluster |
+| 54 | gRNA | gRNA sequence (sample datasheet) |
+| 55 | gRNA_name | gRNA name (sample datasheet) |
+| 56 | Gene_ensemblID | Gene ID, symbol, type and position (Intron, Exon) for intragenic cut sites |
+| 57 | Symbol |  |
+| 58 | Gene_type |  |
+| 59 | Position |  |
+| 60 | Onco_annotation | Annotation with user defined oncogene |
+| 61 | Best | Is cluster the best candidate relative to number of edits |
+| 62 | Relative_abundance | Relative abundance of cluster among all clusters |
+| 63 | Rank | Rank of cluster (by decreasing relative abundance) |
+| 64 | Predicted | Was position predicted? |
+| 65 | bulge | If indels are present, do they form gRNA or gDNA bulge, or both |
 
 # Pipeline step-by-step explanations
 
