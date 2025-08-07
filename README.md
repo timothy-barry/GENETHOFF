@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16759028.svg)](https://doi.org/10.5281/zenodo.16759028)
+
 # Installation
 
 In order to get a working environment, we recommend to clone the git repository :
