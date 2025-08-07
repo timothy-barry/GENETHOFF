@@ -1,16 +1,3 @@
----
-title: "Documentation"
-date: "2025-08-07"
-author: "CORRE Guillaume"
-output: 
-    rmdformats::readthedown:
-      keep_md: yes
-      highlight: kate
-      toc: 3
----
-
-
-
 # Installation
 
 In order to get a working environment, we recommend to clone the git repository :
