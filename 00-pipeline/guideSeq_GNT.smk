@@ -137,7 +137,21 @@ else:
     print(f"\n{RED}!! The following protocols are not defined configuration file:{RESET}", missing_protocols)
     sys.exit(1)
 
+###############################################################
+# Check that the genomes defined in the sample datasheet have a corresponding entry in the configuration file.
+###############################################################
 
+unique_Genome = samplesTable['Genome'].unique()
+
+yaml_Genome = config.keys()
+
+missing_Genome = [Genome for Genome in unique_Genome if Genome not in yaml_Genome]
+
+if not missing_Genome:
+    print("")
+else:
+    print(f"\n{RED}!! The following Genome are not defined configuration file:{RESET}", missing_Genome)
+    sys.exit(1)
 
 
 
