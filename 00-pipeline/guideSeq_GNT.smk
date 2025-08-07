@@ -143,7 +143,7 @@ else:
 
 unique_Genome = samplesTable['Genome'].unique()
 
-yaml_Genome = config.keys()
+yaml_Genome = config["genome"].keys()
 
 missing_Genome = [Genome for Genome in unique_Genome if Genome not in yaml_Genome]
 
