@@ -1,4 +1,25 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16759028.svg)](https://doi.org/10.5281/zenodo.16759028)
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16759028.svg)](https://doi.org/10.5281/zenodo.16759028) [![Static Badge](https://img.shields.io/badge/License-custom-blue?style=flat)](./LICENSE.md)
+
+------------------------------------------------------------------------
+
+### Licensing
+
+This work is distributed under an **Academic Non-Commercial License**.
+
+Commercial use is **not permitted** without explicit written consent from the authors. See the [LICENSE](./LICENSE.md) file for details.
+
+### Citation
+
+If you use this pipeline in your research, please cite:
+
+> Repository : <https://github.com/gcorre/GNT_GuideSeq>
+>
+> DOI: 10.5281/zenodo.16759028
+>
+> Publication :
+
+------------------------------------------------------------------------
 
 # Installation
 
