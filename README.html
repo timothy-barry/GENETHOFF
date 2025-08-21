@@ -9,7 +9,7 @@
     
         <meta name="date" content="2025-08-21" />
     
-    <title>Documentation</title>
+    <title>GNT-GUIDESeq Documentation</title>
 
         <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1265,11 +1265,11 @@ margin-left: 0 !important;
          
    
         
-      <h1 class="title">Documentation</h1>
+      <h1 class="title">GNT-GUIDESeq Documentation</h1>
       
          <!-- readthedown authors -->
    <div id="sidebar">
-    <h2><a href="#content">Documentation</a></h2>
+    <h2><a href="#content">GNT-GUIDESeq Documentation</a></h2>
     <div id="toc">
       <ul>
       <li><a href="#licensing" id="toc-licensing">Licensing</a></li>
@@ -1289,73 +1289,7 @@ margin-left: 0 !important;
       <li><a href="#prediction-tool" id="toc-prediction-tool">Prediction
       tool</a></li>
       </ul></li>
-      <li><a href="#running-the-pipeline" id="toc-running-the-pipeline">Running the pipeline</a>
-      <ul>
-      <li><a href="#prepare-samples-data-sheet-sds" id="toc-prepare-samples-data-sheet-sds">Prepare samples data sheet
-      (SDS)</a>
-      <ul>
-      <li><a href="#merging-samples" id="toc-merging-samples">Merging
-      samples</a></li>
-      <li><a href="#working-with-already-demultiplexed-libraries" id="toc-working-with-already-demultiplexed-libraries">Working with
-      already demultiplexed libraries</a></li>
-      </ul></li>
-      <li><a href="#prepare-the-configuration-file" id="toc-prepare-the-configuration-file">Prepare the configuration
-      file</a>
-      <ul>
-      <li><a href="#metadata" id="toc-metadata">Metadata</a></li>
-      <li><a href="#remove-intermediate-files" id="toc-remove-intermediate-files">Remove intermediate
-      files</a></li>
-      <li><a href="#path-to-sample-data-sheet-and-read-files" id="toc-path-to-sample-data-sheet-and-read-files">Path to Sample
-      Data Sheet and read files</a></li>
-      <li><a href="#reference-genome" id="toc-reference-genome">Reference genome</a></li>
-      <li><a href="#reads-filtering" id="toc-reads-filtering">Reads
-      filtering</a></li>
-      <li><a href="#alignment-to-reference-genome" id="toc-alignment-to-reference-genome">Alignment to reference
-      genome</a></li>
-      <li><a href="#insertion-sites-calling" id="toc-insertion-sites-calling">Insertion sites calling</a></li>
-      <li><a href="#umi-correction" id="toc-umi-correction">UMI
-      correction</a></li>
-      <li><a href="#reporting" id="toc-reporting">Reporting</a></li>
-      <li><a href="#prediction" id="toc-prediction">Prediction</a></li>
-      <li><a href="#reads-adapter-odn-trimming-sequences" id="toc-reads-adapter-odn-trimming-sequences">Reads adapter &amp;
-      ODN trimming sequences</a></li>
-      </ul></li>
-      <li><a href="#folder-structure" id="toc-folder-structure">Folder
-      structure</a></li>
-      </ul></li>
-      <li><a href="#output" id="toc-output">Output</a>
-      <ul>
-      <li><a href="#report" id="toc-report">Report</a></li>
-      <li><a href="#off-targets-files" id="toc-off-targets-files">Off-targets files</a></li>
-      </ul></li>
-      <li><a href="#pipeline-step-by-step-explanations" id="toc-pipeline-step-by-step-explanations">Pipeline step-by-step
-      explanations</a>
-      <ul>
-      <li><a href="#demultiplexing" id="toc-demultiplexing">Demultiplexing</a></li>
-      <li><a href="#odn-trimming" id="toc-odn-trimming">ODN
-      trimming:</a></li>
-      <li><a href="#umi-extraction" id="toc-umi-extraction">UMI
-      extraction</a></li>
-      <li><a href="#adaptor-trimming" id="toc-adaptor-trimming">Adaptor
-      trimming:</a></li>
-      <li><a href="#read-filtering" id="toc-read-filtering">Read
-      filtering:</a></li>
-      <li><a href="#genome-alignment" id="toc-genome-alignment">Genome
-      alignment:</a>
-      <ul>
-      <li><a href="#multi-hits-management" id="toc-multi-hits-management">Multi-hits management:</a></li>
-      </ul></li>
-      <li><a href="#cutting-site-calling" id="toc-cutting-site-calling">Cutting site calling:</a></li>
-      <li><a href="#umi-correction-1" id="toc-umi-correction-1">UMI
-      correction:</a></li>
-      <li><a href="#cut-site-clustering" id="toc-cut-site-clustering">Cut site clustering:</a></li>
-      <li><a href="#grna-match" id="toc-grna-match">gRNA match:</a></li>
-      <li><a href="#annotation-of-clusters" id="toc-annotation-of-clusters">Annotation of clusters:</a></li>
-      <li><a href="#off-target-prediction" id="toc-off-target-prediction">Off target prediction:</a></li>
-      <li><a href="#reporting-1" id="toc-reporting-1">Reporting:</a></li>
-      </ul></li>
-      <li><a href="#troubleshooting" id="toc-troubleshooting">Troubleshooting</a></li>
-      <li><a href="#references" id="toc-references">References</a></li>
+      <li><a href="#running-the-pipeline" id="toc-running-the-pipeline">Running the pipeline</a></li>
       </ul>
     </div>
     <div id="postamble" data-toggle="wy-nav-shift" class="status">
@@ -1373,6 +1307,23 @@ Guillaume</p>
 <div id="main">
 <p><a href="https://doi.org/10.5281/zenodo.16759028"><img role="img" aria-label="DOI" src="data:image/svg+xml; charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgd2lkdGg9IjE5MC44NDM3NSIgaGVpZ2h0PSIyMCI+CiAgICAgICAgPGxpbmVhckdyYWRpZW50IGlkPSJiIiB4Mj0iMCIgeTI9IjEwMCUiPgogICAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNiYmIiIHN0b3Atb3BhY2l0eT0iLjEiLz4KICAgICAgICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLW9wYWNpdHk9Ii4xIi8+CiAgICAgICAgPC9saW5lYXJHcmFkaWVudD4KICAgICAgICA8bWFzayBpZD0iYSIgd2lkdGg9IjE5MC44NDM3NSIgaGVpZ2h0PSIyMCI+CiAgICAgICAgICAgIDxyZWN0IHdpZHRoPSIxOTAuODQzNzUiIGhlaWdodD0iMjAiIHJ4PSIzIgogICAgICAgICAgICBmaWxsPSIjZmZmIi8+CiAgICAgICAgPC9tYXNrPgogICAgICAgIDxnIG1hc2s9InVybCgjYSkiPgogICAgICAgICAgICA8cGF0aCBmaWxsPSIjNTU1IiBkPSJNMCAwaDMxLjM3NXYyMEgweiIgLz4KICAgICAgICAgICAgPHBhdGggZmlsbD0iIzAwN2VjNiIKICAgICAgICAgICAgZD0iTTMxLjM3NSAwaDE1OS40Njg3NXYyMEgzMS4zNzV6IgogICAgICAgICAgICAvPgogICAgICAgICAgICA8cGF0aCBmaWxsPSJ1cmwoI2IpIiBkPSJNMCAwaDE5MC44NDM3NXYyMEgweiIgLz4KICAgICAgICA8L2c+CiAgICAgICAgPGcgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkRlamFWdSBTYW5zLAogICAgICAgIFZlcmRhbmEsR2VuZXZhLHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTEiPgogICAgICAgICAgICA8dGV4dCB4PSIxNi4xODc1IiB5PSIxNSIgZmlsbD0iIzAxMDEwMSIKICAgICAgICAgICAgZmlsbC1vcGFjaXR5PSIuMyI+CiAgICAgICAgICAgICAgICBET0kKICAgICAgICAgICAgPC90ZXh0PgogICAgICAgICAgICA8dGV4dCB4PSIxNi4xODc1IiB5PSIxNCI+CiAgICAgICAgICAgICAgICBET0kKICAgICAgICAgICAgPC90ZXh0PgogICAgICAgICAgICA8dGV4dCB4PSIxMTAuNjA5Mzc1IgogICAgICAgICAgICB5PSIxNSIgZmlsbD0iIzAxMDEwMSIgZmlsbC1vcGFjaXR5PSIuMyI+CiAgICAgICAgICAgICAgICAxMC41MjgxL3plbm9kby4xNjc1OTAyOAogICAgICAgICAgICA8L3RleHQ+CiAgICAgICAgICAgIDx0ZXh0IHg9IjExMC42MDkzNzUiIHk9IjE0Ij4KICAgICAgICAgICAgICAgIDEwLjUyODEvemVub2RvLjE2NzU5MDI4CiAgICAgICAgICAgIDwvdGV4dD4KICAgICAgICA8L2c+CiAgICA8L3N2Zz4=" alt="DOI" /></a> <a href="./LICENSE.md"><img role="img" aria-label="Static Badge" src="data:image/svg+xml;charset=utf-8;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDIiIGhlaWdodD0iMjAiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0iTGljZW5zZTogY3VzdG9tIj48dGl0bGU+TGljZW5zZTogY3VzdG9tPC90aXRsZT48bGluZWFyR3JhZGllbnQgaWQ9InMiIHgyPSIwIiB5Mj0iMTAwJSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjYmJiIiBzdG9wLW9wYWNpdHk9Ii4xIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLW9wYWNpdHk9Ii4xIi8+PC9saW5lYXJHcmFkaWVudD48Y2xpcFBhdGggaWQ9InIiPjxyZWN0IHdpZHRoPSIxMDIiIGhlaWdodD0iMjAiIHJ4PSIzIiBmaWxsPSIjZmZmIi8+PC9jbGlwUGF0aD48ZyBjbGlwLXBhdGg9InVybCgjcikiPjxyZWN0IHdpZHRoPSI1MSIgaGVpZ2h0PSIyMCIgZmlsbD0iIzU1NSIvPjxyZWN0IHg9IjUxIiB3aWR0aD0iNTEiIGhlaWdodD0iMjAiIGZpbGw9IiMwMDdlYzYiLz48cmVjdCB3aWR0aD0iMTAyIiBoZWlnaHQ9IjIwIiBmaWxsPSJ1cmwoI3MpIi8+PC9nPjxnIGZpbGw9IiNmZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJWZXJkYW5hLEdlbmV2YSxEZWphVnUgU2FucyxzYW5zLXNlcmlmIiB0ZXh0LXJlbmRlcmluZz0iZ2VvbWV0cmljUHJlY2lzaW9uIiBmb250LXNpemU9IjExMCI+PHRleHQgYXJpYS1oaWRkZW49InRydWUiIHg9IjI2NSIgeT0iMTUwIiBmaWxsPSIjMDEwMTAxIiBmaWxsLW9wYWNpdHk9Ii4zIiB0cmFuc2Zvcm09InNjYWxlKC4xKSIgdGV4dExlbmd0aD0iNDEwIj5MaWNlbnNlPC90ZXh0Pjx0ZXh0IHg9IjI2NSIgeT0iMTQwIiB0cmFuc2Zvcm09InNjYWxlKC4xKSIgZmlsbD0iI2ZmZiIgdGV4dExlbmd0aD0iNDEwIj5MaWNlbnNlPC90ZXh0Pjx0ZXh0IGFyaWEtaGlkZGVuPSJ0cnVlIiB4PSI3NTUiIHk9IjE1MCIgZmlsbD0iIzAxMDEwMSIgZmlsbC1vcGFjaXR5PSIuMyIgdHJhbnNmb3JtPSJzY2FsZSguMSkiIHRleHRMZW5ndGg9IjQxMCI+Y3VzdG9tPC90ZXh0Pjx0ZXh0IHg9Ijc1NSIgeT0iMTQwIiB0cmFuc2Zvcm09InNjYWxlKC4xKSIgZmlsbD0iI2ZmZiIgdGV4dExlbmd0aD0iNDEwIj5jdXN0b208L3RleHQ+PC9nPjwvc3ZnPg==" alt="Static Badge" /></a></p>
 <hr />
+<p>This repository consists of a snakemake workflow dedicated to the
+analysis of libraries derived from the GUIDE-Seq protocol, including
+iGUIDE-Seq, GUIDE-Seq2, Tag-Seq, OliTag-Seq or any other libraries based
+on the original protocol by Tsai et al. 2015.</p>
+<p>The key features of the pipeline are :</p>
+<ul>
+<li><p>High versatility with analysis of multiplexed libraries including
+samples from different organisms, gRNA and PAM sequences, PCR
+orientations … in a single run.</p></li>
+<li><p>Consideration of bulges and mismatches between the gRNA and gDNA
+alignments.</p></li>
+<li><p>Consideration of multi-hit reads (assignment to random position
+among best hits).</p></li>
+<li><p>Prediction of Off-target sites using SWOFFinder</p></li>
+<li><p>Annotation to gene and oncogene (user defined lists)</p></li>
+<li><p>Reporting with QC and OT quantification.</p></li>
+</ul>
 <div id="licensing" class="section level3">
 <h3>Licensing</h3>
 <p>This work is distributed under an <strong>Academic Non-Commercial
@@ -1491,7 +1442,7 @@ TSG”)</p></li>
 fly and annotate OT accordingly as predicted or not.</p>
 <ul>
 <li>Install from the github repository : <a href="https://github.com/OrensteinLab/SWOffinder" class="uri">https://github.com/OrensteinLab/SWOffinder</a></li>
-<li>Set the path to SWOffinder in the config file (<a href="#prediction">Prediction</a>)</li>
+<li>Set the path to SWOffinder in the config file ([Prediction])</li>
 </ul>
 </div>
 </div>
@@ -1506,8 +1457,8 @@ fly and annotate OT accordingly as predicted or not.</p>
 <em>If working with libraries that were already demultiplexed, please
 read section …..</em></li>
 </ol>
-<div id="prepare-samples-data-sheet-sds" class="section level2">
-<h2>Prepare samples data sheet (SDS)</h2>
+<p>## Prepare samples data sheet (SDS)
+{#prepare-samples-data-sheet-sds}</p>
 <p>The sample data-sheet (SDS) is a simple file provided as delited ( ;
 ) or xlsx format that contains information about each sample to process
 in the run. An example is proposed in
@@ -1580,32 +1531,27 @@ in the run. An example is proposed in
 </tbody>
 </table>
 <ul>
-<li><strong><code>sampleName</code></strong> : Sample name to use.
-<ul>
+<li><strong><code>sampleName</code></strong> : Sample name to use.</li>
 <li>Will be use to name output files and folders.</li>
 <li>Samples with the same <code>sampleName</code> will be merged before
-processing (<a href="#merging-samples">Merging samples</a>)</li>
+processing ([Merging samples])</li>
 <li>Samples name <u><strong>must not include</strong></u> ‘-’ in their
 name as this symbol is used in the pipeline for a special purpose.
 Instead, use “_” or any other separator of your choice.</li>
-</ul></li>
 <li><strong><code>Genome</code></strong>: Uses to define which reference
-genome to use for each sample.
-<ul>
+genome to use for each sample.</li>
 <li>This <strong>must</strong> be one of the values present in config
-file <strong><code>genome</code></strong> key (see <a href="#reference-genome">Reference genome</a>).</li>
-</ul></li>
+file <strong><code>genome</code></strong> key (see [Reference
+genome]).</li>
 <li><strong><code>gRNA_name</code></strong> : name of the gRNA
 used.</li>
 <li><strong><code>gRNA_sequence</code></strong>: Sequence of the gRNA
 <u><strong>without</strong></u> the PAM sequence.</li>
 <li><strong><code>orientation</code></strong> : which PCR orientation
 was chosen [“positive”, “negative”, “mix” if they share the same
-indexes]
-<ul>
+indexes]</li>
 <li>(this info is only used for metadata purposes, both PCR orientations
 are automatically processes by the pipeline).</li>
-</ul></li>
 <li><strong><code>Cas</code></strong>: name of the Cas used</li>
 <li><strong><code>PAM_sequence</code></strong>: Sequence of the PAM</li>
 <li><code>PAM_side</code>: [5 or 3] indicating if the PAM is 5’ or
@@ -1624,8 +1570,7 @@ demultiplexing</li>
 <p>Additional columns can be added for metadata annotation purpose.</p>
 <p>SDS format is automatically validated using the
 <code>snakemake.utils - validate</code> function.</p>
-<div id="merging-samples" class="section level3">
-<h3>Merging samples</h3>
+<p>### Merging samples</p>
 <p>In certain scenarios, it may be beneficial to merge different samples
 from a library during the reads processing stage. This can be
 particularly useful when dealing with Multiple Replicates or +/-PCR
@@ -1634,9 +1579,8 @@ orientations.</p>
 in the Sample Description Sheet (SDS). Samples that share the same name
 will be merged during the reads processing, provided they meet the
 following criteria:</p>
-<ol style="list-style-type: decimal">
-<li><p><strong><code>Reference Genome</code></strong>: The samples must
-use the same reference genome.</p></li>
+<pre><code>1.  **`Reference Genome`**: The samples must use the same reference genome.</code></pre>
+<ol start="2" style="list-style-type: decimal">
 <li><p><strong><code>gRNA</code></strong>: The samples must have the
 same gRNA, both in terms of sequence and name.</p></li>
 <li><p><strong><code>Cas Protein</code></strong>: The samples must use
@@ -1654,82 +1598,17 @@ workflow.</p>
 negative libraries, give the same sample name to both rows. As they use
 the same genome, gRNA, Cas &amp; method, they will be aggregated in a
 single library.</p>
-<table style="width:100%;">
-<caption>UMI and reads counts will still be breakdown to each PCR
-orientation in the final result table.</caption>
-<colgroup>
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-<col width="7%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>sampleName</th>
-<th>CellType</th>
-<th>Genome</th>
-<th>gRNA_name</th>
-<th>gRNA_sequence</th>
-<th>orientation</th>
-<th>Cas</th>
-<th>PAM_sequence</th>
-<th>PAM_side</th>
-<th>Cut_Offset</th>
-<th>type</th>
-<th>index1</th>
-<th>index2</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>VEGFA_s1_K562</td>
-<td>K562</td>
-<td>GRCh38</td>
-<td>VEGFAs1</td>
-<td>GGGTGGGGGGAGTTTGCTCC</td>
-<td>positive</td>
-<td>Cas9</td>
-<td>NGG</td>
-<td>3</td>
-<td>-4</td>
-<td>guideseq</td>
-<td>AGGCAGAA</td>
-<td>CTAAGCCT</td>
-</tr>
-<tr class="even">
-<td>VEGFA_s1_K562</td>
-<td>K562</td>
-<td>GRCh38</td>
-<td>VEGFAs1</td>
-<td>GGGTGGGGGGAGTTTGCTCC</td>
-<td>negative</td>
-<td>Cas9</td>
-<td>NGG</td>
-<td>3</td>
-<td>-4</td>
-<td>guideseq</td>
-<td>TCCTGAGC</td>
-<td>CTAAGCCT</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="working-with-already-demultiplexed-libraries" class="section level3">
-<h3>Working with already demultiplexed libraries</h3>
+<p>| sampleName | CellType | Genome | gRNA_name | gRNA_sequence |
+orientation | Cas | PAM_sequence | PAM_side | Cut_Offset | type | index1
+| index2 | |——|——|——|——|——|——|——|——|——|——|——|——|——| | VEGFA_s1_K562 |
+K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | positive | Cas9 | NGG |
+3 | -4 | guideseq | AGGCAGAA | CTAAGCCT | | VEGFA_s1_K562 | K562 |
+GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | negative | Cas9 | NGG | 3 | -4
+| guideseq | TCCTGAGC | CTAAGCCT |</p>
+<pre><code>: UMI and reads counts will still be breakdown to each PCR orientation in the final result table.</code></pre>
+<p>### Working with already demultiplexed libraries</p>
 <p>To be documented</p>
-</div>
-</div>
-<div id="prepare-the-configuration-file" class="section level2">
-<h2>Prepare the configuration file</h2>
+<p>## Prepare the configuration file</p>
 <p>The configuration file is a yaml formatted file with key-value
 dictionary used to fine-tune the pipeline behavior. Settings will apply
 to <u><strong>all samples of the run</strong></u>.</p>
@@ -1737,76 +1616,63 @@ to <u><strong>all samples of the run</strong></u>.</p>
 <code>./test_dataset/guideSeq_GNT.yml</code></p>
 <p><u>config file must be present in the working directory when starting
 the pipeline.</u></p>
-<div id="metadata" class="section level3">
-<h3>Metadata</h3>
+<p>### Metadata</p>
 <p>Author and affiliation will be printed on the final report.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">author</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Guillaume CORRE, PhD&quot;</span></span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">affiliation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay University, Evry, France&quot;</span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">contact</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;gcorre@genethon.fr&quot;</span></span>
-<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;V1.0&#39;</span></span></code></pre></div>
-</div>
-<div id="remove-intermediate-files" class="section level3">
-<h3>Remove intermediate files</h3>
+<div class="sourceCode" id="cb11"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">author</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Guillaume CORRE, PhD&quot;</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">affiliation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay University, Evry, France&quot;</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="fu">contact</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;gcorre@genethon.fr&quot;</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;V1.0&#39;</span></span></code></pre></div>
+<p>### Remove intermediate files</p>
 <p>Whether to remove all intermediate files after run completion.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">clean_intermediates_files</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;TRUE&#39;</span></span></code></pre></div>
-</div>
-<div id="path-to-sample-data-sheet-and-read-files" class="section level3">
-<h3>Path to Sample Data Sheet and read files</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">clean_intermediates_files</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;TRUE&#39;</span></span></code></pre></div>
+<p>### Path to Sample Data Sheet and read files</p>
 <p>SDS path is relative to current folder (from where the pipeline is
 started). Absolute path can be used.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co">## Library informations</span></span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">sampleInfo_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;sampleInfo.csv&quot;</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="fu">read_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;.&quot;</span><span class="co">  # path to reads if not current folder</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="fu">R1</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Undetermined_S0_L001_R1_001.fastq.gz&quot;</span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="fu">R2</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Undetermined_S0_L001_R2_001.fastq.gz&quot;</span></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="fu">I1</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Undetermined_S0_L001_I1_001.fastq.gz&quot;</span></span>
-<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="fu">I2</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Undetermined_S0_L001_I2_001.fastq.gz&quot;</span></span></code></pre></div>
-</div>
-<div id="reference-genome" class="section level3">
-<h3>Reference genome</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co">## Library informations</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">sampleInfo_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;sampleInfo.csv&quot;</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="fu">read_path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;.&quot;</span><span class="co">  # path to reads if not current folder</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="fu">R1</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Undetermined_S0_L001_R1_001.fastq.gz&quot;</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="fu">R2</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Undetermined_S0_L001_R2_001.fastq.gz&quot;</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="fu">I1</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Undetermined_S0_L001_I1_001.fastq.gz&quot;</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="fu">I2</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Undetermined_S0_L001_I2_001.fastq.gz&quot;</span></span></code></pre></div>
+<p>### Reference genome</p>
 <p>Genome name is user-defined but must be referenced using the exact
 same name in the Sample Data Sheet.</p>
 <p>‘Index’ corresponds to the prefix used when bowtie2 index was built
 (<a href="#build-index-manualy">Build index manualy</a>).</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co">## path to references</span></span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">genome</span><span class="kw">:</span></span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="at">  </span><span class="fu">GRCh37</span><span class="kw">:</span></span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="at">    </span><span class="fu">fasta</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh37/Sequences/GRCh37.primary_assembly.genome.fa&quot;</span></span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="at">    </span><span class="fu">index</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh37/Indexes/Bowtie2/GRCh37.primary_assembly.genome&quot;</span><span class="at"> </span></span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="at">    </span><span class="fu">annotation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh37/Annotations/gencode.v19.annotation.gtf.gz&quot;</span></span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="at">  </span><span class="fu">GRCh38</span><span class="kw">:</span></span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="at">    </span><span class="fu">fasta</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh38/Sequences/GRCh38.primary_assembly.genome.fa&quot;</span></span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="at">    </span><span class="fu">index</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRch38/Indexes/Bowtie2/GRCh38.primary_assembly.genome&quot;</span><span class="at"> </span></span>
-<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="at">    </span><span class="fu">annotation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh38/Annotations/gencode.v46.annotation.gtf.gz&quot;</span></span>
-<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="at">    </span><span class="fu">oncogene_list</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh38/Annotations/OncoList_OncoKB_GRCh38_2025-07-04.tsv&quot;</span></span>
-<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="at">  </span><span class="fu">GRCm39</span><span class="kw">:</span></span>
-<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="at">    </span><span class="fu">fasta</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCm39/Sequences/GRCm39.primary_assembly.genome.fa&quot;</span></span>
-<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="at">    </span><span class="fu">index</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCm39/Indexes/Bowtie2/GRCm39.primary_assembly.genome&quot;</span><span class="at"> </span></span>
-<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="at">    </span><span class="fu">annotation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCm39/Annotations/gencode.vM36.annotation.gtf.gz&quot;</span></span>
-<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="at">    </span><span class="fu">oncogene_list</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&quot;</span></span></code></pre></div>
-</div>
-<div id="reads-filtering" class="section level3">
-<h3>Reads filtering</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co">## path to references</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">genome</span><span class="kw">:</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="at">  </span><span class="fu">GRCh37</span><span class="kw">:</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="at">  </span><span class="fu">fasta</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh37/Sequences/GRCh37.primary_assembly.genome.fa&quot;</span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="fu">index</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh37/Indexes/Bowtie2/GRCh37.primary_assembly.genome&quot;</span><span class="at"> </span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="fu">annotation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh37/Annotations/gencode.v19.annotation.gtf.gz&quot;</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="fu">GRCh38</span><span class="kw">:</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="at">  </span><span class="fu">fasta</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh38/Sequences/GRCh38.primary_assembly.genome.fa&quot;</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="fu">index</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRch38/Indexes/Bowtie2/GRCh38.primary_assembly.genome&quot;</span><span class="at"> </span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="fu">annotation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh38/Annotations/gencode.v46.annotation.gtf.gz&quot;</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="fu">oncogene_list</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCh38/Annotations/OncoList_OncoKB_GRCh38_2025-07-04.tsv&quot;</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="fu">GRCm39</span><span class="kw">:</span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="at">  </span><span class="fu">fasta</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCm39/Sequences/GRCm39.primary_assembly.genome.fa&quot;</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="fu">index</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCm39/Indexes/Bowtie2/GRCm39.primary_assembly.genome&quot;</span><span class="at"> </span></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="fu">annotation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/PATH_TO_REFERENCE/GRCm39/Annotations/gencode.vM36.annotation.gtf.gz&quot;</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="fu">oncogene_list</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;&quot;</span></span></code></pre></div>
+<p>### Reads filtering</p>
 <p>After adaptor &amp; ODN triming and before alignment to the reference
 genome, reads that are too short are discarded. This filter is applied
 if <strong>any</strong> of the mates size is below this threshold.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co">################################################</span></span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">minLength</span><span class="kw">:</span><span class="at"> </span><span class="dv">25</span><span class="co"> ## Minimal read length after trimming, before alignment</span></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
-</div>
-<div id="alignment-to-reference-genome" class="section level3">
-<h3>Alignment to reference genome</h3>
+<div class="sourceCode" id="cb15"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co">################################################</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="fu">minLength</span><span class="kw">:</span><span class="at"> </span><span class="dv">25</span><span class="co"> ## Minimal read length after trimming, before alignment</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
+<p>### Alignment to reference genome</p>
 <p>Define which aligner to use and the range of fragment size.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co">## Alignement </span></span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">################################################</span></span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">aligner</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;bowtie2&quot;</span><span class="co">   ## Aligner to use (bowtie2 only for now)</span></span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="fu">minFragLength</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span><span class="co">         # Minimal fragment length after alignment</span></span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="fu">maxFragLength</span><span class="kw">:</span><span class="at"> </span><span class="dv">1500</span><span class="co">        # Maximal fragment length after alignment </span></span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="fu">rescue_R2</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TRUE&quot;</span><span class="co"> # keep R2 from unaligned pairs or pairs with too short R1 reads and align them as single-end reads.</span></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
-</div>
-<div id="insertion-sites-calling" class="section level3">
-<h3>Insertion sites calling</h3>
+<div class="sourceCode" id="cb16"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co">## Alignement </span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co">################################################</span></span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="fu">aligner</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;bowtie2&quot;</span><span class="co">   ## Aligner to use (bowtie2 only for now)</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="fu">minFragLength</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span><span class="co">         # Minimal fragment length after alignment</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="fu">maxFragLength</span><span class="kw">:</span><span class="at"> </span><span class="dv">1500</span><span class="co">        # Maximal fragment length after alignment </span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="fu">rescue_R2</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TRUE&quot;</span><span class="co"> # keep R2 from unaligned pairs or pairs with too short R1 reads and align them as single-end reads.</span></span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
+<p>### Insertion sites calling</p>
 <p>After alignment on the genome, R2 reads are collapse to single
 insertion points and aggregated if they cluster in a distance smaller
 than <code>ISbinWindow</code> defined here. Filters can be applied to
@@ -1814,19 +1680,17 @@ exclude UMI with few reads (<code>minReadsPerUMI</code>) or insertion
 sites with few UMIs (<code>minUMIPerIS</code>).</p>
 <p>Here, you can also define if you want to tolerate bulges in the
 alignment between the gRNA and gDNA.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="co">################################################</span></span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co">## Off targets calling</span></span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="fu">tolerate_bulges</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TRUE&quot;</span><span class="co">           # whether to include gaps in the gRNA alignment (this will change the gap penalty during SW pairwise alignment)</span></span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="fu">max_edits_crRNA</span><span class="kw">:</span><span class="at"> </span><span class="dv">6</span><span class="co">                # filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)</span></span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="fu">ISbinWindow</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span><span class="co">                  # insertion sites closer than &#39;ISbinWindow&#39; will be clustered together</span></span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="fu">minReadsPerUMI</span><span class="kw">:</span><span class="at"> </span><span class="dv">4</span><span class="co">                 # Min number of reads per UMIs (&gt;=)</span></span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="fu">minUMIPerIS</span><span class="kw">:</span><span class="at"> </span><span class="dv">4</span><span class="co">                      # Min number of UMI per IS (&gt;=)</span></span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="fu">slopSize</span><span class="kw">:</span><span class="at"> </span><span class="dv">50</span><span class="co">                      # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)</span></span>
-<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="fu">min_predicted_distance</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span><span class="co">       # distance between cut site and predicted cut site to consider as predicted</span></span>
-<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
-</div>
-<div id="umi-correction" class="section level3">
-<h3>UMI correction</h3>
+<div class="sourceCode" id="cb17"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co">################################################</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="co">## Off targets calling</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="fu">tolerate_bulges</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TRUE&quot;</span><span class="co">           # whether to include gaps in the gRNA alignment (this will change the gap penalty during SW pairwise alignment)</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="fu">max_edits_crRNA</span><span class="kw">:</span><span class="at"> </span><span class="dv">6</span><span class="co">                # filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="fu">ISbinWindow</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span><span class="co">                  # insertion sites closer than &#39;ISbinWindow&#39; will be clustered together</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="fu">minReadsPerUMI</span><span class="kw">:</span><span class="at"> </span><span class="dv">4</span><span class="co">                 # Min number of reads per UMIs (&gt;=)</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="fu">minUMIPerIS</span><span class="kw">:</span><span class="at"> </span><span class="dv">4</span><span class="co">                      # Min number of UMI per IS (&gt;=)</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="fu">slopSize</span><span class="kw">:</span><span class="at"> </span><span class="dv">50</span><span class="co">                      # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="fu">min_predicted_distance</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span><span class="co">       # distance between cut site and predicted cut site to consider as predicted</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
+<p>### UMI correction</p>
 <p>Due to potential sequencing errors, additionnal UMIs may be detected
 and a correction step is required.</p>
 <p>For each cluster of Off Targets, a similarity matrix between all UMIs
@@ -1834,265 +1698,263 @@ detected is calculated and similar UMI collapsed together if the editing
 distance is smaller than <code>UMI_hamming_distance</code> . The
 Adjacency method described in UMI-tools (<span class="citation">@Smith2017</span>) is used by default (see <a href="https://umi-tools.readthedocs.io/en/latest/the_methods.html" class="uri">https://umi-tools.readthedocs.io/en/latest/the_methods.html</a>
 for details).</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co">################################################</span></span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="co"># post alignment</span></span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="fu">minMAPQ</span><span class="kw">:</span><span class="at"> </span><span class="dv">20</span><span class="co">                      # Min MAPQ score to keep alignments </span></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="fu">UMI_hamming_distance</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span><span class="co">         # min distance to cluster UMI using network-based deduplication, use [0] to keep raw UMIs</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="fu">UMI_deduplication</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Adjacency&quot;</span><span class="co">  # method to correct UMI (cluster or Adjacency)</span></span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="fu">UMI_pattern</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;NNWNNWNN&quot;</span><span class="at">  </span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="fu">UMI_filter</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TRUE&quot;</span><span class="co">              # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]</span></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
-</div>
-<div id="reporting" class="section level3">
-<h3>Reporting</h3>
-<div class="sourceCode" id="cb17"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co">################################################</span></span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="co"># reporting</span></span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="fu">max_clusters</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span><span class="co">                 # max number of cluster alignments to report</span></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="fu">minUMI_alignments_figure</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span><span class="co">       # filter clusters with more than n UMI in the report alignment figure (set to 0 to keep all clusters -&gt; can be slow)</span></span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
-</div>
-<div id="prediction" class="section level3">
-<h3>Prediction</h3>
-<div class="sourceCode" id="cb18"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co"># Prediction</span></span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="co">################################################</span></span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="fu">SWoffFinder</span><span class="kw">:</span></span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="at">  </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/opt/SWOffinder&quot;</span><span class="co"> ## Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)</span></span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="at">  </span><span class="fu">maxE</span><span class="kw">:</span><span class="at"> </span><span class="dv">6</span><span class="co">                 # Max edits allowed (integer).</span></span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="at">  </span><span class="fu">maxM</span><span class="kw">:</span><span class="at"> </span><span class="dv">6</span><span class="co">                 # Max mismatches allowed without bulges (integer).</span></span>
-<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="at">  </span><span class="fu">maxMB</span><span class="kw">:</span><span class="at"> </span><span class="dv">6</span><span class="co">                # Max mismatches allowed with bulges (integer).</span></span>
-<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="at">  </span><span class="fu">maxB</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span><span class="co">                 # Max bulges allowed (integer).</span></span>
-<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a><span class="at">  </span><span class="fu">window_size</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span></span>
-<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
-</div>
-<div id="reads-adapter-odn-trimming-sequences" class="section level3">
-<h3>Reads adapter &amp; ODN trimming sequences</h3>
+<div class="sourceCode" id="cb18"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co">################################################</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="co"># post alignment</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="fu">minMAPQ</span><span class="kw">:</span><span class="at"> </span><span class="dv">20</span><span class="co">                      # Min MAPQ score to keep alignments </span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="fu">UMI_hamming_distance</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span><span class="co">         # min distance to cluster UMI using network-based deduplication, use [0] to keep raw UMIs</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="fu">UMI_deduplication</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Adjacency&quot;</span><span class="co">  # method to correct UMI (cluster or Adjacency)</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="fu">UMI_pattern</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;NNWNNWNN&quot;</span><span class="at">  </span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="fu">UMI_filter</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TRUE&quot;</span><span class="co">              # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
+<p>### Reporting</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co">################################################</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="co"># reporting</span></span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="fu">max_clusters</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span><span class="co">                 # max number of cluster alignments to report</span></span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="fu">minUMI_alignments_figure</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span><span class="co">       # filter clusters with more than n UMI in the report alignment figure (set to 0 to keep all clusters -&gt; can be slow)</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
+<p>### Prediction</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="co"># Prediction</span></span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="co">################################################</span></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="fu">SWoffFinder</span><span class="kw">:</span></span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="at">  </span><span class="fu">path</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;/opt/SWOffinder&quot;</span><span class="co"> ## Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)</span></span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a><span class="fu">maxE</span><span class="kw">:</span><span class="at"> </span><span class="dv">6</span><span class="co">                 # Max edits allowed (integer).</span></span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a><span class="fu">maxM</span><span class="kw">:</span><span class="at"> </span><span class="dv">6</span><span class="co">                 # Max mismatches allowed without bulges (integer).</span></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="fu">maxMB</span><span class="kw">:</span><span class="at"> </span><span class="dv">6</span><span class="co">                # Max mismatches allowed with bulges (integer).</span></span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a><span class="fu">maxB</span><span class="kw">:</span><span class="at"> </span><span class="dv">3</span><span class="co">                 # Max bulges allowed (integer).</span></span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="fu">window_size</span><span class="kw">:</span><span class="at"> </span><span class="dv">100</span></span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
+<p>### Reads adapter &amp; ODN trimming sequences
+{#reads-adapter-odn-trimming-sequences}</p>
 <p>Indicate which sequence will be trimmed from R1 &amp; R2 reads ends
 depending on the PCR orientation and ODN used.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="co">################################################</span></span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="co"># Sequences for the trimming steps</span></span>
-<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="fu">guideseq</span><span class="kw">:</span></span>
-<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a><span class="at">  </span><span class="fu">positive</span><span class="kw">:</span></span>
-<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a><span class="at">    </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;GTTTAATTGAGTTGTCATATGT&quot;</span></span>
-<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;ACATATGACAACTCAATTAAAC&quot;</span></span>
-<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
-<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a><span class="at">  </span><span class="fu">negative</span><span class="kw">:</span></span>
-<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a><span class="at">    </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;ATACCGTTATTAACATATGACAACTCAA&quot;</span></span>
-<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TTGAGTTGTCATATGTTAATAACGGTAT&quot;</span></span>
-<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
-<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a></span>
-<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a></span>
-<span id="cb19-15"><a href="#cb19-15" tabindex="-1"></a></span>
-<span id="cb19-16"><a href="#cb19-16" tabindex="-1"></a><span class="fu">iguideseq</span><span class="kw">:</span></span>
-<span id="cb19-17"><a href="#cb19-17" tabindex="-1"></a><span class="at">  </span><span class="fu">positive</span><span class="kw">:</span></span>
-<span id="cb19-18"><a href="#cb19-18" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;ACATATGACAACTCAATTAAACGCGAGC&quot;</span></span>
-<span id="cb19-19"><a href="#cb19-19" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
-<span id="cb19-20"><a href="#cb19-20" tabindex="-1"></a><span class="at">    </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;GCTCGCGTTTAATTGAGTTGTCATATGT&quot;</span></span>
-<span id="cb19-21"><a href="#cb19-21" tabindex="-1"></a><span class="at">  </span><span class="fu">negative</span><span class="kw">:</span></span>
-<span id="cb19-22"><a href="#cb19-22" tabindex="-1"></a><span class="at">    </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TCGCGTATACCGTTATTAACATATGACAACTCAA&quot;</span></span>
-<span id="cb19-23"><a href="#cb19-23" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TTGAGTTGTCATATGTTAATAACGGTATACGCGA&quot;</span></span>
-<span id="cb19-24"><a href="#cb19-24" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
-<span id="cb19-25"><a href="#cb19-25" tabindex="-1"></a><span class="at">    </span></span>
-<span id="cb19-26"><a href="#cb19-26" tabindex="-1"></a><span class="at">    </span></span>
-<span id="cb19-27"><a href="#cb19-27" tabindex="-1"></a><span class="at">    </span></span>
-<span id="cb19-28"><a href="#cb19-28" tabindex="-1"></a><span class="fu">olitagseq</span><span class="kw">:</span></span>
-<span id="cb19-29"><a href="#cb19-29" tabindex="-1"></a><span class="at">  </span><span class="fu">positive</span><span class="kw">:</span></span>
-<span id="cb19-30"><a href="#cb19-30" tabindex="-1"></a><span class="at">    </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;GGGGTTTAATTGAGTTGTCATATGTT&quot;</span></span>
-<span id="cb19-31"><a href="#cb19-31" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AACATATGACAACTCAATTAAACCCC&quot;</span></span>
-<span id="cb19-32"><a href="#cb19-32" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TCCGCTCCCTCG&quot;</span></span>
-<span id="cb19-33"><a href="#cb19-33" tabindex="-1"></a><span class="at">  </span><span class="fu">negative</span><span class="kw">:</span></span>
-<span id="cb19-34"><a href="#cb19-34" tabindex="-1"></a><span class="at">    </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;CCCATACCGTTATTAACATATGAC&quot;</span></span>
-<span id="cb19-35"><a href="#cb19-35" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;GTCATATGTTAATAACGGTATGGG&quot;</span></span>
-<span id="cb19-36"><a href="#cb19-36" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TCCGCTCCCTCG&quot;</span></span>
-<span id="cb19-37"><a href="#cb19-37" tabindex="-1"></a></span>
-<span id="cb19-38"><a href="#cb19-38" tabindex="-1"></a><span class="fu">tagseq</span><span class="kw">:</span></span>
-<span id="cb19-39"><a href="#cb19-39" tabindex="-1"></a><span class="at">  </span><span class="fu">positive</span><span class="kw">:</span></span>
-<span id="cb19-40"><a href="#cb19-40" tabindex="-1"></a><span class="at">    </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TGCGATAACACGCATTTCGCATAA&quot;</span></span>
-<span id="cb19-41"><a href="#cb19-41" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;CTTATGCGAAATGCGTGTTATCGCA&quot;</span></span>
-<span id="cb19-42"><a href="#cb19-42" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
-<span id="cb19-43"><a href="#cb19-43" tabindex="-1"></a><span class="at">  </span><span class="fu">negative</span><span class="kw">:</span></span>
-<span id="cb19-44"><a href="#cb19-44" tabindex="-1"></a><span class="at">    </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;ATCTCTGAGCCTTATGCGAAATGC&quot;</span></span>
-<span id="cb19-45"><a href="#cb19-45" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;CGCATTTCGCATAAGGCTCAGAGAT&quot;</span></span>
-<span id="cb19-46"><a href="#cb19-46" tabindex="-1"></a><span class="at">    </span><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
-<span id="cb19-47"><a href="#cb19-47" tabindex="-1"></a><span class="at">    </span></span>
-<span id="cb19-48"><a href="#cb19-48" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
-</div>
-</div>
-<div id="folder-structure" class="section level2">
-<h2>Folder structure</h2>
+<div class="sourceCode" id="cb21"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="co">################################################</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="co"># Sequences for the trimming steps</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a><span class="fu">guideseq</span><span class="kw">:</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a><span class="at">  </span><span class="fu">positive</span><span class="kw">:</span></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a><span class="at">  </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;GTTTAATTGAGTTGTCATATGT&quot;</span></span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;ACATATGACAACTCAATTAAAC&quot;</span></span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a><span class="fu">negative</span><span class="kw">:</span></span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a><span class="at">  </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;ATACCGTTATTAACATATGACAACTCAA&quot;</span></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TTGAGTTGTCATATGTTAATAACGGTAT&quot;</span></span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a></span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a><span class="fu">iguideseq</span><span class="kw">:</span></span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a><span class="at">  </span><span class="fu">positive</span><span class="kw">:</span></span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a><span class="at">  </span><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;ACATATGACAACTCAATTAAACGCGAGC&quot;</span></span>
+<span id="cb21-19"><a href="#cb21-19" tabindex="-1"></a><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
+<span id="cb21-20"><a href="#cb21-20" tabindex="-1"></a><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;GCTCGCGTTTAATTGAGTTGTCATATGT&quot;</span></span>
+<span id="cb21-21"><a href="#cb21-21" tabindex="-1"></a><span class="fu">negative</span><span class="kw">:</span></span>
+<span id="cb21-22"><a href="#cb21-22" tabindex="-1"></a><span class="at">  </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TCGCGTATACCGTTATTAACATATGACAACTCAA&quot;</span></span>
+<span id="cb21-23"><a href="#cb21-23" tabindex="-1"></a><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TTGAGTTGTCATATGTTAATAACGGTATACGCGA&quot;</span></span>
+<span id="cb21-24"><a href="#cb21-24" tabindex="-1"></a><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
+<span id="cb21-25"><a href="#cb21-25" tabindex="-1"></a></span>
+<span id="cb21-26"><a href="#cb21-26" tabindex="-1"></a></span>
+<span id="cb21-27"><a href="#cb21-27" tabindex="-1"></a></span>
+<span id="cb21-28"><a href="#cb21-28" tabindex="-1"></a><span class="fu">olitagseq</span><span class="kw">:</span></span>
+<span id="cb21-29"><a href="#cb21-29" tabindex="-1"></a><span class="at">  </span><span class="fu">positive</span><span class="kw">:</span></span>
+<span id="cb21-30"><a href="#cb21-30" tabindex="-1"></a><span class="at">  </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;GGGGTTTAATTGAGTTGTCATATGTT&quot;</span></span>
+<span id="cb21-31"><a href="#cb21-31" tabindex="-1"></a><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AACATATGACAACTCAATTAAACCCC&quot;</span></span>
+<span id="cb21-32"><a href="#cb21-32" tabindex="-1"></a><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TCCGCTCCCTCG&quot;</span></span>
+<span id="cb21-33"><a href="#cb21-33" tabindex="-1"></a><span class="fu">negative</span><span class="kw">:</span></span>
+<span id="cb21-34"><a href="#cb21-34" tabindex="-1"></a><span class="at">  </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;CCCATACCGTTATTAACATATGAC&quot;</span></span>
+<span id="cb21-35"><a href="#cb21-35" tabindex="-1"></a><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;GTCATATGTTAATAACGGTATGGG&quot;</span></span>
+<span id="cb21-36"><a href="#cb21-36" tabindex="-1"></a><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TCCGCTCCCTCG&quot;</span></span>
+<span id="cb21-37"><a href="#cb21-37" tabindex="-1"></a></span>
+<span id="cb21-38"><a href="#cb21-38" tabindex="-1"></a><span class="fu">tagseq</span><span class="kw">:</span></span>
+<span id="cb21-39"><a href="#cb21-39" tabindex="-1"></a><span class="at">  </span><span class="fu">positive</span><span class="kw">:</span></span>
+<span id="cb21-40"><a href="#cb21-40" tabindex="-1"></a><span class="at">  </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;TGCGATAACACGCATTTCGCATAA&quot;</span></span>
+<span id="cb21-41"><a href="#cb21-41" tabindex="-1"></a><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;CTTATGCGAAATGCGTGTTATCGCA&quot;</span></span>
+<span id="cb21-42"><a href="#cb21-42" tabindex="-1"></a><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
+<span id="cb21-43"><a href="#cb21-43" tabindex="-1"></a><span class="fu">negative</span><span class="kw">:</span></span>
+<span id="cb21-44"><a href="#cb21-44" tabindex="-1"></a><span class="at">  </span><span class="fu">R1_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;ATCTCTGAGCCTTATGCGAAATGC&quot;</span></span>
+<span id="cb21-45"><a href="#cb21-45" tabindex="-1"></a><span class="fu">R2_leading</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;CGCATTTCGCATAAGGCTCAGAGAT&quot;</span></span>
+<span id="cb21-46"><a href="#cb21-46" tabindex="-1"></a><span class="fu">R2_trailing</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;AGATCGGAAGAGCGTCGTGT&quot;</span></span>
+<span id="cb21-47"><a href="#cb21-47" tabindex="-1"></a></span>
+<span id="cb21-48"><a href="#cb21-48" tabindex="-1"></a><span class="co">################################################</span></span></code></pre></div>
+<p>## Folder structure</p>
 <p>In order to start a run:</p>
+<pre><code>-   create a new directory in the installation folder and `cd` into.</code></pre>
 <ul>
-<li><p>create a new directory in the installation folder and
-<code>cd</code> into.</p></li>
-<li><p>Then :</p>
-<ul>
-<li><p>add the sample data sheet (<a href="#prepare-samples-data-sheet-sds">Prepare samples data sheet
-(SDS)</a>)</p></li>
-<li><p>add the configuration file (<a href="#prepare-the-configuration-file">Prepare the configuration
-file</a>)</p></li>
-<li><p>add the sequencing
-<code>undeterminded_R1/R2/I1/I2.fastq.gz</code> files (undemultiplexed)
-or symblic link to the raw data.</p></li>
-</ul></li>
+<li>Then :</li>
 </ul>
-<blockquote>
-<p>Input fastq files should respect the following structure from
-original paper :</p>
-<ul>
-<li><p>R1 : contains fragment sequence starting in gDNA</p></li>
-<li><p>R2: Starts with ODN sequence followed by gDNA sequence and
-potential trailing adaptor sequence</p></li>
-<li><p>i1 : Contains barcode 1 (usually 8 nucleotides)</p></li>
-<li><p>i2 : Contains barcode 2 and UMI sequence (usually 8 + 8
-nucleotides)</p></li>
-</ul>
-</blockquote>
-<p>Your folder architecture should look similar to :</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="ex">Path/to/guideseq/</span></span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="ex">├──</span> 00-pipeline/</span>
-<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="ex">├──</span> 01-envs/</span>
-<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="ex">├──</span> 02-resources/</span>
-<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a><span class="ex">├──</span> 03-misc/</span>
-<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a><span class="ex">├──</span> test_dataset/</span>
-<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a><span class="ex">├──</span> My/folder/</span>
-<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>    <span class="ex">├──</span> guideSeq_GNT.yml</span>
-<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>    <span class="ex">├──</span> sampleInfo.csv</span>
-<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>    <span class="ex">├──</span> undertermined_R1.fastq.gz</span>
-<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>    <span class="ex">├──</span> undertermined_R2.fastq.gz</span>
-<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>    <span class="ex">├──</span> undertermined_I1.fastq.gz</span>
-<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a>    <span class="ex">└──</span> undertermined_I2.fastq.gz</span></code></pre></div>
-<p>From inside your analysis folder, run the command below after
-adjusting for number of CPU (-j) :</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">-s</span> ../00-pipeline/guideseq_GNT.smk <span class="dt">\</span></span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>  <span class="at">-j</span> 24 <span class="dt">\</span></span>
-<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>  <span class="at">-k</span> <span class="dt">\</span></span>
-<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>  <span class="at">--use-conda</span> <span class="dt">\ </span></span>
-<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>  <span class="ex">--report-after-run</span> <span class="at">--report</span> runtime_report.html  <span class="dt">\</span></span>
-<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>  <span class="at">-n</span></span>
-<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>    </span>
-<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a><span class="co"># remove the -n argument to start the pipeline</span></span></code></pre></div>
-<p>Each rule takes a maximum of 6 threads (alignment, trimming) to speed
-up the data processing. Set <code>-j</code> as a multiple of 6 to
-process 2 (12threads) , 3 (18 threads) … samples in parallel.</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co">## usefull snakemake arguments </span></span>
-<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="co"># see https://snakemake.readthedocs.io/en/stable/executing/cli.html#all-options</span></span>
-<span id="cb22-3"><a href="#cb22-3" tabindex="-1"></a></span>
-<span id="cb22-4"><a href="#cb22-4" tabindex="-1"></a><span class="ex">--quiet</span></span>
-<span id="cb22-5"><a href="#cb22-5" tabindex="-1"></a><span class="ex">--notemp</span> <span class="co"># keep all intermediate files</span></span>
-<span id="cb22-6"><a href="#cb22-6" tabindex="-1"></a><span class="ex">--rerun-trigger</span> <span class="dt">{code</span><span class="op">,</span><span class="dt">input</span><span class="op">,</span><span class="dt">mtime</span><span class="op">,</span><span class="dt">params</span><span class="op">,</span><span class="dt">software-env}</span> </span>
-<span id="cb22-7"><a href="#cb22-7" tabindex="-1"></a><span class="ex">--rerun-incomplete</span></span>
-<span id="cb22-8"><a href="#cb22-8" tabindex="-1"></a></span>
-<span id="cb22-9"><a href="#cb22-9" tabindex="-1"></a> <span class="ex">--filegraph</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-n</span> <span class="st">&#39;/digraph/,$p&#39;</span> <span class="kw">|</span> <span class="ex">dot</span> <span class="at">-Tpdf</span> <span class="op">&gt;</span> dag_files.pdf <span class="co">#DAG representation of workflow</span></span>
-<span id="cb22-10"><a href="#cb22-10" tabindex="-1"></a> <span class="ex">--rulegraph</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-n</span> <span class="st">&#39;/digraph/,$p&#39;</span> <span class="kw">|</span> <span class="ex">dot</span> <span class="at">-Tpdf</span> <span class="op">&gt;</span> dag_rules.pdf </span></code></pre></div>
-</div>
-</div>
-<div id="output" class="section level1">
-<h1>Output</h1>
-<p>If everything goes well, the pipeline should end successfully :</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode latex"><code class="sourceCode latex"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>Workflow finished, no error</span>
-<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a> _____________</span>
-<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>&lt; You rock baby !! &gt;</span>
-<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a> -------------</span>
-<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>        <span class="fu">\ </span>  ^__^</span>
-<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>         <span class="fu">\ </span> (♥♥)<span class="fu">\_</span>______</span>
-<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>            (__)<span class="fu">\ </span>      )<span class="fu">\/\</span></span>
-<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a>                ||----w |</span>
-<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a>                ||     ||</span></code></pre></div>
-<p>Otherwise, an error will be raised and the origine of the problem
-reported by snakemake:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode latex"><code class="sourceCode latex"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a>&lt; Houston, we have a problem &gt;</span>
-<span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a> ----------------------------</span>
-<span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a>       <span class="fu">\ </span>  <span class="fu">\_</span>______</span>
-<span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a> v__v   <span class="fu">\ </span> <span class="fu">\ </span>  O   )</span>
-<span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a> (xx)      ||----w |</span>
-<span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a> (__)      ||     ||  <span class="fu">\/\</span></span></code></pre></div>
-<p>Upon pipeline completion &amp; if
-<code>&#39;clean_intermediates_files: &#39;FALSE&#39;</code>, your folder should now
-look like (test dataset provided in ./test) :</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode latex"><code class="sourceCode latex"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>my_folder_name/</span>
-<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>├── 00-demultiplexing</span>
-<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>├── 01-trimming</span>
-<span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>├── 02-filtering</span>
-<span id="cb25-5"><a href="#cb25-5" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg_R1.UMI.ODN.trimmed.filtered.fastq.gz</span>
-<span id="cb25-6"><a href="#cb25-6" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg_R2.UMI.ODN.trimmed.filtered.fastq.gz</span>
-<span id="cb25-7"><a href="#cb25-7" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos_R1.UMI.ODN.trimmed.filtered.fastq.gz</span>
-<span id="cb25-8"><a href="#cb25-8" tabindex="-1"></a>│   └── VEGFA_s1_K562_pos_R2.UMI.ODN.trimmed.filtered.fastq.gz</span>
-<span id="cb25-9"><a href="#cb25-9" tabindex="-1"></a>├── 03-align</span>
-<span id="cb25-10"><a href="#cb25-10" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg_R1.UMI.ODN.trimmed.unmapped.fastq.gz</span>
-<span id="cb25-11"><a href="#cb25-11" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam</span>
-<span id="cb25-12"><a href="#cb25-12" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam.bai</span>
-<span id="cb25-13"><a href="#cb25-13" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg_R2.UMI.ODN.trimmed.unmapped.fastq.gz</span>
-<span id="cb25-14"><a href="#cb25-14" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.UMI.ODN.trimmed.filtered.sorted.filtered.bam</span>
-<span id="cb25-15"><a href="#cb25-15" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.UMI.ODN.trimmed.filtered.sorted.filtered.bam.bai</span>
-<span id="cb25-16"><a href="#cb25-16" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos_R1.UMI.ODN.trimmed.unmapped.fastq.gz</span>
-<span id="cb25-17"><a href="#cb25-17" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam</span>
-<span id="cb25-18"><a href="#cb25-18" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam.bai</span>
-<span id="cb25-19"><a href="#cb25-19" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos_R2.UMI.ODN.trimmed.unmapped.fastq.gz</span>
-<span id="cb25-20"><a href="#cb25-20" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos.UMI.ODN.trimmed.filtered.sorted.filtered.bam</span>
-<span id="cb25-21"><a href="#cb25-21" tabindex="-1"></a>│   └── VEGFA_s1_K562_pos.UMI.ODN.trimmed.filtered.sorted.filtered.bam.bai</span>
-<span id="cb25-22"><a href="#cb25-22" tabindex="-1"></a>├── 04-IScalling</span>
-<span id="cb25-23"><a href="#cb25-23" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.cluster_slop.bed</span>
-<span id="cb25-24"><a href="#cb25-24" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.cluster_slop.fa</span>
-<span id="cb25-25"><a href="#cb25-25" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg_R2rescued.reads_per_UMI_per_IS.bed</span>
-<span id="cb25-26"><a href="#cb25-26" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.reads_per_UMI_per_IS.bed</span>
-<span id="cb25-27"><a href="#cb25-27" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.reads_per_UMI_per_IS_corrected.bed</span>
-<span id="cb25-28"><a href="#cb25-28" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.UMIs_per_IS_in_Cluster.bed</span>
-<span id="cb25-29"><a href="#cb25-29" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos.cluster_slop.bed</span>
-<span id="cb25-30"><a href="#cb25-30" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos.cluster_slop.fa</span>
-<span id="cb25-31"><a href="#cb25-31" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos_R2rescued.reads_per_UMI_per_IS.bed</span>
-<span id="cb25-32"><a href="#cb25-32" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos.reads_per_UMI_per_IS.bed</span>
-<span id="cb25-33"><a href="#cb25-33" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos.reads_per_UMI_per_IS_corrected.bed</span>
-<span id="cb25-34"><a href="#cb25-34" tabindex="-1"></a>│   └── VEGFA_s1_K562_pos.UMIs_per_IS_in_Cluster.bed</span>
-<span id="cb25-35"><a href="#cb25-35" tabindex="-1"></a>├── 05-Report</span>
-<span id="cb25-36"><a href="#cb25-36" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.rdata</span>
-<span id="cb25-37"><a href="#cb25-37" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.stat</span>
-<span id="cb25-38"><a href="#cb25-38" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos.rdata</span>
-<span id="cb25-39"><a href="#cb25-39" tabindex="-1"></a>│   └── VEGFA_s1_K562_pos.stat</span>
-<span id="cb25-40"><a href="#cb25-40" tabindex="-1"></a>├── 06-offPredict</span>
-<span id="cb25-41"><a href="#cb25-41" tabindex="-1"></a>│   └── GRCh38_GGGTGGGGGGAGTTTGCTCC_NGG_3.csv</span>
-<span id="cb25-42"><a href="#cb25-42" tabindex="-1"></a>├── guideSeq_GNT.yml</span>
-<span id="cb25-43"><a href="#cb25-43" tabindex="-1"></a>├── logs</span>
-<span id="cb25-44"><a href="#cb25-44" tabindex="-1"></a>│   ├── demultiplexing_R1.log</span>
-<span id="cb25-45"><a href="#cb25-45" tabindex="-1"></a>│   ├── demultiplexing_R2.log</span>
-<span id="cb25-46"><a href="#cb25-46" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.filter.log</span>
-<span id="cb25-47"><a href="#cb25-47" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.odn.log</span>
-<span id="cb25-48"><a href="#cb25-48" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg_R2rescued.UMI.ODN.trimmed.filtered.align.log</span>
-<span id="cb25-49"><a href="#cb25-49" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.trailing.log</span>
-<span id="cb25-50"><a href="#cb25-50" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.UMI.log</span>
-<span id="cb25-51"><a href="#cb25-51" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg.UMI.ODN.trimmed.filtered.align.log</span>
-<span id="cb25-52"><a href="#cb25-52" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos.filter.log</span>
-<span id="cb25-53"><a href="#cb25-53" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos.odn.log</span>
-<span id="cb25-54"><a href="#cb25-54" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos_R2rescued.UMI.ODN.trimmed.filtered.align.log</span>
-<span id="cb25-55"><a href="#cb25-55" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos.trailing.log</span>
-<span id="cb25-56"><a href="#cb25-56" tabindex="-1"></a>│   ├── VEGFA_s1_K562_pos.UMI.log</span>
-<span id="cb25-57"><a href="#cb25-57" tabindex="-1"></a>│   └── VEGFA_s1_K562_pos.UMI.ODN.trimmed.filtered.align.log</span>
-<span id="cb25-58"><a href="#cb25-58" tabindex="-1"></a>├── results</span>
-<span id="cb25-59"><a href="#cb25-59" tabindex="-1"></a>│   ├── report-files</span>
-<span id="cb25-60"><a href="#cb25-60" tabindex="-1"></a>│   │   ├── VEGFA_s1_K562_neg_offtargets_dynamic_files</span>
-<span id="cb25-61"><a href="#cb25-61" tabindex="-1"></a>│   │   │   ├── .... truncated</span>
-<span id="cb25-62"><a href="#cb25-62" tabindex="-1"></a>│   │   ├── VEGFA_s1_K562_neg_offtargets_dynamic.html</span>
-<span id="cb25-63"><a href="#cb25-63" tabindex="-1"></a>│   │   ├── VEGFA_s1_K562_neg_offtargets.html</span>
-<span id="cb25-64"><a href="#cb25-64" tabindex="-1"></a>│   │   ├── VEGFA_s1_K562_pos_offtargets_dynamic_files</span>
-<span id="cb25-65"><a href="#cb25-65" tabindex="-1"></a>│   │   │   ├── .... truncated</span>
-<span id="cb25-66"><a href="#cb25-66" tabindex="-1"></a>│   │   ├── VEGFA_s1_K562_pos_offtargets_dynamic.html</span>
-<span id="cb25-67"><a href="#cb25-67" tabindex="-1"></a>│   │   └── VEGFA_s1_K562_pos_offtargets.html</span>
-<span id="cb25-68"><a href="#cb25-68" tabindex="-1"></a>│   ├── report.rdata</span>
-<span id="cb25-69"><a href="#cb25-69" tabindex="-1"></a>│   ├── test_report.html</span>
-<span id="cb25-70"><a href="#cb25-70" tabindex="-1"></a>│   ├── VEGFA_s1_K562_neg_summary.xlsx</span>
-<span id="cb25-71"><a href="#cb25-71" tabindex="-1"></a>│   └── VEGFA_s1_K562_pos_summary.xlsx</span>
-<span id="cb25-72"><a href="#cb25-72" tabindex="-1"></a>├── sampleInfo.csv</span>
-<span id="cb25-73"><a href="#cb25-73" tabindex="-1"></a>├── test_datasheet.csv</span>
-<span id="cb25-74"><a href="#cb25-74" tabindex="-1"></a>└── test_datasheet.xlsx</span></code></pre></div>
-<div id="report" class="section level2">
-<h2>Report</h2>
+<pre><code>-   add the sample data sheet ([Prepare samples data sheet (SDS)](#prepare-samples-data-sheet-sds))
+  
+  -   add the configuration file ([Prepare the configuration file])
+  
+  -   add the sequencing `undeterminded_R1/R2/I1/I2.fastq.gz` files (undemultiplexed) or symblic link to the raw data.
+  
+  &gt; Input fastq files should respect the following structure from original paper :
+    &gt;
+    &gt; -   R1 : contains fragment sequence starting in gDNA
+  &gt;
+    &gt; -   R2: Starts with ODN sequence followed by gDNA sequence and potential trailing adaptor sequence
+  &gt;
+    &gt; -   i1 : Contains barcode 1 (usually 8 nucleotides)
+  &gt;
+    &gt; -   i2 : Contains barcode 2 and UMI sequence (usually 8 + 8 nucleotides)
+  
+  Your folder architecture should look similar to :
+    
+    ``` bash
+  Path/to/guideseq/
+    ├── 00-pipeline/
+    ├── 01-envs/
+    ├── 02-resources/
+    ├── 03-misc/
+    ├── test_dataset/
+    ├── My/folder/
+    ├── guideSeq_GNT.yml
+  ├── sampleInfo.csv
+  ├── undertermined_R1.fastq.gz
+  ├── undertermined_R2.fastq.gz
+  ├── undertermined_I1.fastq.gz
+  └── undertermined_I2.fastq.gz
+  ```
+  
+  From inside your analysis folder, run the command below after adjusting for number of CPU (-j) :
+    
+    ``` bash
+  snakemake -s ../00-pipeline/guideseq_GNT.smk \
+  -j 24 \
+  -k \
+  --use-conda \ 
+  --report-after-run --report runtime_report.html  \
+  -n
+  
+  # remove the -n argument to start the pipeline
+  ```
+  
+  Each rule takes a maximum of 6 threads (alignment, trimming) to speed up the data processing. Set `-j` as a multiple of 6 to process 2 (12threads) , 3 (18 threads) ... samples in parallel.
+  
+  ``` bash
+  ## usefull snakemake arguments 
+  # see https://snakemake.readthedocs.io/en/stable/executing/cli.html#all-options
+  
+  --quiet
+  --notemp # keep all intermediate files
+  --rerun-trigger {code,input,mtime,params,software-env} 
+  --rerun-incomplete
+  
+  --filegraph | sed -n &#39;/digraph/,$p&#39; | dot -Tpdf &gt; dag_files.pdf #DAG representation of workflow
+  --rulegraph | sed -n &#39;/digraph/,$p&#39; | dot -Tpdf &gt; dag_rules.pdf 
+  ```
+  
+  # Output
+  
+  If everything goes well, the pipeline should end successfully :
+    
+    ``` latex
+  Workflow finished, no error
+  _____________
+  &lt; You rock baby !! &gt;
+    -------------
+    \   ^__^
+    \  (♥♥)\_______
+  (__)\       )\/\
+  ||----w |
+    ||     ||
+    ```
+  
+  Otherwise, an error will be raised and the origine of the problem reported by snakemake:
+    
+    ``` latex
+  &lt; Houston, we have a problem &gt;
+    ----------------------------
+    \   \_______
+  v__v   \  \   O   )</code></pre>
+<ol start="20" style="list-style-type: lower-roman">
+<li><pre><code> ||----w |
+(__)      ||     ||  \/\</code></pre></li>
+</ol>
+<pre><code>
+Upon pipeline completion &amp; if `&#39;clean_intermediates_files: &#39;FALSE&#39;`, your folder should now look like (test dataset provided in ./test) :
+  
+  ``` latex
+my_folder_name/
+  ├── 00-demultiplexing
+├── 01-trimming
+├── 02-filtering
+│   ├── VEGFA_s1_K562_neg_R1.UMI.ODN.trimmed.filtered.fastq.gz
+│   ├── VEGFA_s1_K562_neg_R2.UMI.ODN.trimmed.filtered.fastq.gz
+│   ├── VEGFA_s1_K562_pos_R1.UMI.ODN.trimmed.filtered.fastq.gz
+│   └── VEGFA_s1_K562_pos_R2.UMI.ODN.trimmed.filtered.fastq.gz
+├── 03-align
+│   ├── VEGFA_s1_K562_neg_R1.UMI.ODN.trimmed.unmapped.fastq.gz
+│   ├── VEGFA_s1_K562_neg_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+│   ├── VEGFA_s1_K562_neg_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam.bai
+│   ├── VEGFA_s1_K562_neg_R2.UMI.ODN.trimmed.unmapped.fastq.gz
+│   ├── VEGFA_s1_K562_neg.UMI.ODN.trimmed.filtered.sorted.filtered.bam
+│   ├── VEGFA_s1_K562_neg.UMI.ODN.trimmed.filtered.sorted.filtered.bam.bai
+│   ├── VEGFA_s1_K562_pos_R1.UMI.ODN.trimmed.unmapped.fastq.gz
+│   ├── VEGFA_s1_K562_pos_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+│   ├── VEGFA_s1_K562_pos_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam.bai
+│   ├── VEGFA_s1_K562_pos_R2.UMI.ODN.trimmed.unmapped.fastq.gz
+│   ├── VEGFA_s1_K562_pos.UMI.ODN.trimmed.filtered.sorted.filtered.bam
+│   └── VEGFA_s1_K562_pos.UMI.ODN.trimmed.filtered.sorted.filtered.bam.bai
+├── 04-IScalling
+│   ├── VEGFA_s1_K562_neg.cluster_slop.bed
+│   ├── VEGFA_s1_K562_neg.cluster_slop.fa
+│   ├── VEGFA_s1_K562_neg_R2rescued.reads_per_UMI_per_IS.bed
+│   ├── VEGFA_s1_K562_neg.reads_per_UMI_per_IS.bed
+│   ├── VEGFA_s1_K562_neg.reads_per_UMI_per_IS_corrected.bed
+│   ├── VEGFA_s1_K562_neg.UMIs_per_IS_in_Cluster.bed
+│   ├── VEGFA_s1_K562_pos.cluster_slop.bed
+│   ├── VEGFA_s1_K562_pos.cluster_slop.fa
+│   ├── VEGFA_s1_K562_pos_R2rescued.reads_per_UMI_per_IS.bed
+│   ├── VEGFA_s1_K562_pos.reads_per_UMI_per_IS.bed
+│   ├── VEGFA_s1_K562_pos.reads_per_UMI_per_IS_corrected.bed
+│   └── VEGFA_s1_K562_pos.UMIs_per_IS_in_Cluster.bed
+├── 05-Report
+│   ├── VEGFA_s1_K562_neg.rdata
+│   ├── VEGFA_s1_K562_neg.stat
+│   ├── VEGFA_s1_K562_pos.rdata
+│   └── VEGFA_s1_K562_pos.stat
+├── 06-offPredict
+│   └── GRCh38_GGGTGGGGGGAGTTTGCTCC_NGG_3.csv
+├── guideSeq_GNT.yml
+├── logs
+│   ├── demultiplexing_R1.log
+│   ├── demultiplexing_R2.log
+│   ├── VEGFA_s1_K562_neg.filter.log
+│   ├── VEGFA_s1_K562_neg.odn.log
+│   ├── VEGFA_s1_K562_neg_R2rescued.UMI.ODN.trimmed.filtered.align.log
+│   ├── VEGFA_s1_K562_neg.trailing.log
+│   ├── VEGFA_s1_K562_neg.UMI.log
+│   ├── VEGFA_s1_K562_neg.UMI.ODN.trimmed.filtered.align.log
+│   ├── VEGFA_s1_K562_pos.filter.log
+│   ├── VEGFA_s1_K562_pos.odn.log
+│   ├── VEGFA_s1_K562_pos_R2rescued.UMI.ODN.trimmed.filtered.align.log
+│   ├── VEGFA_s1_K562_pos.trailing.log
+│   ├── VEGFA_s1_K562_pos.UMI.log
+│   └── VEGFA_s1_K562_pos.UMI.ODN.trimmed.filtered.align.log
+├── results
+│   ├── report-files
+│   │   ├── VEGFA_s1_K562_neg_offtargets_dynamic_files
+│   │   │   ├── .... truncated
+│   │   ├── VEGFA_s1_K562_neg_offtargets_dynamic.html
+│   │   ├── VEGFA_s1_K562_neg_offtargets.html
+│   │   ├── VEGFA_s1_K562_pos_offtargets_dynamic_files
+│   │   │   ├── .... truncated
+│   │   ├── VEGFA_s1_K562_pos_offtargets_dynamic.html
+│   │   └── VEGFA_s1_K562_pos_offtargets.html
+│   ├── report.rdata
+│   ├── test_report.html
+│   ├── VEGFA_s1_K562_neg_summary.xlsx
+│   └── VEGFA_s1_K562_pos_summary.xlsx
+├── sampleInfo.csv
+├── test_datasheet.csv
+└── test_datasheet.xlsx</code></pre>
+<p>## Report</p>
 <p>A general report is generated. It summarizes all main QC and key
 features obtained from the run using graphical representations and
 tables.</p>
 <p>An example is available in the <code>./test_dataset/results</code>
 folder.</p>
-</div>
-<div id="off-targets-files" class="section level2">
-<h2>Off-targets files</h2>
+<p>## Off-targets files</p>
 <p>For each sample, an Excel file containing all the OT information is
 created. This file includes numerous columns, some of which are
 particularly noteworthy. It lists all detected positions, even those
@@ -2103,288 +1965,65 @@ oncogenes if they are defined in the configuration file. For OT sites
 with gRNA matches, a summary of indel and mismatch positions is also
 provided.</p>
 <p>Here is the data formatted into a markdown table:</p>
-<table>
-<colgroup>
-<col width="33%" />
-<col width="33%" />
-<col width="33%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Index</th>
-<th>Header value</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>Chromosome</td>
-<td>Chromosome ID where cluster is located</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>Start_cluster</td>
-<td>Genomic coordinates of the cluster</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>end_cluster</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>4</td>
-<td>ClusterID</td>
-<td>ID of cluster</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>MedianMAPQ_cluster</td>
-<td>Median of MAPQ score for alignments in the cluster [0, 42]</td>
-</tr>
-<tr class="even">
-<td>6</td>
-<td>N_IS_cluster</td>
-<td>Number of unique cut positions in the cluster [1, +inf]</td>
-</tr>
-<tr class="odd">
-<td>7</td>
-<td>N_orientations_cluster</td>
-<td>Number of ODN integration orientation in the cluster [1, 2]</td>
-</tr>
-<tr class="even">
-<td>8</td>
-<td>N_orientation_PCR</td>
-<td>Number of PCR orientation detected in the cluster [1, 2]</td>
-</tr>
-<tr class="odd">
-<td>9</td>
-<td>N_UMI_cluster</td>
-<td>Sum of UMIs for all sites in the cluster [1, +inf]</td>
-</tr>
-<tr class="even">
-<td>10</td>
-<td>N_reads_cluster</td>
-<td>Sum of reads for all sites in the cluster [1, +Inf]</td>
-</tr>
-<tr class="odd">
-<td>11 - 20</td>
-<td></td>
-<td>Same as 5-10, broken down by PCR orientation</td>
-</tr>
-<tr class="even">
-<td>21</td>
-<td>Sequence_window</td>
-<td>Nucleotide sequence of the cluster</td>
-</tr>
-<tr class="odd">
-<td>22</td>
-<td>grna_orientation</td>
-<td>Strand the gRNA sequence is matched [Watson, crick]</td>
-</tr>
-<tr class="even">
-<td>23</td>
-<td>Seq_gDNA</td>
-<td>Sequence of the gDNA matching the gRNA</td>
-</tr>
-<tr class="odd">
-<td>24</td>
-<td>Seq_gRNA</td>
-<td>Sequence of the gRNA</td>
-</tr>
-<tr class="even">
-<td>25</td>
-<td>Alignment</td>
-<td>Pairwise alignment representation between gRNA and gDNA</td>
-</tr>
-<tr class="odd">
-<td>26-27</td>
-<td>Gibbs hybridization</td>
-<td>Efficacy and dG_0</td>
-</tr>
-<tr class="even">
-<td>28</td>
-<td>GC_content</td>
-<td>GC% of the gDNA sequence matched</td>
-</tr>
-<tr class="odd">
-<td>29</td>
-<td>Alignment_score</td>
-<td>Alignment score for pairwise alignment of gRNA &amp; gDNA</td>
-</tr>
-<tr class="even">
-<td>30</td>
-<td>Identity_pct</td>
-<td>% identity between gRNA &amp; gDNA sequences</td>
-</tr>
-<tr class="odd">
-<td>31</td>
-<td>N_edits</td>
-<td>Total number of Edit in the alignment (mismatches + indels)</td>
-</tr>
-<tr class="even">
-<td>32</td>
-<td>mismatches_position_gRNA</td>
-<td>Position of mismatches in the gRNA</td>
-</tr>
-<tr class="odd">
-<td>33</td>
-<td>-</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>34</td>
-<td>N_indels</td>
-<td>Number of indels in the pairwise alignment</td>
-</tr>
-<tr class="odd">
-<td>35</td>
-<td>Insertion_length</td>
-<td>Total length of insertions in the pairwise alignment</td>
-</tr>
-<tr class="even">
-<td>36</td>
-<td>Start_insertion</td>
-<td>Start, end and width of each insertion in the pairwise
-alignment</td>
-</tr>
-<tr class="odd">
-<td>37</td>
-<td>End_insertion</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>38</td>
-<td>Width_insertion</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>39 - 43</td>
-<td></td>
-<td>Start, end and width of each deletion in the pairwise alignment</td>
-</tr>
-<tr class="even">
-<td>44</td>
-<td>Pam_gDNA</td>
-<td>PAM sequence identified in gDNA</td>
-</tr>
-<tr class="odd">
-<td>45</td>
-<td>Pam_gRNA</td>
-<td>Theoretical PAM sequence (sample datasheet)</td>
-</tr>
-<tr class="even">
-<td>46</td>
-<td>Pam_side</td>
-<td>Which side is the PAM located (sample datasheet) [5, 3]</td>
-</tr>
-<tr class="odd">
-<td>47</td>
-<td>PAM_indel_count</td>
-<td>Number of indels in the PAM sequence</td>
-</tr>
-<tr class="even">
-<td>48</td>
-<td>PAM_indel_pos</td>
-<td>Position of indels in the PAM sequence</td>
-</tr>
-<tr class="odd">
-<td>49</td>
-<td>Cut_gRNA_alignment</td>
-<td>Theoretical cut site from pairwise alignment and offset (sample
-datasheet)</td>
-</tr>
-<tr class="even">
-<td>50</td>
-<td>Start_IS</td>
-<td>Genomic Position, abundance and relative abundance of the most
-abundant cut site in the cluster</td>
-</tr>
-<tr class="odd">
-<td>51</td>
-<td>Count_UMI</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>52</td>
-<td>UMI_proportion</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>53</td>
-<td>Cut_modal_position</td>
-<td>Cut site with the higher UMI counts in the cluster</td>
-</tr>
-<tr class="even">
-<td>54</td>
-<td>gRNA</td>
-<td>gRNA sequence (sample datasheet)</td>
-</tr>
-<tr class="odd">
-<td>55</td>
-<td>gRNA_name</td>
-<td>gRNA name (sample datasheet)</td>
-</tr>
-<tr class="even">
-<td>56</td>
-<td>Gene_ensemblID</td>
-<td>Gene ID, symbol, type and position (Intron, Exon) for intragenic cut
-sites</td>
-</tr>
-<tr class="odd">
-<td>57</td>
-<td>Symbol</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>58</td>
-<td>Gene_type</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>59</td>
-<td>Position</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>60</td>
-<td>Onco_annotation</td>
-<td>Annotation with user defined oncogene</td>
-</tr>
-<tr class="odd">
-<td>61</td>
-<td>Best</td>
-<td>Is cluster the best candidate relative to number of edits</td>
-</tr>
-<tr class="even">
-<td>62</td>
-<td>Relative_abundance</td>
-<td>Relative abundance of cluster among all clusters</td>
-</tr>
-<tr class="odd">
-<td>63</td>
-<td>Rank</td>
-<td>Rank of cluster (by decreasing relative abundance)</td>
-</tr>
-<tr class="even">
-<td>64</td>
-<td>Predicted</td>
-<td>Was position predicted?</td>
-</tr>
-<tr class="odd">
-<td>65</td>
-<td>bulge</td>
-<td>If indels are present, do they form gRNA or gDNA bulge, or both</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div id="pipeline-step-by-step-explanations" class="section level1">
-<h1>Pipeline step-by-step explanations</h1>
-<div id="demultiplexing" class="section level2">
-<h2>Demultiplexing</h2>
-<p><strong>Tool</strong> : cutadapt</p>
+<pre><code>| Index | Header value | Description |
+|------------------------|------------------------|------------------------|
+| 1 | Chromosome | Chromosome ID where cluster is located |
+| 2 | Start_cluster | Genomic coordinates of the cluster |
+| 3 | end_cluster |  |
+| 4 | ClusterID | ID of cluster |
+| 5 | MedianMAPQ_cluster | Median of MAPQ score for alignments in the cluster [0, 42] |
+| 6 | N_IS_cluster | Number of unique cut positions in the cluster [1, +inf] |
+| 7 | N_orientations_cluster | Number of ODN integration orientation in the cluster [1, 2] |
+| 8 | N_orientation_PCR | Number of PCR orientation detected in the cluster [1, 2] |
+| 9 | N_UMI_cluster | Sum of UMIs for all sites in the cluster [1, +inf] |
+| 10 | N_reads_cluster | Sum of reads for all sites in the cluster [1, +Inf] |
+| 11 - 20 |  | Same as 5-10, broken down by PCR orientation |
+| 21 | Sequence_window | Nucleotide sequence of the cluster |
+| 22 | grna_orientation | Strand the gRNA sequence is matched [Watson, crick] |
+| 23 | Seq_gDNA | Sequence of the gDNA matching the gRNA |
+| 24 | Seq_gRNA | Sequence of the gRNA |
+| 25 | Alignment | Pairwise alignment representation between gRNA and gDNA |
+| 26-27 | Gibbs hybridization | Efficacy and dG_0 |
+| 28 | GC_content | GC% of the gDNA sequence matched |
+| 29 | Alignment_score | Alignment score for pairwise alignment of gRNA &amp; gDNA |
+| 30 | Identity_pct | \% identity between gRNA &amp; gDNA sequences |
+| 31 | N_edits | Total number of Edit in the alignment (mismatches + indels) |
+| 32 | mismatches_position_gRNA | Position of mismatches in the gRNA |
+| 33 | \- |  |
+| 34 | N_indels | Number of indels in the pairwise alignment |
+| 35 | Insertion_length | Total length of insertions in the pairwise alignment |
+| 36 | Start_insertion | Start, end and width of each insertion in the pairwise alignment |
+| 37 | End_insertion |  |
+| 38 | Width_insertion |  |
+| 39 - 43 |  | Start, end and width of each deletion in the pairwise alignment |
+| 44 | Pam_gDNA | PAM sequence identified in gDNA |
+| 45 | Pam_gRNA | Theoretical PAM sequence (sample datasheet) |
+| 46 | Pam_side | Which side is the PAM located (sample datasheet) [5, 3] |
+| 47 | PAM_indel_count | Number of indels in the PAM sequence |
+| 48 | PAM_indel_pos | Position of indels in the PAM sequence |
+| 49 | Cut_gRNA_alignment | Theoretical cut site from pairwise alignment and offset (sample datasheet) |
+| 50 | Start_IS | Genomic Position, abundance and relative abundance of the most abundant cut site in the cluster |
+| 51 | Count_UMI |  |
+| 52 | UMI_proportion |  |
+| 53 | Cut_modal_position | Cut site with the higher UMI counts in the cluster |
+| 54 | gRNA | gRNA sequence (sample datasheet) |
+| 55 | gRNA_name | gRNA name (sample datasheet) |
+| 56 | Gene_ensemblID | Gene ID, symbol, type and position (Intron, Exon) for intragenic cut sites |
+| 57 | Symbol |  |
+| 58 | Gene_type |  |
+| 59 | Position |  |
+| 60 | Onco_annotation | Annotation with user defined oncogene |
+| 61 | Best | Is cluster the best candidate relative to number of edits |
+| 62 | Relative_abundance | Relative abundance of cluster among all clusters |
+| 63 | Rank | Rank of cluster (by decreasing relative abundance) |
+| 64 | Predicted | Was position predicted? |
+| 65 | bulge | If indels are present, do they form gRNA or gDNA bulge, or both |
+
+# Pipeline step-by-step explanations
+
+## Demultiplexing
+
+**Tool** : cutadapt</code></pre>
 <p>Undetermined fastq files are demultiplexed to <code>sampleName</code>
 fastq files according to barcodes present in the sample data sheet.</p>
 <ul>
@@ -2393,9 +2032,7 @@ fastq files according to barcodes present in the sample data sheet.</p>
 <li><p>R1 and R2 fastq are demultiplexed according to i1+i2 sequence
 present in i3 fastq files.</p></li>
 </ul>
-</div>
-<div id="odn-trimming" class="section level2">
-<h2>ODN trimming:</h2>
+<p>## ODN trimming:</p>
 <p><strong>Tool</strong> : cutadapt</p>
 <p>The leading ODN sequence is remove from R2 reads according to the
 <code>method</code> defined in the sample data sheet for each
@@ -2404,24 +2041,22 @@ sample.</p>
 discarded.</p>
 <p>PCR orientation is automatically detected and added to read name for
 future processing:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="at">@M02111:194:000000000-LT722:1:1101:15810:6788_positive</span></span></code></pre></div>
-</div>
-<div id="umi-extraction" class="section level2">
-<h2>UMI extraction</h2>
+<pre><code>``` yaml</code></pre>
+<p><span class="citation">@M02111:194:000000000-LT722:1:1101:15810:6788_positive</span>
+```</p>
+<p>## UMI extraction</p>
 <p><strong>Tool</strong> : cutadapt</p>
 <p>UMI is extracted from the I3 read generate before based on UMI
 pattern length defined in the configuration file.</p>
 <p>UMI is added to reads name:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="at">@M02111:194:000000000-LT722:1:1101:15810:6788_positive_GCTGTAGG</span></span></code></pre></div>
-</div>
-<div id="adaptor-trimming" class="section level2">
-<h2>Adaptor trimming:</h2>
+<pre><code>``` yaml</code></pre>
+<p><span class="citation">@M02111:194:000000000-LT722:1:1101:15810:6788_positive_GCTGTAGG</span>
+```</p>
+<p>## Adaptor trimming:</p>
 <p><strong>Tool</strong> : cutadapt</p>
 <p>The adaptor trailing sequences are trimmed from R1 and R2 reads
 respectively if present.</p>
-</div>
-<div id="read-filtering" class="section level2">
-<h2>Read filtering:</h2>
+<p>## Read filtering:</p>
 <p><strong>Tool</strong> : cutadapt</p>
 <p>After trimming, only read pairs with <strong>both</strong> mates
 longer than a <code>minLength</code> defined in the configuration file
@@ -2429,9 +2064,7 @@ are selected for alignment.</p>
 <p>If the <code>rescue_R2</code> variable is set to <code>TRUE</code>,
 then R2 reads that are longer that <code>minLength</code> is a
 discrarded pair are rescued and processed as single-end reads.</p>
-</div>
-<div id="genome-alignment" class="section level2">
-<h2>Genome alignment:</h2>
+<p>## Genome alignment:</p>
 <p><strong>Tools</strong>: Bowtie2</p>
 <p>Reference sequences are specified in the configuration file. Genome
 index is build if it does not already exist.</p>
@@ -2439,8 +2072,7 @@ index is build if it does not already exist.</p>
 on the <code>reference genome</code> specified in the sample data sheet
 for each sample using the <code>aligner</code> specified in
 configuration file.</p>
-<div id="multi-hits-management" class="section level3">
-<h3>Multi-hits management:</h3>
+<p>### Multi-hits management:</p>
 <p>Multihits are reads with multiple possible equally good alignment
 positions in the genome. We choose to keep only a single random
 alignment for each read instead of reporting all possible positions.</p>
@@ -2449,40 +2081,29 @@ Alignment score (AS tag) is equal to the score of the second best
 alignment score (XS tag) .</p>
 <p>On the long run, if multi read arise from the same cuting site, they
 will distribute randomly to all sites (explain more).</p>
-</div>
-</div>
-<div id="cutting-site-calling" class="section level2">
-<h2>Cutting site calling:</h2>
+<p>## Cutting site calling:</p>
 <p><strong>Tool</strong> : bedtools and awk</p>
 <p>Following alignment on the reference genome, nuclease cutting sites
 are extracted from the start position of R2 read alignment.</p>
 <p>Reads that align at the same cutting site with the same UMI are
 aggregated together keeping track of total reads count.</p>
-</div>
-<div id="umi-correction-1" class="section level2">
-<h2>UMI correction:</h2>
+<p>## UMI correction:</p>
 <p><strong>Tool</strong> : R script</p>
 <p>UMI sequences are corrected for potential sequencing error. UMI with
 less than n edits (hamming distance defined in the configuration file)
 are clustered together.</p>
-</div>
-<div id="cut-site-clustering" class="section level2">
-<h2>Cut site clustering:</h2>
+<p>## Cut site clustering:</p>
 <p><strong>Tool</strong>: bedtools</p>
 <p>Cut sites than fall in the same window of <code>ISbinWindow</code>
 defined in the configuration file are clustered together.</p>
-</div>
-<div id="grna-match" class="section level2">
-<h2>gRNA match:</h2>
+<p>## gRNA match:</p>
 <p><strong>Tool</strong>: R script</p>
 <p>For each cluster of cutting sites, the gRNA sequence defined in the
 sample data sheet for each sample is looked up in a window of +/-
 <code>slopSize</code> bp using the Swith-Watterman algorithm.</p>
 <p>Gap tolerance can be accepted to detect bulges in gDNA or gRNA if the
 <code>tolerate_bulges</code> variable is set.</p>
-</div>
-<div id="annotation-of-clusters" class="section level2">
-<h2>Annotation of clusters:</h2>
+<p>## Annotation of clusters:</p>
 <p><strong>Tool</strong> : R script</p>
 <p>Clusters of cutting sites are annotated using the gtf file specified
 in the configuration file for each organism.</p>
@@ -2491,30 +2112,19 @@ exons features.</p>
 <p>A second step annotate clusters to gene and position relative to
 those genes (exon/intron). Multiple annotations may be present for each
 cluster and are all reported.</p>
-</div>
-<div id="off-target-prediction" class="section level2">
-<h2>Off target prediction:</h2>
+<p>## Off target prediction:</p>
 <p><strong>Tool</strong> : SWOffinder</p>
 <p>For each gRNA sequence, PAM sequence and each organism specified in
 the sample data sheet, a prediction of OTS is realized using the
 SWOffinder tool with edits and mismatches tolerance defined in the
 configuration file.</p>
-</div>
-<div id="reporting-1" class="section level2">
-<h2>Reporting:</h2>
+<p>## Reporting:</p>
 <p>A report is generated with main tables and graphical representations
 to better understand pipeline results.</p>
-</div>
-</div>
-<div id="troubleshooting" class="section level1">
-<h1>Troubleshooting</h1>
+<p># Troubleshooting</p>
 <p>Potential issues :</p>
-<p>Write permissions : in case of error, check that the user has
-read/write permission to the different reference/annotation files and
-working directory</p>
-</div>
-<div id="references" class="section level1">
-<h1>References</h1>
+<pre><code>Write permissions : in case of error, check that the user has read/write permission to the different reference/annotation files and working directory</code></pre>
+<p># References</p>
 </div>
 </div>
 

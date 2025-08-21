@@ -14,4 +14,4 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 -   No Warranty: The Software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the Software or the use or other dealings in the Software.
 
-For commercial use or patenting, please contact the authors at [gcorre\@genethon.fr](mailto:gcorre@genethon.fr){.email}.
+For commercial use or patenting, please contact the authors at [gcorre\@genethon.fr](mailto:gcorre@genethon.fr).

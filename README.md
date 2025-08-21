@@ -1,7 +1,35 @@
+---
+title: "GNT-GUIDESeq Documentation"
+date: "2025-08-21"
+author: "CORRE Guillaume"
+output: 
+    rmdformats::readthedown:
+      keep_md: yes
+      highlight: kate
+      toc: 3
+---
+
+
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16759028.svg)](https://doi.org/10.5281/zenodo.16759028) [![Static Badge](https://img.shields.io/badge/License-custom-blue?style=flat)](./LICENSE.md)
 
 ------------------------------------------------------------------------
+
+This repository consists of a snakemake workflow dedicated to the analysis of libraries derived from the GUIDE-Seq protocol, including iGUIDE-Seq, GUIDE-Seq2, Tag-Seq, OliTag-Seq or any other libraries based on the original protocol by Tsai et al. 2015.
+
+The key features of the pipeline are :
+
+-   High versatility with analysis of multiplexed libraries including samples from different organisms, gRNA and PAM sequences, PCR orientations ... in a single run.
+
+-   Consideration of bulges and mismatches between the gRNA and gDNA alignments.
+
+-   Consideration of multi-hit reads (assignment to random position among best hits).
+
+-   Prediction of Off-target sites using SWOFFinder
+
+-   Annotation to gene and oncogene (user defined lists)
+
+-   Reporting with QC and OT quantification.
 
 ### Licensing
 
@@ -145,27 +173,27 @@ In order to run the analysis, 4 elements are mandatory:
 3.  The configuration file
 4.  The input un-demultiplexed reads in fastq.gz format (R1,R2,I1,I2). *If working with libraries that were already demultiplexed, please read section .....*
 
-## Prepare samples data sheet (SDS) {#prepare-samples-data-sheet-sds}
+\## Prepare samples data sheet (SDS) {#prepare-samples-data-sheet-sds}
 
 The sample data-sheet (SDS) is a simple file provided as delited ( ; ) or xlsx format that contains information about each sample to process in the run. An example is proposed in ``` ./test_dataset/sampleInfo.csv and``./test_dataset/sampleInfo.xlsx ```.
 
 | sampleName | CellType | Genome | gRNA_name | gRNA_sequence | orientation | Cas | PAM_sequence | PAM_side | Cut_Offset | type | index1 | index2 |
-|----|----|----|----|----|----|----|----|----|----|----|----|----|
+|------|------|------|------|------|------|------|------|------|------|------|------|------|
 | VEGFA_s1_K562_pos | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | positive | Cas9 | NGG | 3 | -4 | guideseq | AGGCAGAA | CTAAGCCT |
 | VEGFA_s1_K562_neg | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | negative | Cas9 | NGG | 3 | -4 | guideseq | TCCTGAGC | CTAAGCCT |
 
 : Mandatory columns are:
 
 -   **`sampleName`** : Sample name to use.
-    -   Will be use to name output files and folders.
-    -   Samples with the same `sampleName` will be merged before processing ([Merging samples])
-    -   Samples name [**must not include**]{.underline} '-' in their name as this symbol is used in the pipeline for a special purpose. Instead, use "\_" or any other separator of your choice.
+-   Will be use to name output files and folders.
+-   Samples with the same `sampleName` will be merged before processing ([Merging samples])
+-   Samples name [**must not include**]{.underline} '-' in their name as this symbol is used in the pipeline for a special purpose. Instead, use "\_" or any other separator of your choice.
 -   **`Genome`**: Uses to define which reference genome to use for each sample.
-    -   This **must** be one of the values present in config file **`genome`** key (see [Reference genome]).
+-   This **must** be one of the values present in config file **`genome`** key (see [Reference genome]).
 -   **`gRNA_name`** : name of the gRNA used.
 -   **`gRNA_sequence`**: Sequence of the gRNA [**without**]{.underline} the PAM sequence.
 -   **`orientation`** : which PCR orientation was chosen ["positive", "negative", "mix" if they share the same indexes]
-    -   (this info is only used for metadata purposes, both PCR orientations are automatically processes by the pipeline).
+-   (this info is only used for metadata purposes, both PCR orientations are automatically processes by the pipeline).
 -   **`Cas`**: name of the Cas used
 -   **`PAM_sequence`**: Sequence of the PAM
 -   `PAM_side`: [5 or 3] indicating if the PAM is 5' or 3'
@@ -178,13 +206,15 @@ Additional columns can be added for metadata annotation purpose.
 
 SDS format is automatically validated using the `snakemake.utils - validate` function.
 
-### Merging samples
+\### Merging samples
 
 In certain scenarios, it may be beneficial to merge different samples from a library during the reads processing stage. This can be particularly useful when dealing with Multiple Replicates or +/-PCR orientations.
 
 To achieve this, you can use the same sample name for multiple rows in the Sample Description Sheet (SDS). Samples that share the same name will be merged during the reads processing, provided they meet the following criteria:
 
+```         
 1.  **`Reference Genome`**: The samples must use the same reference genome.
+```
 
 2.  **`gRNA`**: The samples must have the same gRNA, both in terms of sequence and name.
 
@@ -196,18 +226,17 @@ If any of the above conditions are not met, an error will be raised, and the pip
 
 Using the test SDS above, if you want to merge both positive and negative libraries, give the same sample name to both rows. As they use the same genome, gRNA, Cas & method, they will be aggregated in a single library.
 
-| sampleName | CellType | Genome | gRNA_name | gRNA_sequence | orientation | Cas | PAM_sequence | PAM_side | Cut_Offset | type | index1 | index2 |
-|----|----|----|----|----|----|----|----|----|----|----|----|----|
-| VEGFA_s1_K562 | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | positive | Cas9 | NGG | 3 | -4 | guideseq | AGGCAGAA | CTAAGCCT |
-| VEGFA_s1_K562 | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | negative | Cas9 | NGG | 3 | -4 | guideseq | TCCTGAGC | CTAAGCCT |
+\| sampleName \| CellType \| Genome \| gRNA_name \| gRNA_sequence \| orientation \| Cas \| PAM_sequence \| PAM_side \| Cut_Offset \| type \| index1 \| index2 \| \|------\|------\|------\|------\|------\|------\|------\|------\|------\|------\|------\|------\|------\| \| VEGFA_s1_K562 \| K562 \| GRCh38 \| VEGFAs1 \| GGGTGGGGGGAGTTTGCTCC \| positive \| Cas9 \| NGG \| 3 \| -4 \| guideseq \| AGGCAGAA \| CTAAGCCT \| \| VEGFA_s1_K562 \| K562 \| GRCh38 \| VEGFAs1 \| GGGTGGGGGGAGTTTGCTCC \| negative \| Cas9 \| NGG \| 3 \| -4 \| guideseq \| TCCTGAGC \| CTAAGCCT \|
 
+```         
 : UMI and reads counts will still be breakdown to each PCR orientation in the final result table.
+```
 
-### Working with already demultiplexed libraries
+\### Working with already demultiplexed libraries
 
 To be documented
 
-## Prepare the configuration file
+\## Prepare the configuration file
 
 The configuration file is a yaml formatted file with key-value dictionary used to fine-tune the pipeline behavior. Settings will apply to [**all samples of the run**]{.underline}.
 
@@ -215,7 +244,7 @@ An example of configuration file is proposed in `./test_dataset/guideSeq_GNT.yml
 
 [config file must be present in the working directory when starting the pipeline.]{.underline}
 
-### Metadata
+\### Metadata
 
 Author and affiliation will be printed on the final report.
 
@@ -226,7 +255,7 @@ contact: "gcorre@genethon.fr"
 version: 'V1.0'
 ```
 
-### Remove intermediate files
+\### Remove intermediate files
 
 Whether to remove all intermediate files after run completion.
 
@@ -234,7 +263,7 @@ Whether to remove all intermediate files after run completion.
 clean_intermediates_files: 'TRUE'
 ```
 
-### Path to Sample Data Sheet and read files
+\### Path to Sample Data Sheet and read files
 
 SDS path is relative to current folder (from where the pipeline is started). Absolute path can be used.
 
@@ -248,7 +277,7 @@ I1: "Undetermined_S0_L001_I1_001.fastq.gz"
 I2: "Undetermined_S0_L001_I2_001.fastq.gz"
 ```
 
-### Reference genome
+\### Reference genome
 
 Genome name is user-defined but must be referenced using the exact same name in the Sample Data Sheet.
 
@@ -258,22 +287,22 @@ Genome name is user-defined but must be referenced using the exact same name in 
 ## path to references
 genome:
   GRCh37:
-    fasta: "/PATH_TO_REFERENCE/GRCh37/Sequences/GRCh37.primary_assembly.genome.fa"
-    index: "/PATH_TO_REFERENCE/GRCh37/Indexes/Bowtie2/GRCh37.primary_assembly.genome" 
-    annotation: "/PATH_TO_REFERENCE/GRCh37/Annotations/gencode.v19.annotation.gtf.gz"
-  GRCh38:
-    fasta: "/PATH_TO_REFERENCE/GRCh38/Sequences/GRCh38.primary_assembly.genome.fa"
-    index: "/PATH_TO_REFERENCE/GRch38/Indexes/Bowtie2/GRCh38.primary_assembly.genome" 
-    annotation: "/PATH_TO_REFERENCE/GRCh38/Annotations/gencode.v46.annotation.gtf.gz"
-    oncogene_list: "/PATH_TO_REFERENCE/GRCh38/Annotations/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
-  GRCm39:
-    fasta: "/PATH_TO_REFERENCE/GRCm39/Sequences/GRCm39.primary_assembly.genome.fa"
-    index: "/PATH_TO_REFERENCE/GRCm39/Indexes/Bowtie2/GRCm39.primary_assembly.genome" 
-    annotation: "/PATH_TO_REFERENCE/GRCm39/Annotations/gencode.vM36.annotation.gtf.gz"
-    oncogene_list: ""
+  fasta: "/PATH_TO_REFERENCE/GRCh37/Sequences/GRCh37.primary_assembly.genome.fa"
+index: "/PATH_TO_REFERENCE/GRCh37/Indexes/Bowtie2/GRCh37.primary_assembly.genome" 
+annotation: "/PATH_TO_REFERENCE/GRCh37/Annotations/gencode.v19.annotation.gtf.gz"
+GRCh38:
+  fasta: "/PATH_TO_REFERENCE/GRCh38/Sequences/GRCh38.primary_assembly.genome.fa"
+index: "/PATH_TO_REFERENCE/GRch38/Indexes/Bowtie2/GRCh38.primary_assembly.genome" 
+annotation: "/PATH_TO_REFERENCE/GRCh38/Annotations/gencode.v46.annotation.gtf.gz"
+oncogene_list: "/PATH_TO_REFERENCE/GRCh38/Annotations/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
+GRCm39:
+  fasta: "/PATH_TO_REFERENCE/GRCm39/Sequences/GRCm39.primary_assembly.genome.fa"
+index: "/PATH_TO_REFERENCE/GRCm39/Indexes/Bowtie2/GRCm39.primary_assembly.genome" 
+annotation: "/PATH_TO_REFERENCE/GRCm39/Annotations/gencode.vM36.annotation.gtf.gz"
+oncogene_list: ""
 ```
 
-### Reads filtering
+\### Reads filtering
 
 After adaptor & ODN triming and before alignment to the reference genome, reads that are too short are discarded. This filter is applied if **any** of the mates size is below this threshold.
 
@@ -283,7 +312,7 @@ minLength: 25 ## Minimal read length after trimming, before alignment
 ################################################
 ```
 
-### Alignment to reference genome
+\### Alignment to reference genome
 
 Define which aligner to use and the range of fragment size.
 
@@ -297,7 +326,7 @@ rescue_R2: "TRUE" # keep R2 from unaligned pairs or pairs with too short R1 read
 ################################################
 ```
 
-### Insertion sites calling
+\### Insertion sites calling
 
 After alignment on the genome, R2 reads are collapse to single insertion points and aggregated if they cluster in a distance smaller than `ISbinWindow` defined here. Filters can be applied to exclude UMI with few reads (`minReadsPerUMI`) or insertion sites with few UMIs (`minUMIPerIS`).
 
@@ -316,7 +345,7 @@ min_predicted_distance: 100       # distance between cut site and predicted cut 
 ################################################
 ```
 
-### UMI correction
+\### UMI correction
 
 Due to potential sequencing errors, additionnal UMIs may be detected and a correction step is required.
 
@@ -333,7 +362,7 @@ UMI_filter: "TRUE"              # If TRUE, remove UMIs that do no match the expe
 ################################################
 ```
 
-### Reporting
+\### Reporting
 
 ``` yaml
 ################################################
@@ -343,22 +372,22 @@ minUMI_alignments_figure: 1       # filter clusters with more than n UMI in the 
 ################################################
 ```
 
-### Prediction
+\### Prediction
 
 ``` yaml
 # Prediction
 ################################################
 SWoffFinder:
   path: "/opt/SWOffinder" ## Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)
-  maxE: 6                 # Max edits allowed (integer).
-  maxM: 6                 # Max mismatches allowed without bulges (integer).
-  maxMB: 6                # Max mismatches allowed with bulges (integer).
-  maxB: 3                 # Max bulges allowed (integer).
-  window_size: 100
+maxE: 6                 # Max edits allowed (integer).
+maxM: 6                 # Max mismatches allowed without bulges (integer).
+maxMB: 6                # Max mismatches allowed with bulges (integer).
+maxB: 3                 # Max bulges allowed (integer).
+window_size: 100
 ################################################
 ```
 
-### Reads adapter & ODN trimming sequences {#reads-adapter-odn-trimming-sequences}
+\### Reads adapter & ODN trimming sequences {#reads-adapter-odn-trimming-sequences}
 
 Indicate which sequence will be trimmed from R1 & R2 reads ends depending on the PCR orientation and ODN used.
 
@@ -368,153 +397,163 @@ Indicate which sequence will be trimmed from R1 & R2 reads ends depending on the
 
 guideseq:
   positive:
-    R1_trailing: "GTTTAATTGAGTTGTCATATGT"
-    R2_leading: "ACATATGACAACTCAATTAAAC"
-    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
-  negative:
-    R1_trailing: "ATACCGTTATTAACATATGACAACTCAA"
-    R2_leading: "TTGAGTTGTCATATGTTAATAACGGTAT"
-    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
+  R1_trailing: "GTTTAATTGAGTTGTCATATGT"
+R2_leading: "ACATATGACAACTCAATTAAAC"
+R2_trailing: "AGATCGGAAGAGCGTCGTGT"
+negative:
+  R1_trailing: "ATACCGTTATTAACATATGACAACTCAA"
+R2_leading: "TTGAGTTGTCATATGTTAATAACGGTAT"
+R2_trailing: "AGATCGGAAGAGCGTCGTGT"
 
 
 
 iguideseq:
   positive:
-    R2_leading: "ACATATGACAACTCAATTAAACGCGAGC"
-    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
-    R1_trailing: "GCTCGCGTTTAATTGAGTTGTCATATGT"
-  negative:
-    R1_trailing: "TCGCGTATACCGTTATTAACATATGACAACTCAA"
-    R2_leading: "TTGAGTTGTCATATGTTAATAACGGTATACGCGA"
-    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
-    
-    
-    
+  R2_leading: "ACATATGACAACTCAATTAAACGCGAGC"
+R2_trailing: "AGATCGGAAGAGCGTCGTGT"
+R1_trailing: "GCTCGCGTTTAATTGAGTTGTCATATGT"
+negative:
+  R1_trailing: "TCGCGTATACCGTTATTAACATATGACAACTCAA"
+R2_leading: "TTGAGTTGTCATATGTTAATAACGGTATACGCGA"
+R2_trailing: "AGATCGGAAGAGCGTCGTGT"
+
+
+
 olitagseq:
   positive:
-    R1_trailing: "GGGGTTTAATTGAGTTGTCATATGTT"
-    R2_leading: "AACATATGACAACTCAATTAAACCCC"
-    R2_trailing: "TCCGCTCCCTCG"
-  negative:
-    R1_trailing: "CCCATACCGTTATTAACATATGAC"
-    R2_leading: "GTCATATGTTAATAACGGTATGGG"
-    R2_trailing: "TCCGCTCCCTCG"
+  R1_trailing: "GGGGTTTAATTGAGTTGTCATATGTT"
+R2_leading: "AACATATGACAACTCAATTAAACCCC"
+R2_trailing: "TCCGCTCCCTCG"
+negative:
+  R1_trailing: "CCCATACCGTTATTAACATATGAC"
+R2_leading: "GTCATATGTTAATAACGGTATGGG"
+R2_trailing: "TCCGCTCCCTCG"
 
 tagseq:
   positive:
-    R1_trailing: "TGCGATAACACGCATTTCGCATAA"
-    R2_leading: "CTTATGCGAAATGCGTGTTATCGCA"
-    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
-  negative:
-    R1_trailing: "ATCTCTGAGCCTTATGCGAAATGC"
-    R2_leading: "CGCATTTCGCATAAGGCTCAGAGAT"
-    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
-    
+  R1_trailing: "TGCGATAACACGCATTTCGCATAA"
+R2_leading: "CTTATGCGAAATGCGTGTTATCGCA"
+R2_trailing: "AGATCGGAAGAGCGTCGTGT"
+negative:
+  R1_trailing: "ATCTCTGAGCCTTATGCGAAATGC"
+R2_leading: "CGCATTTCGCATAAGGCTCAGAGAT"
+R2_trailing: "AGATCGGAAGAGCGTCGTGT"
+
 ################################################
 ```
 
-## Folder structure
+\## Folder structure
 
 In order to start a run:
 
+```         
 -   create a new directory in the installation folder and `cd` into.
+```
 
 -   Then :
 
-    -   add the sample data sheet ([Prepare samples data sheet (SDS)](#prepare-samples-data-sheet-sds))
-
-    -   add the configuration file ([Prepare the configuration file])
-
-    -   add the sequencing `undeterminded_R1/R2/I1/I2.fastq.gz` files (undemultiplexed) or symblic link to the raw data.
-
-> Input fastq files should respect the following structure from original paper :
->
-> -   R1 : contains fragment sequence starting in gDNA
->
-> -   R2: Starts with ODN sequence followed by gDNA sequence and potential trailing adaptor sequence
->
-> -   i1 : Contains barcode 1 (usually 8 nucleotides)
->
-> -   i2 : Contains barcode 2 and UMI sequence (usually 8 + 8 nucleotides)
-
-Your folder architecture should look similar to :
-
-``` bash
-Path/to/guideseq/
-├── 00-pipeline/
-├── 01-envs/
-├── 02-resources/
-├── 03-misc/
-├── test_dataset/
-├── My/folder/
+````         
+-   add the sample data sheet ([Prepare samples data sheet (SDS)](#prepare-samples-data-sheet-sds))
+  
+  -   add the configuration file ([Prepare the configuration file])
+  
+  -   add the sequencing `undeterminded_R1/R2/I1/I2.fastq.gz` files (undemultiplexed) or symblic link to the raw data.
+  
+  > Input fastq files should respect the following structure from original paper :
+    >
+    > -   R1 : contains fragment sequence starting in gDNA
+  >
+    > -   R2: Starts with ODN sequence followed by gDNA sequence and potential trailing adaptor sequence
+  >
+    > -   i1 : Contains barcode 1 (usually 8 nucleotides)
+  >
+    > -   i2 : Contains barcode 2 and UMI sequence (usually 8 + 8 nucleotides)
+  
+  Your folder architecture should look similar to :
+    
+    ``` bash
+  Path/to/guideseq/
+    ├── 00-pipeline/
+    ├── 01-envs/
+    ├── 02-resources/
+    ├── 03-misc/
+    ├── test_dataset/
+    ├── My/folder/
     ├── guideSeq_GNT.yml
-    ├── sampleInfo.csv
-    ├── undertermined_R1.fastq.gz
-    ├── undertermined_R2.fastq.gz
-    ├── undertermined_I1.fastq.gz
-    └── undertermined_I2.fastq.gz
-```
-
-From inside your analysis folder, run the command below after adjusting for number of CPU (-j) :
-
-``` bash
-snakemake -s ../00-pipeline/guideseq_GNT.smk \
+  ├── sampleInfo.csv
+  ├── undertermined_R1.fastq.gz
+  ├── undertermined_R2.fastq.gz
+  ├── undertermined_I1.fastq.gz
+  └── undertermined_I2.fastq.gz
+  ```
+  
+  From inside your analysis folder, run the command below after adjusting for number of CPU (-j) :
+    
+    ``` bash
+  snakemake -s ../00-pipeline/guideseq_GNT.smk \
   -j 24 \
   -k \
   --use-conda \ 
   --report-after-run --report runtime_report.html  \
   -n
+  
+  # remove the -n argument to start the pipeline
+  ```
+  
+  Each rule takes a maximum of 6 threads (alignment, trimming) to speed up the data processing. Set `-j` as a multiple of 6 to process 2 (12threads) , 3 (18 threads) ... samples in parallel.
+  
+  ``` bash
+  ## usefull snakemake arguments 
+  # see https://snakemake.readthedocs.io/en/stable/executing/cli.html#all-options
+  
+  --quiet
+  --notemp # keep all intermediate files
+  --rerun-trigger {code,input,mtime,params,software-env} 
+  --rerun-incomplete
+  
+  --filegraph | sed -n '/digraph/,$p' | dot -Tpdf > dag_files.pdf #DAG representation of workflow
+  --rulegraph | sed -n '/digraph/,$p' | dot -Tpdf > dag_rules.pdf 
+  ```
+  
+  # Output
+  
+  If everything goes well, the pipeline should end successfully :
     
-# remove the -n argument to start the pipeline
-```
+    ``` latex
+  Workflow finished, no error
+  _____________
+  < You rock baby !! >
+    -------------
+    \   ^__^
+    \  (♥♥)\_______
+  (__)\       )\/\
+  ||----w |
+    ||     ||
+    ```
+  
+  Otherwise, an error will be raised and the origine of the problem reported by snakemake:
+    
+    ``` latex
+  < Houston, we have a problem >
+    ----------------------------
+    \   \_______
+  v__v   \  \   O   )
+````
 
-Each rule takes a maximum of 6 threads (alignment, trimming) to speed up the data processing. Set `-j` as a multiple of 6 to process 2 (12threads) , 3 (18 threads) ... samples in parallel.
+(xx) 
 
-``` bash
-## usefull snakemake arguments 
-# see https://snakemake.readthedocs.io/en/stable/executing/cli.html#all-options
+     ```         
+      ||----w |
+     (__)      ||     ||  \/\
+     ```
 
---quiet
---notemp # keep all intermediate files
---rerun-trigger {code,input,mtime,params,software-env} 
---rerun-incomplete
-
- --filegraph | sed -n '/digraph/,$p' | dot -Tpdf > dag_files.pdf #DAG representation of workflow
- --rulegraph | sed -n '/digraph/,$p' | dot -Tpdf > dag_rules.pdf 
-```
-
-# Output
-
-If everything goes well, the pipeline should end successfully :
-
-``` latex
-Workflow finished, no error
- _____________
-< You rock baby !! >
- -------------
-        \   ^__^
-         \  (♥♥)\_______
-            (__)\       )\/\
-                ||----w |
-                ||     ||
-```
-
-Otherwise, an error will be raised and the origine of the problem reported by snakemake:
-
-``` latex
-< Houston, we have a problem >
- ----------------------------
-       \   \_______
- v__v   \  \   O   )
- (xx)      ||----w |
- (__)      ||     ||  \/\
-```
+```         
 
 Upon pipeline completion & if `'clean_intermediates_files: 'FALSE'`, your folder should now look like (test dataset provided in ./test) :
-
-``` latex
+  
+  ``` latex
 my_folder_name/
-├── 00-demultiplexing
+  ├── 00-demultiplexing
 ├── 01-trimming
 ├── 02-filtering
 │   ├── VEGFA_s1_K562_neg_R1.UMI.ODN.trimmed.filtered.fastq.gz
@@ -589,20 +628,21 @@ my_folder_name/
 └── test_datasheet.xlsx
 ```
 
-## Report
+\## Report
 
 A general report is generated. It summarizes all main QC and key features obtained from the run using graphical representations and tables.
 
 An example is available in the `./test_dataset/results` folder.
 
-## Off-targets files
+\## Off-targets files
 
 For each sample, an Excel file containing all the OT information is created. This file includes numerous columns, some of which are particularly noteworthy. It lists all detected positions, even those without any gRNA matches. For each position, the file reports the total number of UMIs and reads, providing the same information for both positive and negative PCRs. Insertion sites are annotated to genes and oncogenes if they are defined in the configuration file. For OT sites with gRNA matches, a summary of indel and mismatch positions is also provided.
 
 Here is the data formatted into a markdown table:
 
+```         
 | Index | Header value | Description |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | 1 | Chromosome | Chromosome ID where cluster is located |
 | 2 | Start_cluster | Genomic coordinates of the cluster |
 | 3 | end_cluster |  |
@@ -660,6 +700,7 @@ Here is the data formatted into a markdown table:
 ## Demultiplexing
 
 **Tool** : cutadapt
+```
 
 Undetermined fastq files are demultiplexed to `sampleName` fastq files according to barcodes present in the sample data sheet.
 
@@ -667,7 +708,7 @@ Undetermined fastq files are demultiplexed to `sampleName` fastq files according
 
 -   R1 and R2 fastq are demultiplexed according to i1+i2 sequence present in i3 fastq files.
 
-## ODN trimming:
+\## ODN trimming:
 
 **Tool** : cutadapt
 
@@ -677,11 +718,13 @@ Reads that **do not start** with the ODN sequence are discarded.
 
 PCR orientation is automatically detected and added to read name for future processing:
 
+```         
 ``` yaml
-@M02111:194:000000000-LT722:1:1101:15810:6788_positive
 ```
 
-## UMI extraction
+@M02111:194:000000000-LT722:1:1101:15810:6788_positive \`\`\`
+
+\## UMI extraction
 
 **Tool** : cutadapt
 
@@ -689,17 +732,19 @@ UMI is extracted from the I3 read generate before based on UMI pattern length de
 
 UMI is added to reads name:
 
+```         
 ``` yaml
-@M02111:194:000000000-LT722:1:1101:15810:6788_positive_GCTGTAGG
 ```
 
-## Adaptor trimming:
+@M02111:194:000000000-LT722:1:1101:15810:6788_positive_GCTGTAGG \`\`\`
+
+\## Adaptor trimming:
 
 **Tool** : cutadapt
 
 The adaptor trailing sequences are trimmed from R1 and R2 reads respectively if present.
 
-## Read filtering:
+\## Read filtering:
 
 **Tool** : cutadapt
 
@@ -707,7 +752,7 @@ After trimming, only read pairs with **both** mates longer than a `minLength` de
 
 If the `rescue_R2` variable is set to `TRUE`, then R2 reads that are longer that `minLength` is a discrarded pair are rescued and processed as single-end reads.
 
-## Genome alignment:
+\## Genome alignment:
 
 **Tools**: Bowtie2
 
@@ -715,7 +760,7 @@ Reference sequences are specified in the configuration file. Genome index is bui
 
 Trimmed reads pairs that passed the filtering steps are then aligned on the `reference genome` specified in the sample data sheet for each sample using the `aligner` specified in configuration file.
 
-### Multi-hits management:
+\### Multi-hits management:
 
 Multihits are reads with multiple possible equally good alignment positions in the genome. We choose to keep only a single random alignment for each read instead of reporting all possible positions.
 
@@ -723,7 +768,7 @@ Multihit alignments with low MAPQ score are discarded except if the Alignment sc
 
 On the long run, if multi read arise from the same cuting site, they will distribute randomly to all sites (explain more).
 
-## Cutting site calling:
+\## Cutting site calling:
 
 **Tool** : bedtools and awk
 
@@ -731,19 +776,19 @@ Following alignment on the reference genome, nuclease cutting sites are extracte
 
 Reads that align at the same cutting site with the same UMI are aggregated together keeping track of total reads count.
 
-## UMI correction:
+\## UMI correction:
 
 **Tool** : R script
 
 UMI sequences are corrected for potential sequencing error. UMI with less than n edits (hamming distance defined in the configuration file) are clustered together.
 
-## Cut site clustering:
+\## Cut site clustering:
 
 **Tool**: bedtools
 
 Cut sites than fall in the same window of `ISbinWindow` defined in the configuration file are clustered together.
 
-## gRNA match:
+\## gRNA match:
 
 **Tool**: R script
 
@@ -751,7 +796,7 @@ For each cluster of cutting sites, the gRNA sequence defined in the sample data 
 
 Gap tolerance can be accepted to detect bulges in gDNA or gRNA if the `tolerate_bulges` variable is set.
 
-## Annotation of clusters:
+\## Annotation of clusters:
 
 **Tool** : R script
 
@@ -761,20 +806,22 @@ A first step prepare the annotation file to extract only gene and exons features
 
 A second step annotate clusters to gene and position relative to those genes (exon/intron). Multiple annotations may be present for each cluster and are all reported.
 
-## Off target prediction:
+\## Off target prediction:
 
 **Tool** : SWOffinder
 
 For each gRNA sequence, PAM sequence and each organism specified in the sample data sheet, a prediction of OTS is realized using the SWOffinder tool with edits and mismatches tolerance defined in the configuration file.
 
-## Reporting:
+\## Reporting:
 
 A report is generated with main tables and graphical representations to better understand pipeline results.
 
-# Troubleshooting
+\# Troubleshooting
 
 Potential issues :
 
+```         
 Write permissions : in case of error, check that the user has read/write permission to the different reference/annotation files and working directory
+```
 
-# References
+\# References
