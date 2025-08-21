@@ -579,7 +579,7 @@ my_folder_name/
 
 A general report is generated. It summarizes all main QC and key features obtained from the run using graphical representations and tables.
 
-An example is available in the `./test_dataset/results` folder.
+An [example](https://raw.githack.com/gcorre/GNT_GuideSeq/refs/heads/master/test_dataset/results/test_report.html) is available in the `./test_dataset/results` folder
 
 ## Off-targets files
 

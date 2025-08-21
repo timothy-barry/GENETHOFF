@@ -38,4 +38,4 @@ If you use this pipeline in your research, please cite:
 
 # Documentation
 
-For installation and usage, please read the complete [documentation](https://html-preview.github.io/?url=https://github.com/gcorre/GNT_GuideSeq/blob/master/docs/documentation.html).
+For installation and usage instructions, please read the complete [documentation](https://raw.githack.com/gcorre/GNT_GuideSeq/refs/heads/master/docs/documentation.html).
