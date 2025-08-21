@@ -129,7 +129,7 @@ In order to run the analysis, 4 elements are mandatory:
 The sample data-sheet (SDS) is a simple file provided as delited ( ; ) or xlsx format that contains information about each sample to process in the run. An example is proposed in ``` ./test_dataset/sampleInfo.csv and``./test_dataset/sampleInfo.xlsx ```.
 
 | sampleName | CellType | Genome | gRNA_name | gRNA_sequence | orientation | Cas | PAM_sequence | PAM_side | Cut_Offset | type | index1 | index2 |
-|------|------|------|------|------|------|------|------|------|------|------|------|------|
+|----|----|----|----|----|----|----|----|----|----|----|----|----|
 | VEGFA_s1_K562_pos | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | positive | Cas9 | NGG | 3 | -4 | guideseq | AGGCAGAA | CTAAGCCT |
 | VEGFA_s1_K562_neg | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | negative | Cas9 | NGG | 3 | -4 | guideseq | TCCTGAGC | CTAAGCCT |
 
@@ -176,7 +176,7 @@ If any of the above conditions are not met, an error will be raised, and the pip
 Using the test SDS above, if you want to merge both positive and negative libraries, give the same sample name to both rows. As they use the same genome, gRNA, Cas & method, they will be aggregated in a single library.
 
 | sampleName | CellType | Genome | gRNA_name | gRNA_sequence | orientation | Cas | PAM_sequence | PAM_side | Cut_Offset | type | index1 | index2 |
-|------|------|------|------|------|------|------|------|------|------|------|------|------|
+|----|----|----|----|----|----|----|----|----|----|----|----|----|
 | VEGFA_s1_K562 | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | positive | Cas9 | NGG | 3 | -4 | guideseq | AGGCAGAA | CTAAGCCT |
 | VEGFA_s1_K562 | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | negative | Cas9 | NGG | 3 | -4 | guideseq | TCCTGAGC | CTAAGCCT |
 
@@ -581,7 +581,7 @@ For each sample, an Excel file containing all the OT information is created. Thi
 Here is the data formatted into a markdown table:
 
 | Index | Header value | Description |
-|------------------------|------------------------|------------------------|
+|----|----|----|
 | 1 | Chromosome | Chromosome ID where cluster is located |
 | 2 | Start_cluster | Genomic coordinates of the cluster |
 | 3 | end_cluster |  |
