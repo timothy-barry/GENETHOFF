@@ -44,12 +44,13 @@
 
 ## debug
 # 
-#   summary_files= "results/GUIDEseq_Sp_NT_summary.xlsx results/GUIDEseq_SpRY_gRNA_3_HBG_summary.xlsx results/GUIDEseq_SpRY_gRNA_21_HBG_summary.xlsx results/GUIDEseq_Sp_gRNA_12_HBG_summary.xlsx results/GUIDEseq_SpRY_NT_summary.xlsx" "
-#   
-#   sampleInfo.xlsx"
-# sampleInfo= read.delim("sampleInfo.csv",sep=";")
+#   summary_files= "results/GUIDEseq_Sp_NT_summary.xlsx results/GUIDEseq_SpRY_gRNA_3_HBG_summary.xlsx results/GUIDEseq_SpRY_gRNA_21_HBG_summary.xlsx results/GUIDEseq_Sp_gRNA_12_HBG_summary.xlsx results/GUIDEseq_SpRY_NT_summary.xlsx"
+# 
+#  sampleInfo <- read_xlsx("sampleInfo.xlsx")
+#  
+# #= read.delim("sampleInfo.csv",sep=";")
 # config = read_yaml("guideSeq_GNT.yml")
-# predicted_files ="06-offPredict/GRCh38_CAGATAACTGGGCCAACCAT_NNN_3.csv 06-offPredict/GRCh38_CAGATAACTGGGCCAACCAT_NGG_3.csv 06-offPredict/GRCh38_TCTTCCGGAACAAAGTTGCT_NGG_3.csv 06-offPredict/GRCh38_GGGTGGGGGGAGTTTGCTCC_NGG_3.csv"
+# predicted_files ="06-offPredict/GRCh38_CCTTCCCCACACTATCTCAA_NNN_3.csv 06-offPredict/GRCh38_GCCCCTTCCCCACACTATCT_NNN_3.csv 06-offPredict/GRCh38_GTGGGGAAGGGGCCCCCAAG_NGG_3.csv"
 # max_clusters=100
 # minUMI_alignments_figure=1
 # min_predicted_distance=100
@@ -537,7 +538,7 @@ tables_off <- lapply(seq_along(summary_pred_bulge),function(x){
            #soft_trim,
            "Edits pam"= PAM_indel_count,
            Symbol=Symbol_html,
-           Position=position_html,
+           Feature=position_html,
            Predicted= predicted_alignment_html,
            #bulge,
            PCR,
