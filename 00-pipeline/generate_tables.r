@@ -29,7 +29,13 @@
 
 # Assign command-line arguments to variables
   summary_files = args[1] 
-  sampleInfo <- read.delim(args[2], sep=";")
+  
+  if(str_ends(args[2],pattern = "xlsx")){
+    sampleInfo <- read_xlsx(args[2])
+  } else {
+    sampleInfo <- read.delim(args[2], sep=";")
+  }
+
   config <- read_yaml(args[3])
   predicted_files = args[4] 
   max_clusters <- as.numeric(args[5])
@@ -38,7 +44,9 @@
 
 ## debug
 # 
-#   summary_files= "results/EBS_K562_summary.xlsx results/EBS_hDMD_summary.xlsx results/g16_K562_summary.xlsx results/VEGFA_s1_K562_summary.xlsx results/mock_K562_summary.xlsx"
+#   summary_files= "results/GUIDEseq_Sp_NT_summary.xlsx results/GUIDEseq_SpRY_gRNA_3_HBG_summary.xlsx results/GUIDEseq_SpRY_gRNA_21_HBG_summary.xlsx results/GUIDEseq_Sp_gRNA_12_HBG_summary.xlsx results/GUIDEseq_SpRY_NT_summary.xlsx" "
+#   
+#   sampleInfo.xlsx"
 # sampleInfo= read.delim("sampleInfo.csv",sep=";")
 # config = read_yaml("guideSeq_GNT.yml")
 # predicted_files ="06-offPredict/GRCh38_CAGATAACTGGGCCAACCAT_NNN_3.csv 06-offPredict/GRCh38_CAGATAACTGGGCCAACCAT_NGG_3.csv 06-offPredict/GRCh38_TCTTCCGGAACAAAGTTGCT_NGG_3.csv 06-offPredict/GRCh38_GGGTGGGGGGAGTTTGCTCC_NGG_3.csv"
