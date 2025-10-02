@@ -1,3 +1,4 @@
+name: guideseq
 channels:
   - conda-forge
   - bioconda
@@ -26,6 +27,7 @@ dependencies:
   - r-dt
   - r-igraph
   - r-stringdist
+  - r-tinytex
   - r-upsetr
   - r-yaml
   - r-writexl
