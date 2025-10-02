@@ -1,5 +1,5 @@
 This is cutadapt 5.0 with Python 3.12.11
-Command line parameters: -g ^file:demultiplexing_barcodes.fa -j 6 -e 0 --action trim --no-indels -o 00-demultiplexing/{name}_I3.fastq.gz -p 00-demultiplexing/{name}_R2.fastq.gz I3.fastq /media/Data/common/GuideSeq/RawData/test/Undetermined_S0_L001_R2_001.fastq.gz
+Command line parameters: -g ^file:demultiplexing_barcodes.fa -j 6 -e 0 --action trim --no-indels -o 00-demultiplexing/{name}_I3.fastq.gz -p 00-demultiplexing/{name}_R2.fastq.gz I3.fastq .//Undetermined_S0_L001_R2_001.fastq.gz
 Building index of 2 adapters ...
 Built an index containing 2 strings.
 Processing paired-end reads on 6 cores ...

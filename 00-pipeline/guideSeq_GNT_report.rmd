@@ -1,5 +1,5 @@
 ---
-title: "GUIDE-Seq report"
+title: "Off-targets analysis report"
 subtitle: "`r config$affiliation`"
 author: "`r config$author`"
 date: "`r Sys.Date()`"
@@ -134,11 +134,13 @@ kbl(stats_summary %>%
 >
 > Clusters are defined as a group of ODN insertion sites within a distance smaller than **`r config$ISbinWindow`** bp and characterized by :
 >
-> -   Presence of reads aligning in both directions, indicating both ODN orientations ("dual Orientation" in table below)
+> -   Match of the crRNA sequence with less than **`r config$max_edits_crRNA`** edits withing the cluster boundaries +/- **`r config$slopSize`** bp ("With gRNA match . . ." in table below)
 >
-> -   Presence of multiple insertion sites positions ("multiple Cuts" in table below)
+> -   Presence of reads aligning in both directions, indicating both ODN orientations ("2 ODN orientations" in table below)
 >
-> -   Match of the crRNA sequence with less than **`r config$max_edits_crRNA`** edits withing the cluster boundaries +/- **`r config$slopSize`** bp ("crRNA matched" in table below)
+> -   Presence of reads from 2 PCR orientations if available ("2 PCR orientations" in table below)
+>
+> -   Number of clusters overlapping an oncogene.
 >
 > Clusters with more than **`r config$minUMIPerIS`** total UMIs were considered.
 

@@ -18,7 +18,7 @@ library(tidyverse,quietly = T, verbose = F,warn.conflicts = F)
 
 args <- commandArgs(trailingOnly = T)
 file <- args[1]
-bed <- read.delim(file, header = F)
+bed <- read.delim(file, header = F) %>% mutate(V1 = as.character(V1))
 motif <- args[2]
 filt.umi <- as.logical(toupper(args[3]))
 hamming_threshold <- as.numeric(args[4])
@@ -42,7 +42,8 @@ rescueR2 <- args[7]
 ## If R2 reads were rescued from unmapped or too short pairs, merge them with PE read alignments
 if(rescueR2=="TRUE"){
   rescuedR2_file <- str_replace(file,".reads_per_UMI_per_IS.bed","_R2rescued.reads_per_UMI_per_IS.bed")
-  bed_rescuedR2 <- read.delim(rescuedR2_file,header=F) %>% mutate(V1 = as.character(V1))
+  bed_rescuedR2 <- read.delim(rescuedR2_file,header=F) %>% 
+    mutate(V1 = as.character(V1))
   
   bed <- bind_rows(bed,bed_rescuedR2)
 }
