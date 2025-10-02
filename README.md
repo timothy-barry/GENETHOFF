@@ -34,7 +34,7 @@ If you use this pipeline in your research, please cite:
 >
 > DOI: 10.5281/zenodo.16759028
 >
-> Publication :
+> Publication : bioRxiv <https://doi.org/10.1101/2025.09.30.679427>
 
 # Documentation
 
