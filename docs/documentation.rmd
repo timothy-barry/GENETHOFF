@@ -41,12 +41,13 @@ source ~/.bashrc
 
 conda update -n base -c conda-forge conda
 
-conda install mamba -c conda-forge # faster packages manager
+conda install mamba -c conda-forge # faster packages manager, if libmamba not already in your conda distribution
 ```
 
 Install the workflow manager snakemake in the base environment
 
 ``` bash
+conda activate 
 mamba install snakemake openpyxl # worflow manager 
 ```
 
@@ -56,6 +57,14 @@ Create the environment in your favorite path (-p) from the `environment.yaml` fi
 cd GNT_GuideSeq/
 
 mamba env create -f 01-envs/environment.yml
+```
+
+Install the latex dependencies for PDF report generation:
+
+``` bash
+# install tinytex dependencies
+# If already installed but pdf report generation failed, reinstall setting force = TRUE
+conda run -n guideseq Rscript -e "tinytex::install_tinytex(force = FALSE)"
 ```
 
 You should now have an environment named 'guideseq' containing all the required programs when running:
@@ -74,7 +83,7 @@ The pipeline uses the bowtie2 program to align reads on the reference genome (@l
 
 For efficient genome alignment, you can use a pre-built index for Bowtie2. These indices can be downloaded from the [Bowtie2 website](https://bowtie-bio.sourceforge.net/bowtie2/index.shtml). Using a pre-built index saves computational resources and time, as it eliminates the need to build the index from scratch.
 
-### Build index manualy
+### Build index manually
 
 If you decide to build the index, we recommend to **not** use haplotypes, scaffolds and unplaced chromosomes to avoid unnecessary multihits alignments. Instead, use the "primary Assembly" version from ensembl or gencode for example. Manually remove unwanted chromosomes if necessary using the seqkit program:
 
@@ -238,7 +247,7 @@ I2: "Undetermined_S0_L001_I2_001.fastq.gz"
 
 Genome name is user-defined but must be referenced using the exact same name in the Sample Data Sheet.
 
-'Index' corresponds to the prefix used when bowtie2 index was built ([Build index manualy]).
+'Index' corresponds to the prefix used when bowtie2 index was built ([Build index manually]).
 
 ``` yaml
 ## path to references
@@ -759,8 +768,10 @@ A report is generated with main tables and graphical representations to better u
 
 # Troubleshooting
 
-Potential issues :
+**Potential issues :**
 
-Write permissions : in case of error, check that the user has read/write permission to the different reference/annotation files and working directory
+Write permissions : In case of error, check that the user has read/write permission to the different reference/annotation files and working directory
+
+Latex : If PDF report generation failed, check whether `tinytex` is correctly installed in R.
 
 # References

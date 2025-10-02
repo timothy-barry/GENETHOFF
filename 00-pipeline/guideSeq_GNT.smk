@@ -266,15 +266,15 @@ rule trim_ODN:
    R2=temp("01-trimming/{sample}_R2.ODN.fastq.gz"),
    I3=temp("01-trimming/{sample}_I3.ODN.fastq.gz")
   threads: 6
-  log:"logs/{sample}.odn.log"
+  log:R1="logs/{sample}_R1.odn.log",R2="logs/{sample}_R2.odn.log"
   conda: "guideseq"
   message: "removing ODN sequence, discard reads without ODN sequence {wildcards.sample}"
   params: ODN_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_leading"],
    ODN_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_leading"]
   shell: """
-        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log}
+        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log.R1}
         
-        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2} 
+        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2} > {log.R2}
         
         """
   
@@ -286,14 +286,14 @@ rule add_UMI:
      R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz"),
      I3=temp("01-trimming/{sample}_I3.ODN.UMI.fastq.gz")
     threads:6
-    log:"logs/{sample}.UMI.log"    
+    log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
     conda: "guideseq"
     params: UMI=config["UMI_pattern"] ## bp in 3' of index to considere as UMI
     shell: """
         UMI_length=$(expr length {params.UMI})
         
-        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R1} {input.I3} {input.R1} > {log}
-        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2} > {log}
+        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R1} {input.I3} {input.R1} > {log.R1}
+        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2} > {log.R2}
         """
 
 
@@ -550,7 +550,17 @@ rule get_fasta_around_is:
 
 
 rule get_stats_fq:
-    input: rules.merge_sampleName.output.R1, rules.trim_ODN.output.R1, rules.trim_reads.output.R1, rules.filter_reads.output.R1
+    input: 
+     config["read_path"]+"/"+config["R1"],
+     config["read_path"]+"/"+config["R2"],
+     rules.merge_sampleName.output.R1,
+     rules.merge_sampleName.output.R2,
+     rules.trim_ODN.output.R1,
+     rules.trim_ODN.output.R2,
+     rules.trim_reads.output.R1,
+     rules.trim_reads.output.R2,
+     rules.filter_reads.output.R1,
+     rules.filter_reads.output.R2,
     output: "05-Report/{sample}.stat"
     conda: 'guideseq'
     threads: 6
@@ -651,12 +661,14 @@ rule report:
       
 rule make_report:
     input:  rules.report.output.report_rdata
-    output: report_html="results/"+os.path.basename(os.getcwd())+"_report.html"
+    output: report_html="results/"+os.path.basename(os.getcwd())+"_report.html",report_pdf="results/"+os.path.basename(os.getcwd())+"_report.pdf"
     conda: "guideseq"
     params: config_path=config_file_path
     threads: 1
     shell: """
-        Rscript ../00-pipeline/publish_report.r {input} {params.config_path} {output}
+        Rscript ../00-pipeline/publish_report.r {input} {params.config_path} {output.report_html}
+        Rscript ../00-pipeline/publish_report_pdf.r {input} {params.config_path} {output.report_pdf}
+        
     """
 
       
