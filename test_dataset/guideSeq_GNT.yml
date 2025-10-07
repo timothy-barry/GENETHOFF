@@ -6,6 +6,8 @@ version: 'V1.0'
 
 clean_intermediates_files: 'TRUE'
 
+skip_demultiplexing: 'TRUE'
+
 ## Library informations
 sampleInfo_path: "test_datasheet.csv"
 

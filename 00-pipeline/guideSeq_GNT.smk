@@ -29,37 +29,6 @@ configfile: "guideSeq_GNT.yml"
 config_file_path=os.getcwd()+'/'+workflow.configfiles[0]
 
 
-###############################################################
-# check that the input files are present in indicated folder
-###############################################################
-files_to_check = ["R1", "R2", "I1", "I2"]
-
-# Initialize a dictionary to store the results
-results = {}
-
-# Check each file and store the result
-for file_key in files_to_check:
-    file_path = os.path.join(config["read_path"], config[file_key])
-    if os.path.isfile(file_path):
-        results[file_key] ="\033[92m✅\033[0m"  +  "  "    +file_path # Green check mark
-    else:
-        results[file_key] = "\033[91m❌\033[0m"  +  "  "  +file_path  # Red cross mark
-
-# Print the results in a table format with colors
-print("\n\n-------------------\nCheck if input files are present :")
-print("-------------------")
-print(f"{results['R1']}")
-print(f"{results['R2']}")
-print(f"{results['I1']}")
-print(f"{results['I2']}")
-
-# If any file is missing, raise an exception
-missing_files = [file_key for file_key, status in results.items() if "\033[91m❌\033[0m" in status]
-if missing_files:
-    raise FileNotFoundError(f"Missing files: {', '.join(missing_files)}")
-else:
-  print("\n\033[92m All required files were found ... continue processing\033[0m\n" )
-
 
 ###############################################################
 ## Load the sample information files as a TSV file or excel
@@ -155,13 +124,71 @@ else:
 
 
 
+
+###############################################################
+# check that the input files are present in indicated folder
+###############################################################
+
+# for undemultiplexed libraries
+if config["skip_demultiplexing"] == "FALSE":
+  files_to_check = ["R1", "R2", "I1", "I2"]
+  
+  # Initialize a dictionary to store the results
+  results = {}
+  
+  # Check each file and store the result
+  for file_key in files_to_check:
+      file_path = os.path.join(config["read_path"], config[file_key])
+      if os.path.isfile(file_path):
+          results[file_key] ="\033[92m✅\033[0m"  +  "  "    +file_path # Green check mark
+      else:
+          results[file_key] = "\033[91m❌\033[0m"  +  "  "  +file_path  # Red cross mark
+  
+  # Print the results in a table format with colors
+  print("\n\n-------------------\nCheck if input files are present :")
+  print("-------------------")
+  print(f"{results['R1']}")
+  print(f"{results['R2']}")
+  print(f"{results['I1']}")
+  print(f"{results['I2']}")
+  
+  # If any file is missing, raise an exception
+  missing_files = [file_key for file_key, status in results.items() if "\033[91m❌\033[0m" in status]
+  if missing_files:
+      raise FileNotFoundError(f"Missing files: {', '.join(missing_files)}")
+  else:
+    print("\n\033[92m All required files were found ... continue processing\033[0m\n" )
+    
+    
+else:
+  print("\n\n-------------------\n Demultiplexing is not necessary : Check if input files are present :")
+  print("-------------------")
+  for sample in samples_unique:
+    results_demux = []
+    missing = 0
+    print(sample+"...\n")
+    for suffix in ["_R1.fastq.gz","_R2.fastq.gz","_I1.fastq.gz","_I2.fastq.gz"]:
+      file_path = "".join(["00-demultiplexing/", sample,suffix])
+      if os.path.isfile(file_path):
+        results_demux.append("\033[92m✅\033[0m"  +  "  "    +file_path) # Green check mark
+      else:
+        results_demux.append("\033[91m❌\033[0m"  +  "  "  +file_path )
+        missing += 1
+    for val in results_demux:
+      print(val, end='\n')
+    if missing > 0:
+      raise FileNotFoundError("\n\033[91m Some files are missing. check that demultiplexed files are in 00-demultiplexing/\033[0m\n")
+    else:
+      print("\n\033[92m All required files were found ... continue processing\033[0m\n" )
+
+
+
 ###############################################################
 # THIS IS THE WORKFLOW
 ###############################################################
 
 rule target:
-    input: 
-     #expand("06-offPredict/{gen}_{grna}_{pam}_{side}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs,side=sides),
+    input:
      ["results/{sample}_summary.xlsx".format(sample=sample) for sample in samples_unique],
      "results/"+os.path.basename(os.getcwd())+"_report.html"
      
@@ -175,7 +202,7 @@ rule get_chrom_length:
     shell: """
         if [ ! -e {params} ]
         then
-          samtools faidx {input}  ## you must have write access to path
+          samtools faidx {input}  ## you must have write access to this path
         fi
         
         ln -s  {params} {output}
@@ -209,82 +236,173 @@ rule merge_indexes:
 
 
 # make a barcode file with I1 & I2 sequences for demultiplexing.
-rule make_indexes_fasta:
+rule make_indexes_fasta_i1:
     input: 
-    output: temp("demultiplexing_barcodes.fa")
+    output: "demultiplexing_barcodes_i1.fa"
     run: 
         sample_count = defaultdict(int)
-        with open("demultiplexing_barcodes.fa", 'w') as fasta_file:
-          for index, row in samplesTable.iterrows():
-            sequence = row['index1'] + row['index2']
+        with open("demultiplexing_barcodes_i1.fa", 'w') as fasta_file_i1:
+          samplesTable_sub=samplesTable[["sampleName","index1"]].drop_duplicates()
+          for index, row in samplesTable_sub.iterrows():
+            sequence_i1 = row['index1']
             sample_count[row['sampleName']] += 1
             sample_header = f">{row['sampleName']}-{sample_count[row['sampleName']]}"
-            fasta_file.write(sample_header + '\n')
-            fasta_file.write(sequence + '\n')
+            #sample_header = f">{row['sampleName']}"
+            fasta_file_i1.write(sample_header + '\n')
+            fasta_file_i1.write(sequence_i1 + '\n')
+
 
 
 # demultiplexe libraries based on barcodes in the sampleInfo file and I3 file generated before
 ## 
 # check whether an empty library will make the pip to crash (ie wrong index)
 ##
-rule demultiplex_library:
-    input: R1=config["read_path"]+"/"+config["R1"], R2=config["read_path"]+"/"+config["R2"], I1=config["read_path"]+"/"+config["I1"], I2=config["read_path"]+"/"+config["I2"],I3=rules.merge_indexes.output.I3, barcodes=rules.make_indexes_fasta.output
+
+rule demux_I1:
+    input: 
+      R1=config["read_path"]+"/"+config["R1"], 
+      R2=config["read_path"]+"/"+config["R2"], 
+      I1=config["read_path"]+"/"+config["I1"], 
+      I2=config["read_path"]+"/"+config["I2"], 
+      barcodes=rules.make_indexes_fasta_i1.output
     output: 
-     R1=temp(["00-demultiplexing/{sample}-1_R1.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
-     R2=temp(["00-demultiplexing/{sample}-1_R2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
-     I3=temp(["00-demultiplexing/{sample}-1_I3.fastq.gz".format(sample=sample) for sample in samples["sampleName"]])
+      R1=temp(["00-demultiplexing/{sample}-1_i1_R1.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
+      R2=temp(["00-demultiplexing/{sample}-1_i1_R2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
+      I1=temp(["00-demultiplexing/{sample}-1_i1_I1.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
+      I2=temp(["00-demultiplexing/{sample}-1_i1_I2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]])
     conda: "guideseq"
-    log: R1= "logs/demultiplexing_R1.log", R2= "logs/demultiplexing_R2.log"
+    log: R1= "logs/demultiplexing_i1_R1.log"
     threads: 6
     shell: """
         
-        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0  --action trim --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R1.fastq.gz {input.I3} {input.R1} > {log.R1}
-        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0  --action trim --no-indels -o 00-demultiplexing/{{name}}_I3.fastq.gz -p 00-demultiplexing/{{name}}_R2.fastq.gz {input.I3} {input.R2} > {log.R2}
-
-        rm 00-demultiplexing/*unknown* 
-        """
+        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action trim --no-indels -o 00-demultiplexing/{{name}}_i1_I1.fastq.gz -p 00-demultiplexing/{{name}}_i1_R1.fastq.gz {input.I1} {input.R1} > {log.R1}
         
+        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action trim --no-indels -o 00-demultiplexing/{{name}}_i1_I1.fastq.gz -p 00-demultiplexing/{{name}}_i1_R2.fastq.gz {input.I1} {input.R2} > /dev/null
+        
+        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i1_I1.fastq.gz -p 00-demultiplexing/{{name}}_i1_I2.fastq.gz {input.I1} {input.I2} > /dev/null
+
+       # rm 00-demultiplexing/*unknown* 
+        """
 
 
-rule merge_sampleName:
-    input: R1="00-demultiplexing/{sample}-1_R1.fastq.gz", R2="00-demultiplexing/{sample}-1_R2.fastq.gz",I3="00-demultiplexing/{sample}-1_I3.fastq.gz"
-    output: R1=temp("00-demultiplexing/{sample}_R1.fastq.gz"), R2=temp("00-demultiplexing/{sample}_R2.fastq.gz"),I3=temp("00-demultiplexing/{sample}_I3.fastq.gz")
-    threads:1
-    shell: """
-        cat 00-demultiplexing/{wildcards.sample}-*_R1.fastq.gz > {output.R1}
-        cat 00-demultiplexing/{wildcards.sample}-*_R2.fastq.gz > {output.R2}
-        cat 00-demultiplexing/{wildcards.sample}-*_I3.fastq.gz > {output.I3}
-    
+rule merge_samples_i1:
+  input: 
+    R1="00-demultiplexing/{sample}-1_i1_R1.fastq.gz", 
+    R2="00-demultiplexing/{sample}-1_i1_R2.fastq.gz", 
+    I1="00-demultiplexing/{sample}-1_i1_I1.fastq.gz", 
+    I2="00-demultiplexing/{sample}-1_i1_I2.fastq.gz" 
+  output:
+    R1="00-demultiplexing/{sample}_i1_R1.fastq.gz", 
+    R2="00-demultiplexing/{sample}_i1_R2.fastq.gz", 
+    I1="00-demultiplexing/{sample}_i1_I1.fastq.gz", 
+    I2="00-demultiplexing/{sample}_i1_I2.fastq.gz"
+  shell:
     """
+      cat 00-demultiplexing/{wildcards.sample}-*_i1_R1.fastq.gz > {output.R1}
+      cat 00-demultiplexing/{wildcards.sample}-*_i1_R2.fastq.gz > {output.R2}
+      cat 00-demultiplexing/{wildcards.sample}-*_i1_I1.fastq.gz > {output.I1}
+      cat 00-demultiplexing/{wildcards.sample}-*_i1_I2.fastq.gz > {output.I2}
+    """
+
+rule make_indexes_fasta_i2:
+  input: 
+  output:"demultiplexing_barcodes_i2_{sample}.fa"
+  run: 
+    sample_count = defaultdict(int)
+    with open(output[0], 'w') as fasta_file_i2:
+      samplesTable_sub=samplesTable[samplesTable['sampleName'] == wildcards.sample][["sampleName","index2"]].drop_duplicates()
+      for index, row in samplesTable_sub.iterrows():
+        sequence_i2 = row['index2']
+        sample_count[row['sampleName']] += 1
+        sample_header = f">{row['sampleName']}-{sample_count[row['sampleName']]}"
+        fasta_file_i2.write(sample_header + '\n')
+        fasta_file_i2.write(sequence_i2 + '\n')  
+
+
+
+rule demux_I2:
+  input: 
+    R1=rules.merge_samples_i1.output.R1,
+    R2=rules.merge_samples_i1.output.R2,
+    I1=rules.merge_samples_i1.output.I1, 
+    I2=rules.merge_samples_i1.output.I2,
+    barcodes=rules.make_indexes_fasta_i2.output
+  output: 
+    R1=temp("00-demultiplexing/{sample}-1_i2_R1.fastq.gz"),
+    R2=temp("00-demultiplexing/{sample}-1_i2_R2.fastq.gz"),
+    I1=temp("00-demultiplexing/{sample}-1_i2_I1.fastq.gz"),
+    I2=temp("00-demultiplexing/{sample}-1_i2_I2.fastq.gz")
+  conda: "guideseq"
+  log: R1= "logs/demultiplexing_{sample}_i2_R1.log"
+  threads: 6
+  shell: """
+        
+        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R1.fastq.gz {input.I2} {input.R1} > {log.R1}
+        
+        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R2.fastq.gz {input.I2} {input.R2} > /dev/null
+        
+        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_I1.fastq.gz {input.I2} {input.I1} > /dev/null
+
+        #rm 00-demultiplexing/*unknown* 
+        """
+
+
+
+rule merge_samples_i2:
+  input: 
+    R1=rules.demux_I2.output.R1,
+    R2=rules.demux_I2.output.R2,
+    I1=rules.demux_I2.output.I1, 
+    I2=rules.demux_I2.output.I2 
+  output:
+    R1="00-demultiplexing/{sample}_R1.fastq.gz", 
+    R2="00-demultiplexing/{sample}_R2.fastq.gz", 
+    I1="00-demultiplexing/{sample}_I1.fastq.gz", 
+    I2="00-demultiplexing/{sample}_I2.fastq.gz"
+  shell:
+    """
+      cat 00-demultiplexing/{wildcards.sample}-*_i2_R1.fastq.gz > {output.R1}
+      cat 00-demultiplexing/{wildcards.sample}-*_i2_R2.fastq.gz > {output.R2}
+      cat 00-demultiplexing/{wildcards.sample}-*_i2_I1.fastq.gz > {output.I1}
+      cat 00-demultiplexing/{wildcards.sample}-*_i2_I2.fastq.gz > {output.I2}
+    """
+
 
 
 
 # remove ODN and discard reads without ODN
 rule trim_ODN:
-  input: R1="00-demultiplexing/{sample}_R1.fastq.gz", R2="00-demultiplexing/{sample}_R2.fastq.gz",I3="00-demultiplexing/{sample}_I3.fastq.gz"
+  input: 
+    R1="00-demultiplexing/{sample}_R1.fastq.gz", 
+    R2="00-demultiplexing/{sample}_R2.fastq.gz", 
+    I1="00-demultiplexing/{sample}_I1.fastq.gz", 
+    I2="00-demultiplexing/{sample}_I2.fastq.gz"
   output: R1=temp("01-trimming/{sample}_R1.ODN.fastq.gz"),
-   R2=temp("01-trimming/{sample}_R2.ODN.fastq.gz"),
-   I3=temp("01-trimming/{sample}_I3.ODN.fastq.gz")
+    R2=temp("01-trimming/{sample}_R2.ODN.fastq.gz"),
+    I1=temp("01-trimming/{sample}_I1.ODN.fastq.gz"),
+    I2=temp("01-trimming/{sample}_I2.ODN.fastq.gz")
   threads: 6
-  log:R1="logs/{sample}_R1.odn.log",R2="logs/{sample}_R2.odn.log"
+  log:R1="logs/{sample}_R1.odn.log"
   conda: "guideseq"
   message: "removing ODN sequence, discard reads without ODN sequence {wildcards.sample}"
   params: ODN_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_leading"],
-   ODN_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_leading"]
+    ODN_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_leading"]
   shell: """
         cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log.R1}
         
-        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2} > {log.R2}
+        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.I1} -p {output.R2} {input.I1} {input.R2} > /dev/null
+        
+        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > /dev/null
         
         """
   
   # Add UMI to read name
   
 rule add_UMI:
-    input: R1=rules.trim_ODN.output.R1, R2=rules.trim_ODN.output.R2,I3=rules.trim_ODN.output.I3
+    input: R1=rules.trim_ODN.output.R1, R2=rules.trim_ODN.output.R2,I2=rules.trim_ODN.output.I2
     output: R1=temp("01-trimming/{sample}_R1.ODN.UMI.fastq.gz"),
      R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz"),
-     I3=temp("01-trimming/{sample}_I3.ODN.UMI.fastq.gz")
+     I2=temp("01-trimming/{sample}_I2.ODN.UMI.fastq.gz")
     threads:6
     log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
     conda: "guideseq"
@@ -292,8 +410,8 @@ rule add_UMI:
     shell: """
         UMI_length=$(expr length {params.UMI})
         
-        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R1} {input.I3} {input.R1} > {log.R1}
-        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I3} -p {output.R2} {input.I3} {input.R2} > {log.R2}
+        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
+        cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
         """
 
 
@@ -553,8 +671,8 @@ rule get_stats_fq:
     input: 
      config["read_path"]+"/"+config["R1"],
      config["read_path"]+"/"+config["R2"],
-     rules.merge_sampleName.output.R1,
-     rules.merge_sampleName.output.R2,
+     rules.merge_samples_i2.output.R1,
+     rules.merge_samples_i2.output.R2,
      rules.trim_ODN.output.R1,
      rules.trim_ODN.output.R2,
      rules.trim_reads.output.R1,
@@ -658,7 +776,6 @@ rule report:
         Rscript ../00-pipeline/generate_tables.r "{input.summaries}" {params.sampleInfo} {params.config} "{input.predictions}" {params.max_clusters} {params.minUMI_alignments_figure} {params.min_predicted_distance}
         """
       
-      
 rule make_report:
     input:  rules.report.output.report_rdata
     output: report_html="results/"+os.path.basename(os.getcwd())+"_report.html",report_pdf="results/"+os.path.basename(os.getcwd())+"_report.pdf"
@@ -668,7 +785,7 @@ rule make_report:
     shell: """
         Rscript ../00-pipeline/publish_report.r {input} {params.config_path} {output.report_html}
         Rscript ../00-pipeline/publish_report_pdf.r {input} {params.config_path} {output.report_pdf}
-        
+
     """
 
       
