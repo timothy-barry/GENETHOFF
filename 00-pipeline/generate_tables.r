@@ -71,9 +71,8 @@
     select(file,num_seqs) %>% 
     mutate(library = str_match(file,"/(.+)_R1")[,2]) %>% 
     mutate(step = case_when(str_detect(file, "_R1.fastq.gz")~"Demultiplexed",
-                            str_ends(file, "R1.ODN.fastq.gz")~"ODN presence",
-                            str_ends(file, "R1.ODN.UMI.trimmed.fastq.gz")~NA,
-                            str_ends(file, "R1.UMI.ODN.trimmed.filtered.fastq.gz")~"Trimmed & filtered",
+                            str_ends(file, "R1.ODN.fastq.gz")~"ODN match",
+                            str_ends(file, "R1.UMI.ODN.trimmed.filtered.fastq.gz")~"Filtered",
                             TRUE ~ NA)) %>% 
     filter(!is.na(step)) %>% 
     select(-file) %>% 

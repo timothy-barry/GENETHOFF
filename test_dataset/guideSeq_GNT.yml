@@ -6,7 +6,7 @@ version: 'V1.0'
 
 clean_intermediates_files: 'TRUE'
 
-skip_demultiplexing: 'TRUE'
+skip_demultiplexing: "TRUE"
 
 ## Library informations
 sampleInfo_path: "test_datasheet.csv"
@@ -61,7 +61,7 @@ tolerate_bulges: "TRUE"           # whether to include gaps in the gRNA alignmen
 max_edits_crRNA: 6                # filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)
 ISbinWindow: 100                  # insertion sites closer than 'ISbinWindow' will be clustered together
 minReadsPerUMI: 4                 # Min number of reads per UMIs (>=)
-minUMIPerIS: 4                      # Min number of UMI per IS (>=)
+minUMIPerIS: 4                    # Min number of UMI per IS (>=)
 slopSize: 50                      # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)
 min_predicted_distance: 100       # distance between cut site and predicted cut site to consider as predicted
 ################################################

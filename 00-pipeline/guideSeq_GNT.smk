@@ -10,7 +10,7 @@
 
 import re
 import os
-from glob import glob
+import glob
 import pandas as pd
 from snakemake.utils import validate
 import sys
@@ -158,29 +158,65 @@ if config["skip_demultiplexing"] == "FALSE":
       raise FileNotFoundError(f"Missing files: {', '.join(missing_files)}")
   else:
     print("\n\033[92m All required files were found ... continue processing\033[0m\n" )
-    
-    
-else:
-  print("\n\n-------------------\n Demultiplexing is not necessary : Check if input files are present :")
-  print("-------------------")
-  for sample in samples_unique:
-    results_demux = []
-    missing = 0
-    print(sample+"...\n")
-    for suffix in ["_R1.fastq.gz","_R2.fastq.gz","_I1.fastq.gz","_I2.fastq.gz"]:
-      file_path = "".join(["00-demultiplexing/", sample,suffix])
-      if os.path.isfile(file_path):
-        results_demux.append("\033[92m✅\033[0m"  +  "  "    +file_path) # Green check mark
-      else:
-        results_demux.append("\033[91m❌\033[0m"  +  "  "  +file_path )
-        missing += 1
-    for val in results_demux:
-      print(val, end='\n')
-    if missing > 0:
-      raise FileNotFoundError("\n\033[91m Some files are missing. check that demultiplexed files are in 00-demultiplexing/\033[0m\n")
-    else:
-      print("\n\033[92m All required files were found ... continue processing\033[0m\n" )
 
+#########################################################
+## For already demultiplexed libraries
+## check that R1, R2,I1 and I2 files are present in the path defined in the config file key : config["read_path"]
+## each file must start with the sample name
+## a symlink is created to 00-demultiplexing to trick the pipeline so it will start after the demultiplexing step
+########################################################
+else:
+  print("\n\n-------------------\n Demultiplexing is not necessary : Check if input files are present for each sample :")
+  print("-------------------")
+  
+  
+  #path = config["read_path"]  
+  demultiplexing_dir = "00-demultiplexing"
+
+# Ensure the demultiplexing directory exists
+  os.makedirs(demultiplexing_dir, exist_ok=True)
+
+  # Iterate over each sample
+  for sample in samples_unique:
+    path = samplesTable[samplesTable['sampleName'] == sample]["path_to_files"].drop_duplicates().tolist()[0]
+    # Define the patterns for each file type
+    patterns = [
+      f"{sample}*R1*fastq.gz",
+      f"{sample}*R2*fastq.gz",
+      f"{sample}*I1*fastq.gz",
+      f"{sample}*I2*fastq.gz"
+    ]
+    # Check if all files are present for each sample
+    all_present = True
+    file_paths = []
+    for pattern in patterns:
+      motif=f"{path}/{pattern}"
+      matching_files = glob.glob(motif)
+      if not matching_files:
+        all_present = False
+        file_paths.append(motif)
+      else:
+        file_paths.append(matching_files[0])
+      
+      # Print the result
+    if all_present:
+      print(f"{sample}")
+      for file_path in file_paths:
+        print(f"  - \033[92m✅\033[0m {file_path}")
+      print("\n\033[92m All required files were found ... continue processing\033[0m\n" )
+      
+      # Create symbolic links for actual path of files to demultiplexing folder
+      for file_path, suffix in zip(file_paths, ["R1", "R2", "I1", "I2"]):
+        symlink_path = os.path.join(demultiplexing_dir, f"{sample}_{suffix}.fastq.gz")
+        if not os.path.islink(symlink_path):
+            os.symlink(file_path, symlink_path)
+
+    else: #raise an error
+      print(f"{sample}")
+      for file_path in file_paths:
+        print(f"  - \033[91m❌\033[0m {file_path}")
+      raise FileNotFoundError("\n\033[91m Some files are missing. check that demultiplexed files are in "+config["read_path"]+"/\033[0m\n")
+      
 
 
 ###############################################################
@@ -214,31 +250,14 @@ rule prepare_annotations:
     output: "../02-ressources/{genome}.rds"
     threads: 1
     conda: "guideseq"
-    params: config=os.path.abspath(workflow.configfiles[0])
     shell: """
         Rscript ../00-pipeline/prepare_annotations.R {wildcards.genome} {input}
     """     
 
-
-# Merge index1 and 2 in a new fastq file I3. Easier for demultiplexing.
-rule merge_indexes:
-    input: I1=config["read_path"]+"/"+config["I1"] , I2=config["read_path"]+"/"+config["I2"]
-    output: I3=temp("I3.fastq")
-    conda: "guideseq"
-    shell: """
-        # concatenate I1 and I2, !! do not use an ASCII character used in PHRED score encoding (here use tab)
-        
-        paste -d "\t" <(gzip -dc {input.I1}) <(gzip -dc {input.I2}) | awk 'BEGIN{{FS="\\t";OFS=""}} {{if( NR % 4 ==1 || NR % 4 == 3) {{print $1}} else {{print $1,$2}}}}' > I3.fastq
-        #gzip I3.fastq
-
-        """
-
-
-
 # make a barcode file with I1 & I2 sequences for demultiplexing.
 rule make_indexes_fasta_i1:
     input: 
-    output: "demultiplexing_barcodes_i1.fa"
+    output: temp("demultiplexing_barcodes_i1.fa")
     run: 
         sample_count = defaultdict(int)
         with open("demultiplexing_barcodes_i1.fa", 'w') as fasta_file_i1:
@@ -283,7 +302,7 @@ rule demux_I1:
 
        # rm 00-demultiplexing/*unknown* 
         """
-
+  
 
 rule merge_samples_i1:
   input: 
@@ -292,10 +311,10 @@ rule merge_samples_i1:
     I1="00-demultiplexing/{sample}-1_i1_I1.fastq.gz", 
     I2="00-demultiplexing/{sample}-1_i1_I2.fastq.gz" 
   output:
-    R1="00-demultiplexing/{sample}_i1_R1.fastq.gz", 
-    R2="00-demultiplexing/{sample}_i1_R2.fastq.gz", 
-    I1="00-demultiplexing/{sample}_i1_I1.fastq.gz", 
-    I2="00-demultiplexing/{sample}_i1_I2.fastq.gz"
+    R1=temp("00-demultiplexing/{sample}_i1_R1.fastq.gz"), 
+    R2=temp("00-demultiplexing/{sample}_i1_R2.fastq.gz"), 
+    I1=temp("00-demultiplexing/{sample}_i1_I1.fastq.gz"), 
+    I2=temp("00-demultiplexing/{sample}_i1_I2.fastq.gz")
   shell:
     """
       cat 00-demultiplexing/{wildcards.sample}-*_i1_R1.fastq.gz > {output.R1}
@@ -306,7 +325,7 @@ rule merge_samples_i1:
 
 rule make_indexes_fasta_i2:
   input: 
-  output:"demultiplexing_barcodes_i2_{sample}.fa"
+  output:temp("demultiplexing_barcodes_i2_{sample}.fa")
   run: 
     sample_count = defaultdict(int)
     with open(output[0], 'w') as fasta_file_i2:
@@ -377,7 +396,8 @@ rule trim_ODN:
     R2="00-demultiplexing/{sample}_R2.fastq.gz", 
     I1="00-demultiplexing/{sample}_I1.fastq.gz", 
     I2="00-demultiplexing/{sample}_I2.fastq.gz"
-  output: R1=temp("01-trimming/{sample}_R1.ODN.fastq.gz"),
+  output: 
+    R1=temp("01-trimming/{sample}_R1.ODN.fastq.gz"),
     R2=temp("01-trimming/{sample}_R2.ODN.fastq.gz"),
     I1=temp("01-trimming/{sample}_I1.ODN.fastq.gz"),
     I2=temp("01-trimming/{sample}_I2.ODN.fastq.gz")
@@ -399,15 +419,15 @@ rule trim_ODN:
   # Add UMI to read name
   
 rule add_UMI:
-    input: R1=rules.trim_ODN.output.R1, R2=rules.trim_ODN.output.R2,I2=rules.trim_ODN.output.I2
-    output: R1=temp("01-trimming/{sample}_R1.ODN.UMI.fastq.gz"),
-     R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz"),
-     I2=temp("01-trimming/{sample}_I2.ODN.UMI.fastq.gz")
-    threads:6
-    log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
-    conda: "guideseq"
-    params: UMI=config["UMI_pattern"] ## bp in 3' of index to considere as UMI
-    shell: """
+  input: R1=rules.trim_ODN.output.R1, R2=rules.trim_ODN.output.R2,I2=rules.trim_ODN.output.I2
+  output: R1=temp("01-trimming/{sample}_R1.ODN.UMI.fastq.gz"),
+    R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz"),
+    I2=temp("01-trimming/{sample}_I2.ODN.UMI.fastq.gz")
+  threads:6
+  log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
+  conda: "guideseq"
+  params: UMI=config["UMI_pattern"] ## bp in 3' of index to considere as UMI
+  shell: """
         UMI_length=$(expr length {params.UMI})
         
         cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
@@ -417,18 +437,22 @@ rule add_UMI:
 
   # remove leading and trailing ODN sequences
 rule trim_reads:
-    input: R1=rules.add_UMI.output.R1, R2=rules.add_UMI.output.R2
-    output: R1=temp("01-trimming/{sample}_R1.ODN.UMI.trimmed.fastq.gz"), 
-     R2=temp("01-trimming/{sample}_R2.ODN.UMI.trimmed.fastq.gz")
-    threads: 6
-    log: "logs/{sample}.trailing.log"
-    conda: "guideseq"
-    message: "trimming ODN and adaptor sequences in reads"
-    params: R2_trailing_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_trailing"],
-     R2_trailing_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_trailing"],
-     R1_trailing_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R1_trailing"],
-     R1_trailing_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R1_trailing"]
-    shell: """
+  input: 
+    R1=rules.add_UMI.output.R1, 
+    R2=rules.add_UMI.output.R2
+  output: 
+    R1=temp("01-trimming/{sample}_R1.ODN.UMI.trimmed.fastq.gz"), 
+    R2=temp("01-trimming/{sample}_R2.ODN.UMI.trimmed.fastq.gz")
+  threads: 6
+  log: "logs/{sample}.trailing.log"
+  conda: "guideseq"
+  message: "trimming ODN and adaptor sequences in reads"
+  params: 
+    R2_trailing_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_trailing"],
+    R2_trailing_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_trailing"],
+    R1_trailing_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R1_trailing"],
+    R1_trailing_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R1_trailing"]
+  shell: """
         cutadapt -j {threads} \
           -A "{params.R2_trailing_pos};min_overlap=6;max_error_rate=0.1" \
           -A "{params.R2_trailing_neg};min_overlap=6;max_error_rate=0.1" \
@@ -440,15 +464,20 @@ rule trim_reads:
 
   # make a size selection before mapping
 rule filter_reads:
-    input: R1=rules.trim_reads.output.R1, R2=rules.trim_reads.output.R2
-    output:  R1="02-filtering/{sample}_R1.UMI.ODN.trimmed.filtered.fastq.gz", R2="02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.fastq.gz",
-     R1short=temp("02-filtering/{sample}_R1.UMI.ODN.trimmed.tooshort.fastq.gz"), R2short=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.tooshort.fastq.gz")
-    threads: 6
-    log: "logs/{sample}.filter.log"
-    params: length=config["minLength"]
-    conda: "guideseq"
-    message: "remove pairs if one mate is shorter than x bp"
-    shell: """
+  input: 
+    R1=rules.trim_reads.output.R1, 
+    R2=rules.trim_reads.output.R2
+  output:  
+    R1="02-filtering/{sample}_R1.UMI.ODN.trimmed.filtered.fastq.gz", 
+    R2="02-filtering/{sample}_R2.UMI.ODN.trimmed.filtered.fastq.gz",
+    R1short=temp("02-filtering/{sample}_R1.UMI.ODN.trimmed.tooshort.fastq.gz"), 
+    R2short=temp("02-filtering/{sample}_R2.UMI.ODN.trimmed.tooshort.fastq.gz")
+  threads: 6
+  log: "logs/{sample}.filter.log"
+  params: length=config["minLength"]
+  conda: "guideseq"
+  message: "remove pairs if one mate is shorter than x bp"
+  shell: """
         cutadapt -j {threads} \
           --pair-filter=any \
           --minimum-length {params.length} \
@@ -462,16 +491,20 @@ rule filter_reads:
   # map reads on the reference genome as pairs
 if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
     rule alignOnGenome:
-        input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2
-        output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"),
-         R2_unmapped="03-align/{sample}_R2.UMI.ODN.trimmed.unmapped.fastq.gz"
+        input: 
+          R1=rules.filter_reads.output.R1,
+          R2=rules.filter_reads.output.R2
+        output: 
+          sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"),
+          R2_unmapped="03-align/{sample}_R2.UMI.ODN.trimmed.unmapped.fastq.gz"
         threads: 6
         log: "logs/{sample}.UMI.ODN.trimmed.filtered.align.log"
         conda: "guideseq"
         message: "Aligning PE reads on genome with Bowtie2"
-        params: index=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["index"],
-         minFragLength=config["minFragLength"],
-         maxFragLength=config["maxFragLength"]
+        params: 
+          index=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["index"],
+          minFragLength=config["minFragLength"],
+          maxFragLength=config["maxFragLength"]
         shell: """
                 bowtie2 -p {threads} --no-unal \
                   -I {params.minFragLength} \
@@ -486,8 +519,12 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
 
 elif (config["aligner"]  == "bwa") :
     rule alignOnGenome:
-        input: R1=rules.filter_reads.output.R1, R2=rules.filter_reads.output.R2
-        output: sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"), unfilterdsam=temp("03-align/{sample}.UMI.ODN.trimmed.unfiltered.sam")
+        input: 
+          R1=rules.filter_reads.output.R1,
+          R2=rules.filter_reads.output.R2
+        output: 
+          sam=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sam"),
+          unfilterdsam=temp("03-align/{sample}.UMI.ODN.trimmed.unfiltered.sam")
         threads: 6
         log: "logs/{sample}.UMI.ODN.trimmed.filtered.align.log"
         conda: "guideseq"
@@ -502,8 +539,10 @@ elif (config["aligner"]  == "bwa") :
   ## true multihits have MAPQ=1 with bowtie2
   
 rule filter_alignments:
-    input: sam=rules.alignOnGenome.output.sam
-    output: list=temp("03-align/{sample}_multi.txt"),
+    input: 
+      sam=rules.alignOnGenome.output.sam
+    output: 
+      list=temp("03-align/{sample}_multi.txt"),
     threads: 2
     conda: "guideseq"
     message: "keep only alignments with high MAPQ or with equal score with best secondary alignment (multihits)"
@@ -517,10 +556,13 @@ rule filter_alignments:
 
 # sort alignments by names (required for BEDPE conversion) and position (for viewing)
 rule sort_aligned:
-    input: sam=rules.alignOnGenome.output.sam, list = rules.filter_alignments.output.list
-    output:  bam="03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.filtered.bam", 
-     bamPos=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.bam"),
-     bamName=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam")
+    input: 
+      sam=rules.alignOnGenome.output.sam, 
+      list = rules.filter_alignments.output.list
+    output:  
+      bam="03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.filtered.bam",
+      bamPos=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.bam"),
+      bamName=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam")
     threads: 6
     conda: "guideseq"
     message: "Sort reads by name"
@@ -539,9 +581,11 @@ rule sort_aligned:
 # aggregate reads per fragment size and genomic coordinates
 # add a cluster ID to group close IS (distance defined in the config file) 
 rule call_IS:
-    input: rules.sort_aligned.output.bamName
-    output: tmp=temp("04-IScalling/{sample}.pebed"), 
-     umi="04-IScalling/{sample}.reads_per_UMI_per_IS.bed"
+    input: 
+      rules.sort_aligned.output.bamName
+    output: 
+      tmp=temp("04-IScalling/{sample}.pebed"), 
+      umi="04-IScalling/{sample}.reads_per_UMI_per_IS.bed"
     threads: 1
     conda: "guideseq"
     params: UMI=config["UMI_pattern"]
@@ -567,7 +611,8 @@ rule rescue_R2:
   input: 
    R2_short=rules.filter_reads.output.R2short,
    R2_unmapped=rules.alignOnGenome.output.R2_unmapped
-  output: sam=temp("03-align/{sample}_R2rescued.UMI.ODN.trimmed.filtered.sam")
+  output: 
+    sam=temp("03-align/{sample}_R2rescued.UMI.ODN.trimmed.filtered.sam")
   threads: 6
   conda: "guideseq"
   log: "logs/{sample}_R2rescued.UMI.ODN.trimmed.filtered.align.log"
@@ -591,7 +636,9 @@ rule sort_rescued_R2:
 
 rule callIS_R2rescued:
   input: rules.sort_rescued_R2.output
-  output: umi="04-IScalling/{sample}_R2rescued.reads_per_UMI_per_IS.bed", tmp=temp("04-IScalling/{sample}_rescueR2.bed")
+  output: 
+    umi="04-IScalling/{sample}_R2rescued.reads_per_UMI_per_IS.bed", 
+    tmp=temp("04-IScalling/{sample}_rescueR2.bed")
   threads: 1
   conda: "guideseq"
   params: UMI=config["UMI_pattern"]
@@ -614,8 +661,11 @@ rule callIS_R2rescued:
 #######################
 
 rule correct_UMI:
-    input: bed=rules.call_IS.output.umi, bed_rescued=rules.callIS_R2rescued.output.umi
-    output: "04-IScalling/{sample}.reads_per_UMI_per_IS_corrected.bed"
+    input: 
+      bed=rules.call_IS.output.umi, 
+      bed_rescued=rules.callIS_R2rescued.output.umi
+    output: 
+      "04-IScalling/{sample}.reads_per_UMI_per_IS_corrected.bed"
     conda: "guideseq"
     threads: 2
     params: hamming=config["UMI_hamming_distance"], filter = config["UMI_filter"],  UMI=config["UMI_pattern"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"]
@@ -625,8 +675,10 @@ rule correct_UMI:
 
 
 rule Collapse_UMI_IS:
-    input: rules.correct_UMI.output
-    output: collapse="04-IScalling/{sample}.UMIs_per_IS_in_Cluster.bed"
+    input: 
+      rules.correct_UMI.output
+    output: 
+      collapse="04-IScalling/{sample}.UMIs_per_IS_in_Cluster.bed"
     threads: 1
     conda: "guideseq"
     params: window=config["ISbinWindow"], minMAPQ=config["minMAPQ"],minReadsPerUMI=config["minReadsPerUMI"],minUMIPerIS=config["minUMIPerIS"]
@@ -645,8 +697,12 @@ rule Collapse_UMI_IS:
 
     
 rule get_fasta_around_is:
-    input: bed=rules.Collapse_UMI_IS.output.collapse, length=["../02-ressources/{genome}.chrom.length".format(genome=genome) for genome in genomes_unique]
-    output: cluster="04-IScalling/{sample}.cluster_slop.bed", fa="04-IScalling/{sample}.cluster_slop.fa"
+    input: 
+      bed=rules.Collapse_UMI_IS.output.collapse,
+      length=["../02-ressources/{genome}.chrom.length".format(genome=genome) for genome in genomes_unique]
+    output: 
+      cluster="04-IScalling/{sample}.cluster_slop.bed",
+      fa="04-IScalling/{sample}.cluster_slop.fa"
     threads: 1
     conda: "guideseq"
     params: fasta=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["fasta"], 
@@ -664,19 +720,12 @@ rule get_fasta_around_is:
         bedtools getfasta -name -fi {params.fasta} -bed {output.cluster} > {output.fa}
         """ 
 
-
-
-
 rule get_stats_fq:
     input: 
-     config["read_path"]+"/"+config["R1"],
-     config["read_path"]+"/"+config["R2"],
      rules.merge_samples_i2.output.R1,
      rules.merge_samples_i2.output.R2,
      rules.trim_ODN.output.R1,
      rules.trim_ODN.output.R2,
-     rules.trim_reads.output.R1,
-     rules.trim_reads.output.R2,
      rules.filter_reads.output.R1,
      rules.filter_reads.output.R2,
     output: "05-Report/{sample}.stat"
