@@ -19,6 +19,8 @@ from collections import defaultdict
 from snakemake.utils import min_version
 min_version("9.3.0")
 
+#ruleorder: make_I2 > merge_samples_i2
+
 ###############################################################
 # check that the config file is present in current folder
 ###############################################################
@@ -161,7 +163,8 @@ if config["skip_demultiplexing"] == "FALSE":
 
 #########################################################
 ## For already demultiplexed libraries
-## check that R1, R2,I1 and I2 files are present in the path defined in the config file key : config["read_path"]
+## check that R1, R2 are present in the path defined in the config file key : config["read_path"]
+## UMI must be in the R1 and R2 headers in the format : NNNNNNNN+NNNNNNNNNNNNNNNN (added during demultiplexing from NGS machine)
 ## each file must start with the sample name
 ## a symlink is created to 00-demultiplexing to trick the pipeline so it will start after the demultiplexing step
 ########################################################
@@ -183,8 +186,6 @@ else:
     patterns = [
       f"{sample}*R1*fastq.gz",
       f"{sample}*R2*fastq.gz",
-      f"{sample}*I1*fastq.gz",
-      f"{sample}*I2*fastq.gz"
     ]
     # Check if all files are present for each sample
     all_present = True
@@ -197,27 +198,35 @@ else:
         file_paths.append(motif)
       else:
         file_paths.append(matching_files[0])
-      
+    
       # Print the result
     if all_present:
       print(f"{sample}")
       for file_path in file_paths:
         print(f"  - \033[92m✅\033[0m {file_path}")
-      print("\n\033[92m All required files were found ... continue processing\033[0m\n" )
       
       # Create symbolic links for actual path of files to demultiplexing folder
-      for file_path, suffix in zip(file_paths, ["R1", "R2", "I1", "I2"]):
+      for file_path, suffix in zip(file_paths, ["R1", "R2"]):
         symlink_path = os.path.join(demultiplexing_dir, f"{sample}_{suffix}.fastq.gz")
         if not os.path.islink(symlink_path):
             os.symlink(file_path, symlink_path)
-
+            
+      # check fo I2 (if absent, will be generated from R2 read header)
+      pattern = f"{sample}*I2*fastq.gz"
+      motif=f"{path}/{pattern}"
+      matching_files = glob.glob(motif)
+      if matching_files:
+        print(f"  - \033[92m✅\033[0m {matching_files[0]}")
+        symlink_path = os.path.join(demultiplexing_dir, f"{sample}_newI2.fastq.gz")
+        if not os.path.islink(symlink_path):
+          os.symlink(matching_files[0], symlink_path)
+      print("\n\033[92m All required files were found ... continue processing\033[0m\n" )
     else: #raise an error
       print(f"{sample}")
       for file_path in file_paths:
         print(f"  - \033[91m❌\033[0m {file_path}")
       raise FileNotFoundError("\n\033[91m Some files are missing. check that demultiplexed files are in "+config["read_path"]+"/\033[0m\n")
       
-
 
 ###############################################################
 # THIS IS THE WORKFLOW
@@ -254,7 +263,7 @@ rule prepare_annotations:
         Rscript ../00-pipeline/prepare_annotations.R {wildcards.genome} {input}
     """     
 
-# make a barcode file with I1 & I2 sequences for demultiplexing.
+# make a barcode file with I1 sequences for demultiplexing.
 rule make_indexes_fasta_i1:
     input: 
     output: temp("demultiplexing_barcodes_i1.fa")
@@ -308,18 +317,15 @@ rule merge_samples_i1:
   input: 
     R1="00-demultiplexing/{sample}-1_i1_R1.fastq.gz", 
     R2="00-demultiplexing/{sample}-1_i1_R2.fastq.gz", 
-    I1="00-demultiplexing/{sample}-1_i1_I1.fastq.gz", 
     I2="00-demultiplexing/{sample}-1_i1_I2.fastq.gz" 
   output:
     R1=temp("00-demultiplexing/{sample}_i1_R1.fastq.gz"), 
     R2=temp("00-demultiplexing/{sample}_i1_R2.fastq.gz"), 
-    I1=temp("00-demultiplexing/{sample}_i1_I1.fastq.gz"), 
     I2=temp("00-demultiplexing/{sample}_i1_I2.fastq.gz")
   shell:
     """
       cat 00-demultiplexing/{wildcards.sample}-*_i1_R1.fastq.gz > {output.R1}
       cat 00-demultiplexing/{wildcards.sample}-*_i1_R2.fastq.gz > {output.R2}
-      cat 00-demultiplexing/{wildcards.sample}-*_i1_I1.fastq.gz > {output.I1}
       cat 00-demultiplexing/{wildcards.sample}-*_i1_I2.fastq.gz > {output.I2}
     """
 
@@ -343,13 +349,11 @@ rule demux_I2:
   input: 
     R1=rules.merge_samples_i1.output.R1,
     R2=rules.merge_samples_i1.output.R2,
-    I1=rules.merge_samples_i1.output.I1, 
     I2=rules.merge_samples_i1.output.I2,
     barcodes=rules.make_indexes_fasta_i2.output
   output: 
     R1=temp("00-demultiplexing/{sample}-1_i2_R1.fastq.gz"),
     R2=temp("00-demultiplexing/{sample}-1_i2_R2.fastq.gz"),
-    I1=temp("00-demultiplexing/{sample}-1_i2_I1.fastq.gz"),
     I2=temp("00-demultiplexing/{sample}-1_i2_I2.fastq.gz")
   conda: "guideseq"
   log: R1= "logs/demultiplexing_{sample}_i2_R1.log"
@@ -360,8 +364,6 @@ rule demux_I2:
         
         cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_R2.fastq.gz {input.I2} {input.R2} > /dev/null
         
-        cutadapt -g ^file:{input.barcodes} -j {threads} -e 0 --discard-untrimmed --action none --no-indels -o 00-demultiplexing/{{name}}_i2_I2.fastq.gz -p 00-demultiplexing/{{name}}_i2_I1.fastq.gz {input.I2} {input.I1} > /dev/null
-
         #rm 00-demultiplexing/*unknown* 
         """
 
@@ -371,58 +373,46 @@ rule merge_samples_i2:
   input: 
     R1=rules.demux_I2.output.R1,
     R2=rules.demux_I2.output.R2,
-    I1=rules.demux_I2.output.I1, 
     I2=rules.demux_I2.output.I2 
   output:
     R1="00-demultiplexing/{sample}_R1.fastq.gz", 
     R2="00-demultiplexing/{sample}_R2.fastq.gz", 
-    I1="00-demultiplexing/{sample}_I1.fastq.gz", 
     I2="00-demultiplexing/{sample}_I2.fastq.gz"
   shell:
     """
       cat 00-demultiplexing/{wildcards.sample}-*_i2_R1.fastq.gz > {output.R1}
       cat 00-demultiplexing/{wildcards.sample}-*_i2_R2.fastq.gz > {output.R2}
-      cat 00-demultiplexing/{wildcards.sample}-*_i2_I1.fastq.gz > {output.I1}
       cat 00-demultiplexing/{wildcards.sample}-*_i2_I2.fastq.gz > {output.I2}
     """
 
-
-
-
-# remove ODN and discard reads without ODN
-rule trim_ODN:
-  input: 
-    R1="00-demultiplexing/{sample}_R1.fastq.gz", 
-    R2="00-demultiplexing/{sample}_R2.fastq.gz", 
-    I1="00-demultiplexing/{sample}_I1.fastq.gz", 
-    I2="00-demultiplexing/{sample}_I2.fastq.gz"
-  output: 
-    R1=temp("01-trimming/{sample}_R1.ODN.fastq.gz"),
-    R2=temp("01-trimming/{sample}_R2.ODN.fastq.gz"),
-    I1=temp("01-trimming/{sample}_I1.ODN.fastq.gz"),
-    I2=temp("01-trimming/{sample}_I2.ODN.fastq.gz")
-  threads: 6
-  log:R1="logs/{sample}_R1.odn.log"
+# make an I2 file : extract UMI fro mread header
+rule make_I2:
+  input:
+    R1="00-demultiplexing/{sample}_R1.fastq.gz"
+  output:
+    temp("00-demultiplexing/{sample}_newI2.fastq.gz")
+  threads: 1
   conda: "guideseq"
-  message: "removing ODN sequence, discard reads without ODN sequence {wildcards.sample}"
-  params: ODN_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_leading"],
-    ODN_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_leading"]
   shell: """
-        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log.R1}
-        
-        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.I1} -p {output.R2} {input.I1} {input.R2} > /dev/null
-        
-        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > /dev/null
-        
-        """
+    python ../03-misc/extract_I2_from_header.py {input} {output}
+  """
   
-  # Add UMI to read name
+
   
+# Add UMI to read name
 rule add_UMI:
-  input: R1=rules.trim_ODN.output.R1, R2=rules.trim_ODN.output.R2,I2=rules.trim_ODN.output.I2
-  output: R1=temp("01-trimming/{sample}_R1.ODN.UMI.fastq.gz"),
-    R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz"),
-    I2=temp("01-trimming/{sample}_I2.ODN.UMI.fastq.gz")
+  input: 
+    I2=branch(lambda wildcards: (
+            str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "true" and not os.path.islink("00-demultiplexing/{sample}_newI2.fastq.gz")) ,
+            then=rules.make_I2.output,
+            otherwise="00-demultiplexing/{sample}_I2.fastq.gz"
+        ),
+    R1="00-demultiplexing/{sample}_R1.fastq.gz", 
+    R2="00-demultiplexing/{sample}_R2.fastq.gz"
+  output: 
+    R1=temp("01-trimming/{sample}_R1.UMI.fastq.gz"),
+    R2=temp("01-trimming/{sample}_R2.UMI.fastq.gz"),
+    I2=temp("01-trimming/{sample}_I2.UMI.fastq.gz")
   threads:6
   log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
   conda: "guideseq"
@@ -435,11 +425,33 @@ rule add_UMI:
         """
 
 
+
+# remove ODN and discard reads without ODN
+rule trim_ODN:
+  input: 
+    R1=rules.add_UMI.output.R1,
+    R2=rules.add_UMI.output.R2
+  output: 
+    R1=temp("01-trimming/{sample}_R1.ODN.UMI.fastq.gz"),
+    R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz")
+  threads: 6
+  log:R1="logs/{sample}_R1.odn.log"
+  conda: "guideseq"
+  message: "removing ODN sequence, discard reads without ODN sequence {wildcards.sample}"
+  params: ODN_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_leading"],
+    ODN_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_leading"]
+  shell: """
+        cutadapt -j {threads} -G "negative={params.ODN_neg};max_error_rate=0;rightmost" -G "positive={params.ODN_pos};max_error_rate=0;rightmost" --discard-untrimmed  --rename='{{id}}_{{r2.adapter_name}} {{comment}}' -o {output.R1} -p {output.R2} {input.R1} {input.R2} > {log.R1}
+        
+
+          """
+
+
   # remove leading and trailing ODN sequences
 rule trim_reads:
   input: 
-    R1=rules.add_UMI.output.R1, 
-    R2=rules.add_UMI.output.R2
+    R1=rules.trim_ODN.output.R1, 
+    R2=rules.trim_ODN.output.R2
   output: 
     R1=temp("01-trimming/{sample}_R1.ODN.UMI.trimmed.fastq.gz"), 
     R2=temp("01-trimming/{sample}_R2.ODN.UMI.trimmed.fastq.gz")
