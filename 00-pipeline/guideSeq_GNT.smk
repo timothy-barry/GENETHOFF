@@ -19,46 +19,80 @@ from collections import defaultdict
 from snakemake.utils import min_version
 min_version("9.3.0")
 
-#ruleorder: make_I2 > merge_samples_i2
+
+RED= "\033[91m"
+GREEN= "\033[92m"
+RESET= "\033[0m"
+
+
+os.system("cat ../03-misc/logo.txt; echo '\n'")
 
 ###############################################################
 # check that the config file is present in current folder
 ###############################################################
 if not os.path.isfile("guideSeq_GNT.yml"):
-    raise SystemExit("\n  No config file found in current directory \n")
-
-configfile: "guideSeq_GNT.yml"
-config_file_path=os.getcwd()+'/'+workflow.configfiles[0]
+  print(RED + u'\u274C' + RESET + " Configuration file not found\n")
+  sys.exit(1)
+else:
+  print(GREEN + u'\u2705' + RESET + " Configuration file found\n")
+  configfile: "guideSeq_GNT.yml"
+  config_file_path=os.getcwd()+'/'+workflow.configfiles[0]
 
 
 
 ###############################################################
-## Load the sample information files as a TSV file or excel
+## Load the sample datasheet as a TSV file or excel
 ###############################################################
 if not os.path.isfile(config["sampleInfo_path"]):
-    raise SystemExit("\n  No Sample Data Sheet file found in current directory \n")
-
-sample_datasheet=config["sampleInfo_path"]
-
-# if sample_datasheet ends with xlsx,
-if sample_datasheet.endswith("xlsx"):
-  samplesTable =pd.read_excel(sample_datasheet).set_index("sampleName", drop=False)
+  print(RED + u'\u274C' + RESET + " Sample data sheet not found\n")
+  sys.exit(1)
 else:
-  samplesTable = pd.read_table(sample_datasheet,sep=";").set_index("sampleName", drop=False)
+  print(GREEN + u'\u2705' + RESET + " Sample data sheet found\n")
+  sample_datasheet=config["sampleInfo_path"]
 
-#check the validity of the sample Data Sheet (Path is relative to pipeline file, not current folder)
-validate(samplesTable, "samples.schema.yaml")
+  # if sample_datasheet ends with xlsx,
+  if sample_datasheet.endswith("xlsx"):
+    samplesTable =pd.read_excel(sample_datasheet).set_index("sampleName", drop=False)
+  else:
+    samplesTable = pd.read_table(sample_datasheet,sep=";").set_index("sampleName", drop=False)
+  
+  #check the validity of the sample Data Sheet (Path is relative to pipeline file, not current folder)
+  validate(samplesTable, "samples.schema.yaml")
 
 
 
 
+###############################################################
+## if skipping demultiplexing and several libraries have the same name, then raise an error
+###############################################################
 
-## if multiple rows have the same sampleName, check that they have the same gRNA,PAM, Cas and genome
-# The purpose of this code is to ensure data consistency by verifying that samples with the same name have identical features. 
-# The check for hyphens in sample names is to prevent issues with delimiters in file names or identifiers.
+lib_names = samplesTable["sampleName"].tolist()
 
-RED= "\x1b[33m"
-RESET= "\033[0m"
+if config["skip_demultiplexing"] == "TRUE" and len(lib_names)!=len(set(lib_names)):
+  print(RED + u'\u274C' + RESET + " All samples name must be unique if demultiplexing is skipped.\n")
+  print(samplesTable["sampleName"].to_markdown(index=False),"\n")
+  sys.exit(1)
+
+###############################################################
+## if skipping demultiplexing , check that libraries folders specified in sample datasheet exist
+###############################################################
+
+if config["skip_demultiplexing"] == "TRUE":
+  paths = samplesTable["path_to_files"].drop_duplicates().tolist()
+  for path in paths:
+    if not os.path.isdir(path):
+      print(RED + u'\u274C' + " At least one path does not exist in sample datasheet."+ RESET+"\n")
+      print(samplesTable[["sampleName","path_to_files"]].to_markdown(index=False),"\n")
+      sys.exit(1)
+
+
+
+###############################################################
+## if multiple rows have the same sampleName, libraries will be merged
+#     ---> check that they have the same gRNA,PAM, Cas and genome
+#     ---> check for hyphens in sample names to prevent issues with delimiters in file names or identifiers.
+
+###############################################################
 
 columns_to_check = ['sampleName','Genome','gRNA_name', 'gRNA_sequence','PAM_sequence','PAM_side','Cas','type',"Cut_Offset"]
 
@@ -66,7 +100,7 @@ identical_values=samplesTable.groupby(samplesTable.index).apply(lambda x: x[colu
     
 if identical_values.all():
     samples = samplesTable[columns_to_check].drop_duplicates()
-    print("################################################\n",samples,"\n################################################")
+    print("#### Samples that will be processed : \n\n",samples.to_markdown(index=False),"\n")
     
     my_list=samples[["Genome","gRNA_sequence","PAM_sequence","PAM_side"]].drop_duplicates()
     
@@ -93,7 +127,7 @@ else:
 
 
 ###############################################################
-# Check that the protocole defined in the sample datasheet (guideSeq, iGuideSeq, tagSeq, ...) has a corresponding entry in the configuration file for sequence trimming.
+# Check that the protocoles defined in the sample datasheet all have a corresponding entry in the configuration file.
 ###############################################################
 
 unique_protocols = samplesTable['type'].unique()
@@ -103,13 +137,13 @@ yaml_protocols = config.keys()
 missing_protocols = [protocol for protocol in unique_protocols if protocol not in yaml_protocols]
 
 if not missing_protocols:
-    print("")
+    print(GREEN + u'\u2705' + RESET + " All protocols were found in configuration file \n")
 else:
-    print(f"\n{RED}!! The following protocols are not defined configuration file:{RESET}", missing_protocols)
-    sys.exit(1)
+  print(RED + u'\u274C' +  " At least one method is not defined in the configuration file"+ RESET +" \n")
+  sys.exit(1)
 
 ###############################################################
-# Check that the genomes defined in the sample datasheet have a corresponding entry in the configuration file.
+# Check that the genomes defined in the sample datasheet  all have a corresponding entry in the configuration file.
 ###############################################################
 
 unique_Genome = samplesTable['Genome'].unique()
@@ -119,68 +153,71 @@ yaml_Genome = config["genome"].keys()
 missing_Genome = [Genome for Genome in unique_Genome if Genome not in yaml_Genome]
 
 if not missing_Genome:
-    print("")
+  print(GREEN + u'\u2705' + RESET + " All reference genomes were found in configuration file \n")
 else:
-    print(f"\n{RED}!! The following Genome are not defined configuration file:{RESET}", missing_Genome)
-    sys.exit(1)
+  print(RED + u'\u274C'  + " At least one genome is not defined in the configuration file"+ RESET+" \n")
+  sys.exit(1)
 
 
 
 
 ###############################################################
-# check that the input files are present in indicated folder
+# check that the input files are present in indicated folder.
 ###############################################################
 
-# for undemultiplexed libraries
+    ###############################################################
+    # for undemultiplexed libraries, the files name is define in the CONFIGURATION FILE
+    ###############################################################
+
 if config["skip_demultiplexing"] == "FALSE":
   files_to_check = ["R1", "R2", "I1", "I2"]
   
-  # Initialize a dictionary to store the results
   results = {}
   
-  # Check each file and store the result
   for file_key in files_to_check:
       file_path = os.path.join(config["read_path"], config[file_key])
       if os.path.isfile(file_path):
-          results[file_key] ="\033[92m✅\033[0m"  +  "  "    +file_path # Green check mark
+          results[file_key] =GREEN + u'\u2705' + RESET + " " +file_path 
       else:
-          results[file_key] = "\033[91m❌\033[0m"  +  "  "  +file_path  # Red cross mark
-  
+          results[file_key] = RED + u'\u274C' + RESET +" "  +file_path 
+          
   # Print the results in a table format with colors
-  print("\n\n-------------------\nCheck if input files are present :")
-  print("-------------------")
-  print(f"{results['R1']}")
-  print(f"{results['R2']}")
-  print(f"{results['I1']}")
-  print(f"{results['I2']}")
-  
-  # If any file is missing, raise an exception
-  missing_files = [file_key for file_key, status in results.items() if "\033[91m❌\033[0m" in status]
-  if missing_files:
-      raise FileNotFoundError(f"Missing files: {', '.join(missing_files)}")
-  else:
-    print("\n\033[92m All required files were found ... continue processing\033[0m\n" )
+  print("## Skip_demultiplexing : FALSE \n")
+  print("### Checking if input files are present :\n")
 
-#########################################################
-## For already demultiplexed libraries
-## check that R1, R2 are present in the path defined in the config file key : config["read_path"]
-## UMI must be in the R1 and R2 headers in the format : NNNNNNNN+NNNNNNNNNNNNNNNN (added during demultiplexing from NGS machine)
-## each file must start with the sample name
-## a symlink is created to 00-demultiplexing to trick the pipeline so it will start after the demultiplexing step
-########################################################
+  print(f"      -{results['R1']}")
+  print(f"      -{results['R2']}")
+  print(f"      -{results['I1']}")
+  print(f"      -{results['I2']}\n")
+  
+  # If any file is missing among R1, R2, I1 and R2, raise an exception
+  missing_files = [file_key for file_key, status in results.items() if RED in status]
+  if missing_files:
+    print(RED + u'\u274C'  + " Some files are missing, see above. Abording ..." + RESET + "\n")
+    sys.exit(1)
+  else:
+    print(GREEN + u'\u2705'  + " All required files were found ... continue processing" + RESET + "\n")
+
+
+    #########################################################
+    ## For already demultiplexed libraries
+    ## check that R1, R2 are present in the path defined in the SAMPLE DATASHEET
+    ## UMI must be in the R1 and R2 headers in the format : NNNNNNNN+NNNNNNNNNNNNNNNN (8+16 in guideseq, added during demultiplexing from NGS machine)
+    ## each fastq file must start with the sample name as defined in the SAMPLE DATASHEET
+    ## a symlink from each file is created into 00-demultiplexing so the pipeline  will start after the demultiplexing step
+    ########################################################
 else:
-  print("\n\n-------------------\n Demultiplexing is not necessary : Check if input files are present for each sample :")
-  print("-------------------")
+  print("\n\n ## Skip_demultiplexing : TRUE \n ### Checking if input files are present for each sample :\n")
   
-  
-  #path = config["read_path"]  
   demultiplexing_dir = "00-demultiplexing"
 
 # Ensure the demultiplexing directory exists
   os.makedirs(demultiplexing_dir, exist_ok=True)
 
   # Iterate over each sample
+  incomplete_samples = 0
   for sample in samples_unique:
+
     path = samplesTable[samplesTable['sampleName'] == sample]["path_to_files"].drop_duplicates().tolist()[0]
     # Define the patterns for each file type
     patterns = [
@@ -201,9 +238,9 @@ else:
     
       # Print the result
     if all_present:
-      print(f"{sample}")
+      print(f"    {sample}")
       for file_path in file_paths:
-        print(f"  - \033[92m✅\033[0m {file_path}")
+        print(f"      -" + GREEN+u'\u2705'+RESET +" "+ file_path)
       
       # Create symbolic links for actual path of files to demultiplexing folder
       for file_path, suffix in zip(file_paths, ["R1", "R2"]):
@@ -211,21 +248,36 @@ else:
         if not os.path.islink(symlink_path):
             os.symlink(file_path, symlink_path)
             
-      # check fo I2 (if absent, will be generated from R2 read header)
+      # check for I2 (if absent, will be generated from R2 read header)
       pattern = f"{sample}*I2*fastq.gz"
       motif=f"{path}/{pattern}"
       matching_files = glob.glob(motif)
       if matching_files:
-        print(f"  - \033[92m✅\033[0m {matching_files[0]}")
+        print(f"      -" + GREEN+u'\u2705'+RESET +" "+ matching_files[0])
         symlink_path = os.path.join(demultiplexing_dir, f"{sample}_newI2.fastq.gz")
         if not os.path.islink(symlink_path):
           os.symlink(matching_files[0], symlink_path)
-      print("\n\033[92m All required files were found ... continue processing\033[0m\n" )
+      print(GREEN +  "      All required files were found for sample "+sample + RESET + "\n")
     else: #raise an error
-      print(f"{sample}")
+      incomplete_samples +=1
+      print(f"    {sample}")
       for file_path in file_paths:
-        print(f"  - \033[91m❌\033[0m {file_path}")
-      raise FileNotFoundError("\n\033[91m Some files are missing. check that demultiplexed files are in "+config["read_path"]+"/\033[0m\n")
+        if("*" in file_path):
+          print(f"      -" + RED+u'\u274C'+RESET +" "+ file_path)
+        else:
+          print(f"      -" + GREEN+u'\u2705'+RESET +" "+ file_path)
+      print(RED + "      Some files are missing for sample "+sample + RESET + "\n")
+    
+  if(incomplete_samples > 0):
+    print(RED + u'\u274C'  + " Some files are missing. Please check that correct folders are indicated in the sample datasheet below: " + RESET + "\n")
+    print("############### List of samples in sample datasheet\n")
+    print(samplesTable[["sampleName","path_to_files"]].to_markdown(index=False))
+    sys.exit(1)
+    
+  else:
+    print(GREEN + u'\u2705'  + " All files found ... continuing " + RESET + "\n")
+
+  
       
 
 ###############################################################
@@ -288,10 +340,10 @@ rule make_indexes_fasta_i1:
 
 rule demux_I1:
     input: 
-      R1=config["read_path"]+"/"+config["R1"], 
-      R2=config["read_path"]+"/"+config["R2"], 
-      I1=config["read_path"]+"/"+config["I1"], 
-      I2=config["read_path"]+"/"+config["I2"], 
+      R1=os.path.join(config["read_path"], config["R1"]), 
+      R2=os.path.join(config["read_path"], config["R2"]), 
+      I1=os.path.join(config["read_path"], config["I1"]), 
+      I2=os.path.join(config["read_path"], config["I2"]), 
       barcodes=rules.make_indexes_fasta_i1.output
     output: 
       R1=temp(["00-demultiplexing/{sample}-1_i1_R1.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
@@ -848,7 +900,6 @@ rule make_report:
         Rscript ../00-pipeline/publish_report_pdf.r {input} {params.config_path} {output.report_pdf}
 
     """
-
       
 onsuccess:
     print("Workflow finished, no error")
