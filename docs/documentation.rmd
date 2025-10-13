@@ -1,5 +1,5 @@
 ---
-title: "GNT-GUIDE-Seq"
+title: "GENETH'OFF"
 author: "CORRE Guillaume"
 date: "`r Sys.Date()`"
 output:
@@ -12,13 +12,13 @@ output:
 In order to get a working environment, we recommend to clone the git repository :
 
 ``` bash
-git clone https://github.com/gcorre/GNT_GuideSeq
+git clone https://github.com/gcorre/GENETHOFF
 ```
 
 Your folder architecture should look similar to :
 
 ``` bash
-GNT_GuideSeq
+GENETHOFF
 ├── 00-pipeline/
 ├── 01-envs/
 ├── 02-resources/
@@ -54,7 +54,7 @@ mamba install snakemake openpyxl # worflow manager
 Create the environment in your favorite path (-p) from the `environment.yaml` file:
 
 ``` bash
-cd GNT_GuideSeq/
+cd GENETHOFF/
 
 mamba env create -f 01-envs/environment.yml
 ```
@@ -64,17 +64,17 @@ Install the latex dependencies for PDF report generation:
 ``` bash
 # install tinytex dependencies
 # If already installed but pdf report generation failed, reinstall setting force = TRUE
-conda run -n guideseq Rscript -e "tinytex::install_tinytex(force = FALSE)"
+conda run -n GENETHOFF Rscript -e "tinytex::install_tinytex(force = FALSE)"
 ```
 
-You should now have an environment named 'guideseq' containing all the required programs when running:
+You should now have an environment named 'GENETHOFF' containing all the required programs when running:
 
 ``` bash
 #list environments
 mamba env list 
 
-# programs version in guideseq environment
-mamba list -n guideseq
+# programs version in GENETHOFF environment
+mamba list -n GENETHOFF
 ```
 
 ## Reference genomes
@@ -88,7 +88,7 @@ For efficient genome alignment, you can use a pre-built index for Bowtie2. These
 If you decide to build the index, we recommend to **not** use haplotypes, scaffolds and unplaced chromosomes to avoid unnecessary multihits alignments. Instead, use the "primary Assembly" version from ensembl or gencode for example. Manually remove unwanted chromosomes if necessary using the seqkit program:
 
 ``` bash
-conda activate guideseq # load the 'guideseq' environment to access tools
+conda activate guideseq # load the 'GENETHOFF' environment to access tools
 
 # keep only chromosomes, dicard scaffolds
 seqkit grep  -r -p '^[chr]?[0-9XYM]+' Homo_sapiens.GRCh38.dna.primary_assembly.fa > your_clean_fasta
@@ -138,16 +138,16 @@ In order to run the analysis, 4 elements are mandatory:
 1.  The conda environment (see above for installation)
 2.  The Sample Data Sheet
 3.  The configuration file
-4.  The input un-demultiplexed reads in fastq.gz format (R1,R2,I1,I2). *If working with libraries that were already demultiplexed, please read section .....*
+4.  The input un-demultiplexed reads in fastq.gz format (R1,R2,I1,I2). If working with libraries that were already demultiplexed, please read section [Working with already demultiplexed libraries].
 
 ## Prepare samples data sheet (SDS) {#prepare-samples-data-sheet-sds}
 
-The sample data-sheet (SDS) is a simple file provided as delited ( ; ) or xlsx format that contains information about each sample to process in the run. An example is proposed in ``` ./test_dataset/sampleInfo.csv and``./test_dataset/sampleInfo.xlsx ```.
+The sample data-sheet (SDS) is a simple file provided as delimited ( ; ) or xlsx format that contains information about each sample to process in the run. An example is proposed in ``` ./test_dataset/sampleInfo.csv and``./test_dataset/sampleInfo.xlsx ```.
 
-| sampleName | CellType | Genome | gRNA_name | gRNA_sequence | orientation | Cas | PAM_sequence | PAM_side | Cut_Offset | type | index1 | index2 |
-|------|------|------|------|------|------|------|------|------|------|------|------|------|
-| VEGFA_s1_K562_pos | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | positive | Cas9 | NGG | 3 | -4 | guideseq | AGGCAGAA | CTAAGCCT |
-| VEGFA_s1_K562_neg | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | negative | Cas9 | NGG | 3 | -4 | guideseq | TCCTGAGC | CTAAGCCT |
+| sampleName | CellType | Genome | gRNA_name | gRNA_sequence | orientation | Cas | PAM_sequence | PAM_side | Cut_Offset | type | index1 | index2 | path_to_files |
+|------|------|------|------|------|------|------|------|------|------|------|------|------|------|
+| VEGFA_s1_K562_pos | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | positive | Cas9 | NGG | 3 | -4 | guideseq | AGGCAGAA | CTAAGCCT | ./my_folder1/ |
+| VEGFA_s1_K562_neg | K562 | GRCh38 | VEGFAs1 | GGGTGGGGGGAGTTTGCTCC | negative | Cas9 | NGG | 3 | -4 | guideseq | TCCTGAGC | CTAAGCCT | ./my_folder2/ |
 
 : Mandatory columns are:
 
@@ -168,6 +168,7 @@ The sample data-sheet (SDS) is a simple file provided as delited ( ; ) or xlsx f
 -   **`type`**: Type of experiment ["guideseq", "iguideseq"] or other. This value will define which sequence to trim ([Reads adapter & ODN trimming sequences](#reads-adapter-odn-trimming-sequences)). Type of library in the SDS file must match one identical type in the configuration file.
 -   **`index1`**: Sequence of index 1 for demultiplexing
 -   **`index2`**: Sequence of index 2 for demultiplexing
+-   `path_to_files` : If skipping demultiplexing, path to folder containing R1 and R2 reads.
 
 Additional columns can be added for metadata annotation purpose.
 
@@ -200,13 +201,67 @@ Using the test SDS above, if you want to merge both positive and negative librar
 
 ### Working with already demultiplexed libraries
 
-To be documented
+In configuration file, set :
+
+``` yaml
+skip_demultiplexing: "TRUE"
+```
+
+If working with already demultiplexed libraries, we still need to get UMIs in order to perform the quantification.
+
+The following approach is used here:
+
+-   For each sample :
+
+    -   Check that R1 and R2 are present in the folder defined in the sample datasheet column `'path_to_files'.`Each sample may be in a different folder, or not.
+
+        -   Also check if I2 is present (contains barcode2 and UMI sequences).
+
+        -   I1 is not required as demultiplexing was already performed.
+
+    -   Create a symlink from R1, R2 and I2 files (if present) to 00-demultiplexing/
+
+        -   **Do not move your raw files to 00-demultiplexing/ !!**
+
+        -   **This folder is deleted after processing.**
+
+    -   If I2 is present, the pipeline will proceed normally as required files (symlinks) are present in the 00-demultiplexed/ folder.
+
+    -   If I2 is missing, the pipeline creates it from R2 reads header using the conversion script located in `03-misc/extract_I2_from_header.py` and proceed normally.
+
+For this last option, it means that **R2 reads must contains the indexes in their header**, as generated by NGS platforms during automatic demultiplexing :
+
+Example R2 reads :
+
+``` yaml
+@M02111:194:000000000-LT722:1:1101:16107:1339 2:N:0:TCCTGAGC+CTAAGCCTAATTCAGC
+TTGAGTTGTCATATGTTAATAACGGTATAGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTGCTGAATTAGGCTTAGG
++
+>ABBCFFFFFFFGGGGGFGGGGHGGGHGHHGHGHGGGGHHHGGGGEEGHHHGHGGHHHGH5D5GAFGHGHGGHBGBFF
+...
+...
+(continued)
+```
+
+The missing I2 files will be reconstructed from the R2 files, replacing the reads sequence by the index sequence present in the header (between "+" and end of line). Quality track is composed of "I" only :
+
+Generated I2 reads:
+
+``` yaml
+@M02111:194:000000000-LT722:1:1101:16107:1339 2:N:0:TCCTGAGC+CTAAGCCTAATTCAGC
+CTAAGCCTAATTCAGC
++
+IIIIIIIIIIIIIIII
+...
+...
+(continued)
+```
 
 ## Prepare the configuration file
 
 The configuration file is a yaml formatted file with key-value dictionary used to fine-tune the pipeline behavior. Settings will apply to [**all samples of the run**]{.underline}.
 
-An example of configuration file is proposed in `./test_dataset/guideSeq_GNT.yml`
+An example of configuration file is proposed in `./test_dataset/configuration.yml`
 
 [config file must be present in the working directory when starting the pipeline.]{.underline}
 
@@ -218,7 +273,7 @@ Author and affiliation will be printed on the final report.
 author: "Guillaume CORRE, PhD"
 affiliation: "Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay University, Evry, France"
 contact: "gcorre@genethon.fr"
-version: 'V1.0'
+version: 'V1.1'
 ```
 
 ### Remove intermediate files
@@ -227,15 +282,20 @@ Whether to remove all intermediate files after run completion.
 
 ``` yaml
 clean_intermediates_files: 'TRUE'
+
+skip_demultiplexing: "FALSE"
 ```
 
 ### Path to Sample Data Sheet and read files
 
 SDS path is relative to current folder (from where the pipeline is started). Absolute path can be used.
 
+If demultiplexing is skipped, R1, R2, I1 and I2 reads will not be used. Path to samples must be indicated in the sample datasheet column `'path_to_files'`.
+
 ``` yaml
 ## Library informations
 sampleInfo_path: "sampleInfo.csv"
+
 read_path: "."  # path to reads if not current folder
 R1: "Undetermined_S0_L001_R1_001.fastq.gz"
 R2: "Undetermined_S0_L001_R2_001.fastq.gz"
@@ -294,7 +354,7 @@ rescue_R2: "TRUE" # keep R2 from unaligned pairs or pairs with too short R1 read
 
 ### Insertion sites calling
 
-After alignment on the genome, R2 reads are collapse to single insertion points and aggregated if they cluster in a distance smaller than `ISbinWindow` defined here. Filters can be applied to exclude UMI with few reads (`minReadsPerUMI`) or insertion sites with few UMIs (`minUMIPerIS`).
+After alignment on the genome, R2 reads are collapsed to single insertion points and aggregated if they cluster in a distance smaller than `ISbinWindow` defined here. Filters can be applied to exclude UMI with few reads (`minReadsPerUMI`) or insertion sites with few UMIs (`minUMIPerIS`).
 
 Here, you can also define if you want to tolerate bulges in the alignment between the gRNA and gDNA.
 
@@ -313,7 +373,7 @@ min_predicted_distance: 100       # distance between cut site and predicted cut 
 
 ### UMI correction
 
-Due to potential sequencing errors, additionnal UMIs may be detected and a correction step is required.
+Due to potential sequencing errors, additional UMIs may be detected and a correction step is required.
 
 For each cluster of Off Targets, a similarity matrix between all UMIs detected is calculated and similar UMI collapsed together if the editing distance is smaller than `UMI_hamming_distance` . The Adjacency method described in UMI-tools (@Smith2017) is used by default (see <https://umi-tools.readthedocs.io/en/latest/the_methods.html> for details).
 
@@ -420,7 +480,7 @@ In order to start a run:
 
     -   add the configuration file ([Prepare the configuration file])
 
-    -   add the sequencing `undeterminded_R1/R2/I1/I2.fastq.gz` files (undemultiplexed) or symblic link to the raw data.
+    -   for Multiplexed libraries, add the sequencing `undeterminded_R1/R2/I1/I2.fastq.gz` files or symblic link to the raw data.
 
 > Input fastq files should respect the following structure from original paper :
 >
@@ -435,14 +495,14 @@ In order to start a run:
 Your folder architecture should look similar to :
 
 ``` bash
-Path/to/guideseq/
+Path/to/GENETHOFF/
 ├── 00-pipeline/
 ├── 01-envs/
 ├── 02-resources/
 ├── 03-misc/
 ├── test_dataset/
 ├── My/folder/
-    ├── guideSeq_GNT.yml
+    ├── configuration.yml
     ├── sampleInfo.csv
     ├── undertermined_R1.fastq.gz
     ├── undertermined_R2.fastq.gz
@@ -453,7 +513,7 @@ Path/to/guideseq/
 From inside your analysis folder, run the command below after adjusting for number of CPU (-j) :
 
 ``` bash
-snakemake -s ../00-pipeline/guideseq_GNT.smk \
+snakemake -s ../00-pipeline/genethOFF.snakemake \
   -j 24 \
   -k \
   --use-conda \ 
@@ -549,7 +609,7 @@ my_folder_name/
 │   └── VEGFA_s1_K562_pos.stat
 ├── 06-offPredict
 │   └── GRCh38_GGGTGGGGGGAGTTTGCTCC_NGG_3.csv
-├── guideSeq_GNT.yml
+├── configuration.yml
 ├── logs
 │   ├── demultiplexing_R1.log
 │   ├── demultiplexing_R2.log
@@ -588,11 +648,11 @@ my_folder_name/
 
 A general report is generated. It summarizes all main QC and key features obtained from the run using graphical representations and tables.
 
-An [example](https://raw.githack.com/gcorre/GNT_GuideSeq/refs/heads/master/test_dataset/results/test_report.html) is available in the `./test_dataset/results` folder
+An [example](https://raw.githack.com/gcorre/GENETHOFF/refs/heads/master/test_dataset/results/test_report.html) is available in the `./test_dataset/results` folder
 
 ## Off-targets files
 
-For each sample, an Excel file containing all the OT information is created. This file includes numerous columns, some of which are particularly noteworthy. It lists all detected positions, even those without any gRNA matches. For each position, the file reports the total number of UMIs and reads, providing the same information for both positive and negative PCRs. Insertion sites are annotated to genes and oncogenes if they are defined in the configuration file. For OT sites with gRNA matches, a summary of indel and mismatch positions is also provided.
+For each sample, an Excel file containing all the OT information is created. This file includes numerous columns, some of which are particularly noteworthy. It lists all detected positions, even those without any gRNA matches. For each position, the file reports the total number of UMIs and reads, providing the same information for both positive and negative PCRs. Insertion sites are annotated to genes and oncogenes if they are defined in the configuration file. For OT sites with gRNA matches, a summary of INDELS and mismatchs positions is also provided.
 
 Here is the data formatted into a markdown table:
 
