@@ -27,7 +27,7 @@ config_path=args[2]
 
 # Generate the html report
 
-rmarkdown::render(input = "../00-pipeline/guideSeq_GNT_report_pdf.rmd", 
+rmarkdown::render(input = "../00-pipeline/genethOFF_report_pdf.rmd", 
                   output_format = "pdf_document", 
                   output_dir = dirname(args[3]),
                   output_file = basename(args[3]),

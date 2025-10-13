@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.16759028.svg)](https://doi.org/10.5281/zenodo.16759028) [![Static Badge](https://img.shields.io/badge/License-custom-blue?style=flat)](./LICENSE.md)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17341604.svg)](https://doi.org/10.5281/zenodo.17341604) [![Static Badge](https://img.shields.io/badge/License-custom-blue?style=flat)](./LICENSE.md)
 
 ------------------------------------------------------------------------
 

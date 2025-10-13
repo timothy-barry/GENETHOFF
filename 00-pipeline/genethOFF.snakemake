@@ -2,7 +2,7 @@
 # Snakemake for the processing of GUIDE-seq NGS datasets.
 
 ## RUN the pipeline in the project folder.
-## snakemake -s PATH/TO/pipeline.snakamake -k -j 12 --use-conda -n
+## snakemake -s PATH/TO/genethOFF.snakemake -k -j 12 --use-conda --quiet -n
 
 ###############################################################
 # Import python modules
@@ -30,12 +30,12 @@ os.system("cat ../03-misc/logo.txt; echo '\n'")
 ###############################################################
 # check that the config file is present in current folder
 ###############################################################
-if not os.path.isfile("guideSeq_GNT.yml"):
+if not os.path.isfile("configuration.yml"):
   print(RED + u'\u274C' + RESET + " Configuration file not found\n")
   sys.exit(1)
 else:
   print(GREEN + u'\u2705' + RESET + " Configuration file found\n")
-  configfile: "guideSeq_GNT.yml"
+  configfile: "configuration.yml"
   config_file_path=os.getcwd()+'/'+workflow.configfiles[0]
 
 
@@ -294,7 +294,7 @@ rule get_chrom_length:
     input: lambda wildcards: config["genome"][wildcards.genome]["fasta"]
     output: "../02-ressources/{genome}.chrom.length"
     threads: 1
-    conda: "guideseq"
+    conda: "GENETHOFF"
     params: lambda wildcards: config["genome"][wildcards.genome]["fasta"]+".fai"
     shell: """
         if [ ! -e {params} ]
@@ -310,7 +310,7 @@ rule prepare_annotations:
     input: lambda wildcards: config["genome"][wildcards.genome]["annotation"]
     output: "../02-ressources/{genome}.rds"
     threads: 1
-    conda: "guideseq"
+    conda: "GENETHOFF"
     shell: """
         Rscript ../00-pipeline/prepare_annotations.R {wildcards.genome} {input}
     """     
@@ -350,7 +350,7 @@ rule demux_I1:
       R2=temp(["00-demultiplexing/{sample}-1_i1_R2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
       I1=temp(["00-demultiplexing/{sample}-1_i1_I1.fastq.gz".format(sample=sample) for sample in samples["sampleName"]]),
       I2=temp(["00-demultiplexing/{sample}-1_i1_I2.fastq.gz".format(sample=sample) for sample in samples["sampleName"]])
-    conda: "guideseq"
+    conda: "GENETHOFF"
     log: R1= "logs/demultiplexing_i1_R1.log"
     threads: 6
     shell: """
@@ -407,7 +407,7 @@ rule demux_I2:
     R1=temp("00-demultiplexing/{sample}-1_i2_R1.fastq.gz"),
     R2=temp("00-demultiplexing/{sample}-1_i2_R2.fastq.gz"),
     I2=temp("00-demultiplexing/{sample}-1_i2_I2.fastq.gz")
-  conda: "guideseq"
+  conda: "GENETHOFF"
   log: R1= "logs/demultiplexing_{sample}_i2_R1.log"
   threads: 6
   shell: """
@@ -437,14 +437,14 @@ rule merge_samples_i2:
       cat 00-demultiplexing/{wildcards.sample}-*_i2_I2.fastq.gz > {output.I2}
     """
 
-# make an I2 file : extract UMI fro mread header
+# make an I2 file : extract UMI from read header
 rule make_I2:
   input:
     R1="00-demultiplexing/{sample}_R1.fastq.gz"
   output:
     temp("00-demultiplexing/{sample}_newI2.fastq.gz")
   threads: 1
-  conda: "guideseq"
+  conda: "GENETHOFF"
   shell: """
     python ../03-misc/extract_I2_from_header.py {input} {output}
   """
@@ -467,7 +467,7 @@ rule add_UMI:
     I2=temp("01-trimming/{sample}_I2.UMI.fastq.gz")
   threads:6
   log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
-  conda: "guideseq"
+  conda: "GENETHOFF"
   params: UMI=config["UMI_pattern"] ## bp in 3' of index to considere as UMI
   shell: """
         UMI_length=$(expr length {params.UMI})
@@ -488,7 +488,7 @@ rule trim_ODN:
     R2=temp("01-trimming/{sample}_R2.ODN.UMI.fastq.gz")
   threads: 6
   log:R1="logs/{sample}_R1.odn.log"
-  conda: "guideseq"
+  conda: "GENETHOFF"
   message: "removing ODN sequence, discard reads without ODN sequence {wildcards.sample}"
   params: ODN_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_leading"],
     ODN_neg=lambda wildcards: config[samples["type"][wildcards.sample]]["negative"]["R2_leading"]
@@ -509,7 +509,7 @@ rule trim_reads:
     R2=temp("01-trimming/{sample}_R2.ODN.UMI.trimmed.fastq.gz")
   threads: 6
   log: "logs/{sample}.trailing.log"
-  conda: "guideseq"
+  conda: "GENETHOFF"
   message: "trimming ODN and adaptor sequences in reads"
   params: 
     R2_trailing_pos=lambda wildcards: config[samples["type"][wildcards.sample]]["positive"]["R2_trailing"],
@@ -539,7 +539,7 @@ rule filter_reads:
   threads: 6
   log: "logs/{sample}.filter.log"
   params: length=config["minLength"]
-  conda: "guideseq"
+  conda: "GENETHOFF"
   message: "remove pairs if one mate is shorter than x bp"
   shell: """
         cutadapt -j {threads} \
@@ -563,7 +563,7 @@ if (config["aligner"]  == "bowtie2" or config["aligner"]  == "Bowtie2") :
           R2_unmapped="03-align/{sample}_R2.UMI.ODN.trimmed.unmapped.fastq.gz"
         threads: 6
         log: "logs/{sample}.UMI.ODN.trimmed.filtered.align.log"
-        conda: "guideseq"
+        conda: "GENETHOFF"
         message: "Aligning PE reads on genome with Bowtie2"
         params: 
           index=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["index"],
@@ -591,7 +591,7 @@ elif (config["aligner"]  == "bwa") :
           unfilterdsam=temp("03-align/{sample}.UMI.ODN.trimmed.unfiltered.sam")
         threads: 6
         log: "logs/{sample}.UMI.ODN.trimmed.filtered.align.log"
-        conda: "guideseq"
+        conda: "GENETHOFF"
         message: "Aligning PE reads on genome with BWA mem"
         params:  index=config["genome"][lambda wildcards:samples["Genome"][wildcards.sample]]["index"]
         shell: """
@@ -608,7 +608,7 @@ rule filter_alignments:
     output: 
       list=temp("03-align/{sample}_multi.txt"),
     threads: 2
-    conda: "guideseq"
+    conda: "GENETHOFF"
     message: "keep only alignments with high MAPQ or with equal score with best secondary alignment (multihits)"
     params: minMAPQ=config["minMAPQ"]
     shell: """
@@ -628,7 +628,7 @@ rule sort_aligned:
       bamPos=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sorted.bam"),
       bamName=temp("03-align/{sample}.UMI.ODN.trimmed.filtered.sortedName.filtered.bam")
     threads: 6
-    conda: "guideseq"
+    conda: "GENETHOFF"
     message: "Sort reads by name"
     shell: """
         samtools sort -@ {threads} {input.sam}  > {output.bamPos}
@@ -651,7 +651,7 @@ rule call_IS:
       tmp=temp("04-IScalling/{sample}.pebed"), 
       umi="04-IScalling/{sample}.reads_per_UMI_per_IS.bed"
     threads: 1
-    conda: "guideseq"
+    conda: "GENETHOFF"
     params: UMI=config["UMI_pattern"]
     shell: """
     
@@ -678,7 +678,7 @@ rule rescue_R2:
   output: 
     sam=temp("03-align/{sample}_R2rescued.UMI.ODN.trimmed.filtered.sam")
   threads: 6
-  conda: "guideseq"
+  conda: "GENETHOFF"
   log: "logs/{sample}_R2rescued.UMI.ODN.trimmed.filtered.align.log"
   params: index=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["index"]
   shell: """
@@ -690,7 +690,7 @@ rule rescue_R2:
 rule sort_rescued_R2:
   input: rules.rescue_R2.output
   output: "03-align/{sample}_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam"
-  conda: "guideseq"
+  conda: "GENETHOFF"
   threads:6
   params: minMAPQ=config["minMAPQ"]
   shell: """
@@ -704,7 +704,7 @@ rule callIS_R2rescued:
     umi="04-IScalling/{sample}_R2rescued.reads_per_UMI_per_IS.bed", 
     tmp=temp("04-IScalling/{sample}_rescueR2.bed")
   threads: 1
-  conda: "guideseq"
+  conda: "GENETHOFF"
   params: UMI=config["UMI_pattern"]
   shell: """
   
@@ -730,7 +730,7 @@ rule correct_UMI:
       bed_rescued=rules.callIS_R2rescued.output.umi
     output: 
       "04-IScalling/{sample}.reads_per_UMI_per_IS_corrected.bed"
-    conda: "guideseq"
+    conda: "GENETHOFF"
     threads: 2
     params: hamming=config["UMI_hamming_distance"], filter = config["UMI_filter"],  UMI=config["UMI_pattern"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"]
     shell: """
@@ -744,7 +744,7 @@ rule Collapse_UMI_IS:
     output: 
       collapse="04-IScalling/{sample}.UMIs_per_IS_in_Cluster.bed"
     threads: 1
-    conda: "guideseq"
+    conda: "GENETHOFF"
     params: window=config["ISbinWindow"], minMAPQ=config["minMAPQ"],minReadsPerUMI=config["minReadsPerUMI"],minUMIPerIS=config["minUMIPerIS"]
     shell: """
         
@@ -768,7 +768,7 @@ rule get_fasta_around_is:
       cluster="04-IScalling/{sample}.cluster_slop.bed",
       fa="04-IScalling/{sample}.cluster_slop.fa"
     threads: 1
-    conda: "guideseq"
+    conda: "GENETHOFF"
     params: fasta=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["fasta"], 
      chr_length=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["fasta"]+".fai",
      slop_size=config["slopSize"]
@@ -793,7 +793,7 @@ rule get_stats_fq:
      rules.filter_reads.output.R1,
      rules.filter_reads.output.R2,
     output: "05-Report/{sample}.stat"
-    conda: 'guideseq'
+    conda: "GENETHOFF"
     threads: 6
     shell: """
         seqkit stat -j {threads} -a -T {input} > {output}
@@ -812,7 +812,7 @@ def get_output_files(wildcards):
 rule predict_offtarget_SWOffinder:
     input: 
     output: csv= "06-offPredict/{gen}_{grna}_{pam}_{side}.csv"
-    conda: 'guideseq'
+    conda: "GENETHOFF"
     params: genome=lambda wildcards: config["genome"][wildcards.gen]["fasta"],
         gRNA=lambda wildcards:{wildcards.grna},
         maxE=config["max_edits_crRNA"],               #Max edits allowed (integer).
@@ -848,7 +848,7 @@ rule predict_offtarget_SWOffinder:
 rule report_data:
     input: fasta=rules.get_fasta_around_is.output.fa, cluster=rules.get_fasta_around_is.output.cluster, bed=rules.Collapse_UMI_IS.output.collapse, statfq=rules.get_stats_fq.output,statal=rules.alignOnGenome.log
     output: "05-Report/{sample}.rdata"
-    conda: "guideseq"
+    conda: "GENETHOFF"
     threads: 4
     params: gRNA_seq=lambda wildcards:samples["gRNA_sequence"][wildcards.sample], 
      gRNA_name=lambda wildcards:samples["gRNA_name"][wildcards.sample],
@@ -865,7 +865,7 @@ rule report_data:
 rule annotate_sites:
     input: rdata=rules.report_data.output, annot=["../02-ressources/{genome}.rds".format(genome=genome) for genome in genomes_unique]
     output: "results/{sample}_summary.xlsx"
-    conda: "guideseq"
+    conda: "GENETHOFF"
     threads: 4
     params: species=lambda wildcards: samples["Genome"][wildcards.sample], oncoList=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["oncogene_list"]
     shell: """
@@ -877,7 +877,7 @@ rule report:
     input: summaries= ["results/{sample}_summary.xlsx".format(sample=sample) for sample in samples_unique],
      predictions=expand("06-offPredict/{gen}_{grna}_{pam}_{side}.csv", zip, grna=gRNAs, gen=genomes,pam=PAMs,side=sides)
     output: report_rdata= "results/report.rdata"
-    conda: "guideseq"
+    conda: "GENETHOFF"
     threads: 1
     params: sampleInfo=config["sampleInfo_path"], 
      config=os.path.abspath(workflow.configfiles[0]), 
@@ -892,22 +892,20 @@ rule report:
 rule make_report:
     input:  rules.report.output.report_rdata
     output: report_html="results/"+os.path.basename(os.getcwd())+"_report.html",report_pdf="results/"+os.path.basename(os.getcwd())+"_report.pdf"
-    conda: "guideseq"
+    conda: "GENETHOFF"
     params: config_path=config_file_path
     threads: 1
     shell: """
         Rscript ../00-pipeline/publish_report.r {input} {params.config_path} {output.report_html}
         Rscript ../00-pipeline/publish_report_pdf.r {input} {params.config_path} {output.report_pdf}
-
     """
-      
 onsuccess:
     print("Workflow finished, no error")
-    shell("conda run -n guideseq echo 'You rock baby !' | cowpy -e greedy")
+    shell("conda run -n GENETHOFF echo 'You rock baby !' | cowpy -e greedy")
     if config["clean_intermediates_files"] == "TRUE":
       shell("rm -r 0*/")
 
 onerror:
     print("An error occurred")
-    shell("conda run -n guideseq echo 'Houston, we have a problem' | cowpy -e dead -c mutilated")
+    shell("conda run -n GENETHOFF echo 'Houston, we have a problem' | cowpy -e dead -c mutilated")
 
