@@ -7,9 +7,9 @@
 
         <meta name="author" content="CORRE Guillaume" />
     
-        <meta name="date" content="2025-10-09" />
+        <meta name="date" content="2025-10-13" />
     
-    <title>GNT-GUIDE-Seq</title>
+    <title>GENETH’OFF</title>
 
         <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1266,11 +1266,11 @@ margin-left: 0 !important;
          
    
         
-      <h1 class="title">GNT-GUIDE-Seq</h1>
+      <h1 class="title">GENETH’OFF</h1>
       
          <!-- readthedown authors -->
    <div id="sidebar">
-    <h2><a href="#content">GNT-GUIDE-Seq</a></h2>
+    <h2><a href="#content">GENETH’OFF</a></h2>
     <div id="toc">
       <ul>
       <li><a href="#installation" id="toc-installation">Installation</a>
@@ -1325,7 +1325,7 @@ margin-left: 0 !important;
     <div id="postamble" data-toggle="wy-nav-shift" class="status">
                   <p class="author"><span class="glyphicon glyphicon-user"></span> CORRE
 Guillaume</p>
-                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2025-10-09</p>
+                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2025-10-13</p>
           </div>
    </div>
      
@@ -1339,9 +1339,9 @@ Guillaume</p>
 <h1>Installation</h1>
 <p>In order to get a working environment, we recommend to clone the git
 repository :</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/gcorre/GNT_GuideSeq</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/gcorre/GENETHOFF</span></code></pre></div>
 <p>Your folder architecture should look similar to :</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">GNT_GuideSeq</span></span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="ex">GENETHOFF</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="ex">├──</span> 00-pipeline/</span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="ex">├──</span> 01-envs/</span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="ex">├──</span> 02-resources/</span>
@@ -1366,20 +1366,20 @@ repository :</p>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="ex">mamba</span> install snakemake openpyxl <span class="co"># worflow manager </span></span></code></pre></div>
 <p>Create the environment in your favorite path (-p) from the
 <code>environment.yaml</code> file:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="bu">cd</span> GNT_GuideSeq/</span>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="bu">cd</span> GENETHOFF/</span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="ex">mamba</span> env create <span class="at">-f</span> 01-envs/environment.yml</span></code></pre></div>
 <p>Install the latex dependencies for PDF report generation:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># install tinytex dependencies</span></span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co"># If already installed but pdf report generation failed, reinstall setting force = TRUE</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="ex">conda</span> run <span class="at">-n</span> guideseq Rscript <span class="at">-e</span> <span class="st">&quot;tinytex::install_tinytex(force = FALSE)&quot;</span></span></code></pre></div>
-<p>You should now have an environment named ‘guideseq’ containing all
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="ex">conda</span> run <span class="at">-n</span> GENETHOFF Rscript <span class="at">-e</span> <span class="st">&quot;tinytex::install_tinytex(force = FALSE)&quot;</span></span></code></pre></div>
+<p>You should now have an environment named ‘GENETHOFF’ containing all
 the required programs when running:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co">#list environments</span></span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="ex">mamba</span> env list </span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># programs version in guideseq environment</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="ex">mamba</span> list <span class="at">-n</span> guideseq</span></code></pre></div>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># programs version in GENETHOFF environment</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="ex">mamba</span> list <span class="at">-n</span> GENETHOFF</span></code></pre></div>
 </div>
 <div id="reference-genomes" class="section level2">
 <h2>Reference genomes</h2>
@@ -1396,7 +1396,7 @@ time, as it eliminates the need to build the index from scratch.</p>
 to avoid unnecessary multihits alignments. Instead, use the “primary
 Assembly” version from ensembl or gencode for example. Manually remove
 unwanted chromosomes if necessary using the seqkit program:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="ex">conda</span> activate guideseq <span class="co"># load the &#39;guideseq&#39; environment to access tools</span></span>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="ex">conda</span> activate guideseq <span class="co"># load the &#39;GENETHOFF&#39; environment to access tools</span></span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co"># keep only chromosomes, dicard scaffolds</span></span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="ex">seqkit</span> grep  <span class="at">-r</span> <span class="at">-p</span> <span class="st">&#39;^[chr]?[0-9XYM]+&#39;</span> Homo_sapiens.GRCh38.dna.primary_assembly.fa <span class="op">&gt;</span> your_clean_fasta</span></code></pre></div>
@@ -1453,14 +1453,15 @@ fly and annotate OT accordingly as predicted or not.</p>
 <li>The Sample Data Sheet</li>
 <li>The configuration file</li>
 <li>The input un-demultiplexed reads in fastq.gz format (R1,R2,I1,I2).
-<em>If working with libraries that were already demultiplexed, please
-read section …..</em></li>
+If working with libraries that were already demultiplexed, please read
+section <a href="#working-with-already-demultiplexed-libraries">Working
+with already demultiplexed libraries</a>.</li>
 </ol>
 <div id="prepare-samples-data-sheet-sds" class="section level2">
 <h2>Prepare samples data sheet (SDS)</h2>
-<p>The sample data-sheet (SDS) is a simple file provided as delited ( ;
-) or xlsx format that contains information about each sample to process
-in the run. An example is proposed in
+<p>The sample data-sheet (SDS) is a simple file provided as delimited (
+; ) or xlsx format that contains information about each sample to
+process in the run. An example is proposed in
 <code>./test_dataset/sampleInfo.csv and``./test_dataset/sampleInfo.xlsx</code>.</p>
 <table style="width:100%;">
 <caption>Mandatory columns are:</caption>
@@ -1745,7 +1746,7 @@ replacing the reads sequence by the index sequence present in the header
 dictionary used to fine-tune the pipeline behavior. Settings will apply
 to <u><strong>all samples of the run</strong></u>.</p>
 <p>An example of configuration file is proposed in
-<code>./test_dataset/guideSeq_GNT.yml</code></p>
+<code>./test_dataset/configuration.yml</code></p>
 <p><u>config file must be present in the working directory when starting
 the pipeline.</u></p>
 <div id="metadata" class="section level3">
@@ -1754,7 +1755,7 @@ the pipeline.</u></p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="fu">author</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Guillaume CORRE, PhD&quot;</span></span>
 <span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">affiliation</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay University, Evry, France&quot;</span></span>
 <span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="fu">contact</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;gcorre@genethon.fr&quot;</span></span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;V1.0&#39;</span></span></code></pre></div>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;V1.1&#39;</span></span></code></pre></div>
 </div>
 <div id="remove-intermediate-files" class="section level3">
 <h3>Remove intermediate files</h3>
@@ -1824,7 +1825,7 @@ if <strong>any</strong> of the mates size is below this threshold.</p>
 </div>
 <div id="insertion-sites-calling" class="section level3">
 <h3>Insertion sites calling</h3>
-<p>After alignment on the genome, R2 reads are collapse to single
+<p>After alignment on the genome, R2 reads are collapsed to single
 insertion points and aggregated if they cluster in a distance smaller
 than <code>ISbinWindow</code> defined here. Filters can be applied to
 exclude UMI with few reads (<code>minReadsPerUMI</code>) or insertion
@@ -1844,7 +1845,7 @@ alignment between the gRNA and gDNA.</p>
 </div>
 <div id="umi-correction" class="section level3">
 <h3>UMI correction</h3>
-<p>Due to potential sequencing errors, additionnal UMIs may be detected
+<p>Due to potential sequencing errors, additional UMIs may be detected
 and a correction step is required.</p>
 <p>For each cluster of Off Targets, a similarity matrix between all UMIs
 detected is calculated and similar UMI collapsed together if the editing
@@ -1965,14 +1966,14 @@ nucleotides)</p></li>
 </ul>
 </blockquote>
 <p>Your folder architecture should look similar to :</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="ex">Path/to/guideseq/</span></span>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="ex">Path/to/GENETHOFF/</span></span>
 <span id="cb24-2"><a href="#cb24-2" tabindex="-1"></a><span class="ex">├──</span> 00-pipeline/</span>
 <span id="cb24-3"><a href="#cb24-3" tabindex="-1"></a><span class="ex">├──</span> 01-envs/</span>
 <span id="cb24-4"><a href="#cb24-4" tabindex="-1"></a><span class="ex">├──</span> 02-resources/</span>
 <span id="cb24-5"><a href="#cb24-5" tabindex="-1"></a><span class="ex">├──</span> 03-misc/</span>
 <span id="cb24-6"><a href="#cb24-6" tabindex="-1"></a><span class="ex">├──</span> test_dataset/</span>
 <span id="cb24-7"><a href="#cb24-7" tabindex="-1"></a><span class="ex">├──</span> My/folder/</span>
-<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a>    <span class="ex">├──</span> guideSeq_GNT.yml</span>
+<span id="cb24-8"><a href="#cb24-8" tabindex="-1"></a>    <span class="ex">├──</span> configuration.yml</span>
 <span id="cb24-9"><a href="#cb24-9" tabindex="-1"></a>    <span class="ex">├──</span> sampleInfo.csv</span>
 <span id="cb24-10"><a href="#cb24-10" tabindex="-1"></a>    <span class="ex">├──</span> undertermined_R1.fastq.gz</span>
 <span id="cb24-11"><a href="#cb24-11" tabindex="-1"></a>    <span class="ex">├──</span> undertermined_R2.fastq.gz</span>
@@ -1980,7 +1981,7 @@ nucleotides)</p></li>
 <span id="cb24-13"><a href="#cb24-13" tabindex="-1"></a>    <span class="ex">└──</span> undertermined_I2.fastq.gz</span></code></pre></div>
 <p>From inside your analysis folder, run the command below after
 adjusting for number of CPU (-j) :</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">-s</span> ../00-pipeline/guideseq_GNT.smk <span class="dt">\</span></span>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="ex">snakemake</span> <span class="at">-s</span> ../00-pipeline/genethOFF.snakemake <span class="dt">\</span></span>
 <span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>  <span class="at">-j</span> 24 <span class="dt">\</span></span>
 <span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a>  <span class="at">-k</span> <span class="dt">\</span></span>
 <span id="cb25-4"><a href="#cb25-4" tabindex="-1"></a>  <span class="at">--use-conda</span> <span class="dt">\ </span></span>
@@ -2067,7 +2068,7 @@ look like (test dataset provided in ./test) :</p>
 <span id="cb29-39"><a href="#cb29-39" tabindex="-1"></a>│   └── VEGFA_s1_K562_pos.stat</span>
 <span id="cb29-40"><a href="#cb29-40" tabindex="-1"></a>├── 06-offPredict</span>
 <span id="cb29-41"><a href="#cb29-41" tabindex="-1"></a>│   └── GRCh38_GGGTGGGGGGAGTTTGCTCC_NGG_3.csv</span>
-<span id="cb29-42"><a href="#cb29-42" tabindex="-1"></a>├── guideSeq_GNT.yml</span>
+<span id="cb29-42"><a href="#cb29-42" tabindex="-1"></a>├── configuration.yml</span>
 <span id="cb29-43"><a href="#cb29-43" tabindex="-1"></a>├── logs</span>
 <span id="cb29-44"><a href="#cb29-44" tabindex="-1"></a>│   ├── demultiplexing_R1.log</span>
 <span id="cb29-45"><a href="#cb29-45" tabindex="-1"></a>│   ├── demultiplexing_R2.log</span>
@@ -2105,7 +2106,7 @@ look like (test dataset provided in ./test) :</p>
 <p>A general report is generated. It summarizes all main QC and key
 features obtained from the run using graphical representations and
 tables.</p>
-<p>An <a href="https://raw.githack.com/gcorre/GNT_GuideSeq/refs/heads/master/test_dataset/results/test_report.html">example</a>
+<p>An <a href="https://raw.githack.com/gcorre/GENETHOFF/refs/heads/master/test_dataset/results/test_report.html">example</a>
 is available in the <code>./test_dataset/results</code> folder</p>
 </div>
 <div id="off-targets-files" class="section level2">
@@ -2117,7 +2118,7 @@ without any gRNA matches. For each position, the file reports the total
 number of UMIs and reads, providing the same information for both
 positive and negative PCRs. Insertion sites are annotated to genes and
 oncogenes if they are defined in the configuration file. For OT sites
-with gRNA matches, a summary of indel and mismatch positions is also
+with gRNA matches, a summary of INDELS and mismatchs positions is also
 provided.</p>
 <p>Here is the data formatted into a markdown table:</p>
 <table>
