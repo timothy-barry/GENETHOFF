@@ -7,6 +7,10 @@
 #SBATCH -c 6
 #SBATCH --partition short
 
+# load modules
+mamba activate crisprde-venv
+
+# run command
 snakemake -s ../00-pipeline/genethOFF.snakemake \
   -j 6 \
   -k \
