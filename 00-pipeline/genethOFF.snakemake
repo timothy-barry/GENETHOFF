@@ -738,7 +738,7 @@ rule correct_UMI:
     threads: 2
     params: hamming=config["UMI_hamming_distance"], filter = config["UMI_filter"],  UMI=config["UMI_pattern"], method = config["UMI_deduplication"], rescueR2=config["rescue_R2"]
     shell: """
-        Rscript {workflow.source_path("../00-pipeline/correct_umi.R")} {input.bed} {params.UMI} {params.filter} {params.hamming} {params.method} {output} {params.rescueR2}
+        Rscript $HOME"/research_code/GENETHOFF/00-pipeline/correct_umi.R" {input.bed} {params.UMI} {params.filter} {params.hamming} {params.method} {output} {params.rescueR2}
         """
 
 
