@@ -9,6 +9,8 @@
 
 # source research config
 pipeline_dir=$HOME"research_code/GENETHOFF/"
+work_dir=$HOME"research_offsite/work"
+cp $pipeline_dir"spry-1620/configuration.yml" $work_dir
 
 # load modules
 module load conda/miniforge3/24.11.3-0
@@ -19,6 +21,6 @@ conda activate crisprde-venv
 snakemake \
 -s $pipeline_dir"00-pipeline/genethOFF.snakemake" \ 
 -j 12 \
---configfile $pipeline_dir"spry-1620/configuration.yml" \
 --use-conda \
---directory $HOME"research_offsite/work"
+--directory $workdir
+
