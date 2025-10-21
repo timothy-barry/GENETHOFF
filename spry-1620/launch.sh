@@ -8,8 +8,9 @@
 #SBATCH --partition short
 
 # load modules
-mamba init
-mamba activate crisprde-venv
+module load conda/miniforge3/24.11.3-0
+conda init
+conda activate crisprde-venv
 
 # run command
 snakemake -s ../00-pipeline/genethOFF.snakemake \

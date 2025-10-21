@@ -1,0 +1,9 @@
+WorkflowError in file "/home/tib163/research_code/GENETHOFF/spry-1620/../00-pipeline/genethOFF.snakemake", line 60:
+Error validating row 0 of data frame.
+ValidationError: 1620 is not of type 'string'
+
+Failed validating 'type' in schema['properties']['gRNA_name']:
+    {'type': 'string', 'description': 'name of gRNA'}
+
+On instance['gRNA_name']:
+    1620

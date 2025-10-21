@@ -1,0 +1,7 @@
+ImportError in file "/home/tib163/research_code/GENETHOFF/spry-1620/../00-pipeline/genethOFF.snakemake", line 55:
+Missing optional dependency 'openpyxl'.  Use pip or conda to install openpyxl.
+  File "/home/tib163/research_code/GENETHOFF/spry-1620/../00-pipeline/genethOFF.snakemake", line 55, in <module>
+  File "/home/tib163/.conda/envs/crisprde-venv/lib/python3.11/site-packages/pandas/io/excel/_base.py", line 495, in read_excel
+  File "/home/tib163/.conda/envs/crisprde-venv/lib/python3.11/site-packages/pandas/io/excel/_base.py", line 1567, in __init__
+  File "/home/tib163/.conda/envs/crisprde-venv/lib/python3.11/site-packages/pandas/io/excel/_openpyxl.py", line 552, in __init__
+  File "/home/tib163/.conda/envs/crisprde-venv/lib/python3.11/site-packages/pandas/compat/_optional.py", line 138, in import_optional_dependency
