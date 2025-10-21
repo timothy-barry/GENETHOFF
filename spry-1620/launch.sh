@@ -22,5 +22,5 @@ snakemake -n \
 -s $pipeline_dir"00-pipeline/genethOFF.snakemake" \
 -j 12 \
 --use-conda \
---directory $workdir \
+--directory $work_dir \
 stop_at_collapse
