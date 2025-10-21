@@ -7,10 +7,18 @@
 #SBATCH -c 12
 #SBATCH --partition short
 
+# source research config
+pipeline_dir=$HOME"research_code/GENETHOFF/"
+
 # load modules
 module load conda/miniforge3/24.11.3-0
 conda init
 conda activate crisprde-venv
 
 # run command
-snakemake -s ../00-pipeline/genethOFF.snakemake -j 12 --use-conda
+snakemake \
+-s $pipeline_dir"00-pipeline/genethOFF.snakemake" \ 
+-j 12 \
+--configfile $pipeline_dir"spry-1620/configuration.yml" \
+--use-conda \
+--directory $HOME"research_offsite/work"
