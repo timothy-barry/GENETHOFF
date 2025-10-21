@@ -8,6 +8,7 @@
 #SBATCH --partition short
 
 # load modules
+mamba init
 mamba activate crisprde-venv
 
 # run command
