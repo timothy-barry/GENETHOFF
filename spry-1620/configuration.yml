@@ -22,7 +22,7 @@ I2: ""
 genome:
   GRCh38:
     fasta: "/n/data1/bch/hemonc/bauer/genomes/hg38.fa"
-    index: "/n/data1/bch/hemonc/bauer/genomes/hg38.fa.fai"
+    index: "/n/data1/bch/hemonc/bauer/genomes/hg38.fa"
     annotation: "/home/tib163/research_offsite/ref_genome_info/gencode.v49.chr_patch_hapl_scaff.annotation.gtf"
     oncogene_list: "/home/tib163/research_code/GENETHOFF/02-ressources/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
 ################################################
