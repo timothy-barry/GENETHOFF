@@ -8,7 +8,7 @@ clean_intermediates_files: "FALSE"
 skip_demultiplexing: "TRUE"
 
 ## Library informations
-sampleInfo_path: "datasheet.xlsx"
+sampleInfo_path: $HOME"/research_code/GENETHOFF/spry-1620/datasheet.xlsx"
 
 read_path:  "."
 R1: ""
@@ -23,8 +23,8 @@ genome:
   GRCh38:
     fasta: "/n/data1/bch/hemonc/bauer/genomes/hg38.fa"
     index: "/n/data1/bch/hemonc/bauer/genomes/hg38.fa.fai"
-    annotation: "/home/tib163/research_offsite/ref_genome_info/gencode.v49.chr_patch_hapl_scaff.annotation.gtf"
-    oncogene_list: "./../02-ressources/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
+    annotation: $HOME"/tib163/research_offsite/ref_genome_info/gencode.v49.chr_patch_hapl_scaff.annotation.gtf"
+    oncogene_list: $HOME"/research_code/GENETHOFF/02-ressources/OncoList_OncoKB_GRCh38_2025-07-04.tsv"
 ################################################
 
 ################################################
