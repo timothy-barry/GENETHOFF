@@ -8,8 +8,8 @@
 #SBATCH --partition short
 
 # source research config
-pipeline_dir=$HOME"research_code/GENETHOFF/"
-work_dir=$HOME"research_offsite/work"
+pipeline_dir=$HOME"/research_code/GENETHOFF/"
+work_dir=$HOME"/research_offsite/work"
 cp $pipeline_dir"spry-1620/configuration.yml" $work_dir
 
 # load modules
