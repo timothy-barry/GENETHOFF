@@ -1,0 +1,94 @@
+
+author: "Guillaume CORRE, PhD"
+affiliation: "Therapeutic Gene Editing - GENETHON, INSERM U951, Paris-Saclay University, Evry, France"
+contact: "gcorre@genethon.fr"
+version: 'V1.0'
+
+clean_intermediates_files: "FALSE"
+skip_demultiplexing: "TRUE"
+
+## Library informations
+sampleInfo_path: "datasheet.xlsx"
+
+read_path:  "."
+R1: ""
+R2: ""
+I1: ""
+I2: ""
+
+
+################################################
+## path to references
+genome:
+  GRCh38:
+    fasta: "/n/data1/bch/hemonc/bauer/genomes/hg38.fa"
+    index: "/n/data1/bch/hemonc/bauer/genomes/hg38.fa.fai"
+    annotation: ""
+    oncogene_list: ""
+################################################
+
+################################################
+minLength: 25 ## Minimal read length after trimming, before alignment
+################################################
+
+## Alignement 
+################################################
+aligner: "bowtie2"         # Aligner to use (bowtie2 or bwa)
+minFragLength: 100         # Minimal fragment length after alignment
+maxFragLength: 1500        # Maximal fragment length after alignment 
+rescue_R2: "TRUE"          # Rescur R2 reads if R1 is too short or the pair doesn't align properly.
+
+################################################
+
+################################################
+# post alignment
+minMAPQ: 20                     # Min MAPQ score to keep alignments 
+UMI_hamming_distance: 1         # min distance to cluster UMI using network-based deduplication, use [0] to keep raw UMIs
+UMI_deduplication: "Adjacency"  # method to correct UMI (cluster or Adjacency)
+UMI_pattern: "NNNNNNNNN"  
+UMI_filter: "TRUE"              # If TRUE, remove UMIs that do no match the expected pattern [FALSE or TRUE]
+################################################
+
+
+################################################
+## Off targets calling
+tolerate_bulges: "TRUE"           # whether to include gaps in the gRNA alignment (this will change the gap penalty during SW pairwise alignment)
+max_edits_crRNA: 6                # filter clusters with less or equal than n edits in the crRNA sequence (edits = substitutions + INDELs)
+ISbinWindow: 100                  # insertion sites closer than 'ISbinWindow' will be clustered together
+minReadsPerUMI: 4                 # Min number of reads per UMIs (>=)
+minUMIPerIS: 4                    # Min number of UMI per IS (>=)
+slopSize: 50                      # window size (bp) around IS (both directions) to identify gRNA sequence (ie 50bp = -50bp to +50bp)
+min_predicted_distance: 100       # distance between cut site and predicted cut site to consider as predicted
+################################################
+
+################################################
+# reporting
+max_clusters: 100                 # max number of cluster alignments to report
+minUMI_alignments_figure: 1       # filter clusters with more than n UMI in the report alignment figure (set to 0 to keep all clusters -> can be slow)
+################################################
+
+# Prediction
+################################################
+SWoffFinder:
+  path: "/opt/SWOffinder" ## Path to SWoffinder on your server (downloaded from https://github.com/OrensteinLab/SWOffinder)
+  maxE: 6                 # Max edits allowed (integer).
+  maxM: 6                 # Max mismatches allowed without bulges (integer).
+  maxMB: 6                # Max mismatches allowed with bulges (integer).
+  maxB: 3                 # Max bulges allowed (integer).
+  window_size: 100
+################################################
+
+
+
+################################################
+# Sequences for the trimming steps
+
+guideseq:
+  positive:
+    R1_trailing: "GTTTAATTGAGTTGTCATATGT"
+    R2_leading: "ACATATGACAACTCAATTAAAC"
+    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
+  negative:
+    R1_trailing: "ATACCGTTATTAACATATGACAACTCAA"
+    R2_leading: "TTGAGTTGTCATATGTTAATAACGGTAT"
+    R2_trailing: "AGATCGGAAGAGCGTCGTGT"
