@@ -14,7 +14,7 @@ cp $pipeline_dir"spry-1620/configuration.yml" $work_dir
 
 # load modules
 module load conda/miniforge3/24.11.3-0
-conda init
+# conda init
 conda activate crisprde-venv
 
 # run command
