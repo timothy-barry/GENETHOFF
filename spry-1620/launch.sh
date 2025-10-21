@@ -18,9 +18,9 @@ conda init
 conda activate crisprde-venv
 
 # run command
-snakemake \
--s $pipeline_dir"00-pipeline/genethOFF.snakemake" \ 
+snakemake -n \
+-s $pipeline_dir"00-pipeline/genethOFF.snakemake" \
 -j 12 \
 --use-conda \
 --directory $workdir
-
+-n
