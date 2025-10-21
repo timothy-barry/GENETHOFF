@@ -1,0 +1,50 @@
+
+
+[92m✅[0m Configuration file found
+
+[92m✅[0m Sample data sheet found
+
+#### Samples that will be processed : 
+
+ | sampleName                                | Genome   | gRNA_name   | gRNA_sequence        | PAM_sequence   |   PAM_side | Cas       | type     |   Cut_Offset |
+|:------------------------------------------|:---------|:------------|:---------------------|:---------------|-----------:|:----------|:---------|-------------:|
+| 293T_SpRY_Cas9_1620_GSPneg_S79_S87        | GRCh38   | grna_1620   | TTTATCACAGGCTCCAGGAA | NNN            |          3 | SpRY-Cas9 | guideseq |           -4 |
+| 293T_SpRY_Cas9_1620_GSPplus_S76_S84       | GRCh38   | grna_1620   | TTTATCACAGGCTCCAGGAA | NNN            |          3 | SpRY-Cas9 | guideseq |           -4 |
+| 293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89  | GRCh38   | grna_1620   | TTTATCACAGGCTCCAGGAA | NNN            |          3 | SpRY-Cas9 | guideseq |           -4 |
+| 293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86 | GRCh38   | grna_1620   | TTTATCACAGGCTCCAGGAA | NNN            |          3 | SpRY-Cas9 | guideseq |           -4 | 
+
+[92m✅[0m All protocols were found in configuration file 
+
+[92m✅[0m All reference genomes were found in configuration file 
+
+
+
+ ## Skip_demultiplexing : TRUE 
+ ### Checking if input files are present for each sample :
+
+    293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_L001_R1_001.fastq.gz
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_L001_R2_001.fastq.gz
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_L001_I2_001.fastq.gz
+[92m      All required files were found for sample 293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89[0m
+
+    293T_SpRY_Cas9_1620_GSPplus_S76_S84
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPplus_S76_S84_L001_R1_001.fastq.gz
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPplus_S76_S84_L001_R2_001.fastq.gz
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPplus_S76_S84_L001_I2_001.fastq.gz
+[92m      All required files were found for sample 293T_SpRY_Cas9_1620_GSPplus_S76_S84[0m
+
+    293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_L001_R1_001.fastq.gz
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_L001_R2_001.fastq.gz
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_L001_I2_001.fastq.gz
+[92m      All required files were found for sample 293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86[0m
+
+    293T_SpRY_Cas9_1620_GSPneg_S79_S87
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPneg_S79_S87_L001_R1_001.fastq.gz
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPneg_S79_S87_L001_R2_001.fastq.gz
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPneg_S79_S87_L001_I2_001.fastq.gz
+[92m      All required files were found for sample 293T_SpRY_Cas9_1620_GSPneg_S79_S87[0m
+
+[92m✅ All files found ... continuing [0m
+

@@ -1,0 +1,648 @@
+cat: ../03-misc/logo.txt: No such file or directory
+Assuming unrestricted shared filesystem usage.
+host: compute-a-16-72.o2.rc.hms.harvard.edu
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 12
+Rules claiming more threads will be scaled down.
+Job stats:
+job                  count
+-----------------  -------
+Collapse_UMI_IS          4
+add_UMI                  4
+alignOnGenome            4
+callIS_R2rescued         4
+call_IS                  4
+correct_UMI              4
+filter_alignments        4
+filter_reads             4
+rescue_R2                4
+sort_aligned             4
+sort_rescued_R2          4
+stop_at_collapse         1
+trim_ODN                 4
+trim_reads               4
+total                   53
+
+Select jobs to execute...
+Failed to solve scheduling problem with ILP solver, falling back to greedy scheduler. You likely have to fix your ILP solver installation. Error message: PULP_CBC_CMD: Not Available (check permissions on cbc)
+Execute 2 jobs...
+
+[Tue Oct 21 17:58:03 2025]
+localrule add_UMI:
+    input: 00-demultiplexing/293T_SpRY_Cas9_1620_GSPplus_S76_S84_newI2.fastq.gz, 00-demultiplexing/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.fastq.gz, 00-demultiplexing/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.fastq.gz
+    output: 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_I2.UMI.fastq.gz
+    log: logs/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.UMI.log, logs/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.log
+    jobid: 29
+    reason: Missing output files: 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.fastq.gz
+    wildcards: sample=293T_SpRY_Cas9_1620_GSPplus_S76_S84
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+
+[Tue Oct 21 17:58:05 2025]
+localrule add_UMI:
+    input: 00-demultiplexing/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_newI2.fastq.gz, 00-demultiplexing/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.fastq.gz, 00-demultiplexing/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.fastq.gz
+    output: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_I2.UMI.fastq.gz
+    log: logs/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.UMI.log, logs/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.log
+    jobid: 47
+    reason: Missing output files: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.fastq.gz
+    wildcards: sample=293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:58:15 2025]
+Finished jobid: 29 (Rule: add_UMI)
+1 of 53 steps (2%) done
+Removing temporary output 00-demultiplexing/293T_SpRY_Cas9_1620_GSPplus_S76_S84_newI2.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_I2.UMI.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:15 2025]
+Job 28: removing ODN sequence, discard reads without ODN sequence 293T_SpRY_Cas9_1620_GSPplus_S76_S84
+Reason: Missing output files: 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.ODN.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.ODN.UMI.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.fastq.gz
+Activating conda environment: GENETHOFF
+[Tue Oct 21 17:58:15 2025]
+Finished jobid: 47 (Rule: add_UMI)
+2 of 53 steps (4%) done
+Removing temporary output 00-demultiplexing/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_newI2.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_I2.UMI.fastq.gz.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:15 2025]
+Job 46: removing ODN sequence, discard reads without ODN sequence 293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86
+Reason: Missing output files: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.ODN.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.ODN.UMI.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:58:19 2025]
+Finished jobid: 28 (Rule: trim_ODN)
+3 of 53 steps (6%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.UMI.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:19 2025]
+localrule add_UMI:
+    input: 00-demultiplexing/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_newI2.fastq.gz, 00-demultiplexing/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.fastq.gz, 00-demultiplexing/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.fastq.gz
+    output: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_I2.UMI.fastq.gz
+    log: logs/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.UMI.log, logs/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.log
+    jobid: 9
+    reason: Missing output files: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.UMI.fastq.gz
+    wildcards: sample=293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:58:19 2025]
+Finished jobid: 46 (Rule: trim_ODN)
+4 of 53 steps (8%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.UMI.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:19 2025]
+Job 45: trimming ODN and adaptor sequences in reads
+Reason: Missing output files: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.ODN.UMI.trimmed.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.ODN.UMI.trimmed.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.ODN.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.ODN.UMI.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+Adapter 'AGATCGGAAGAGCGTCGTGT' (regular 3') was specified multiple times! Please make sure that this is what you want.
+[Tue Oct 21 17:58:23 2025]
+Finished jobid: 45 (Rule: trim_reads)
+5 of 53 steps (9%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.ODN.UMI.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.ODN.UMI.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:23 2025]
+Job 27: trimming ODN and adaptor sequences in reads
+Reason: Missing output files: 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.ODN.UMI.trimmed.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.ODN.UMI.trimmed.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.ODN.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.ODN.UMI.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:58:24 2025]
+Finished jobid: 9 (Rule: add_UMI)
+6 of 53 steps (11%) done
+Removing temporary output 00-demultiplexing/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_newI2.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_I2.UMI.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:24 2025]
+Job 8: removing ODN sequence, discard reads without ODN sequence 293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89
+Reason: Missing output files: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.ODN.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.ODN.UMI.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.UMI.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+Adapter 'AGATCGGAAGAGCGTCGTGT' (regular 3') was specified multiple times! Please make sure that this is what you want.
+[Tue Oct 21 17:58:26 2025]
+Finished jobid: 27 (Rule: trim_reads)
+7 of 53 steps (13%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.ODN.UMI.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.ODN.UMI.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:26 2025]
+Job 44: remove pairs if one mate is shorter than x bp
+Reason: Missing output files: 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.UMI.ODN.trimmed.filtered.fastq.gz, 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.ODN.trimmed.filtered.fastq.gz, 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.ODN.trimmed.tooshort.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.ODN.UMI.trimmed.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.ODN.UMI.trimmed.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:58:27 2025]
+Finished jobid: 8 (Rule: trim_ODN)
+8 of 53 steps (15%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.UMI.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:27 2025]
+Job 26: remove pairs if one mate is shorter than x bp
+Reason: Missing output files: 02-filtering/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.ODN.trimmed.tooshort.fastq.gz, 02-filtering/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.UMI.ODN.trimmed.filtered.fastq.gz, 02-filtering/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.ODN.trimmed.filtered.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.ODN.UMI.trimmed.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.ODN.UMI.trimmed.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:58:30 2025]
+Finished jobid: 44 (Rule: filter_reads)
+9 of 53 steps (17%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.ODN.UMI.trimmed.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.ODN.UMI.trimmed.fastq.gz.
+Removing temporary output 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.UMI.ODN.trimmed.tooshort.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:30 2025]
+Job 7: trimming ODN and adaptor sequences in reads
+Reason: Missing output files: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.ODN.UMI.trimmed.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.ODN.UMI.trimmed.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.ODN.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.ODN.UMI.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:58:31 2025]
+Finished jobid: 26 (Rule: filter_reads)
+10 of 53 steps (19%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.ODN.UMI.trimmed.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.ODN.UMI.trimmed.fastq.gz.
+Removing temporary output 02-filtering/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.UMI.ODN.trimmed.tooshort.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:31 2025]
+Job 25: Aligning PE reads on genome with Bowtie2
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84.UMI.ODN.trimmed.filtered.sam, 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.ODN.trimmed.unmapped.fastq.gz; Input files updated by another job: 02-filtering/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R1.UMI.ODN.trimmed.filtered.fastq.gz, 02-filtering/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.ODN.trimmed.filtered.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+Adapter 'AGATCGGAAGAGCGTCGTGT' (regular 3') was specified multiple times! Please make sure that this is what you want.
+[Tue Oct 21 17:58:33 2025]
+Finished jobid: 7 (Rule: trim_reads)
+11 of 53 steps (21%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.ODN.UMI.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.ODN.UMI.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:33 2025]
+localrule add_UMI:
+    input: 00-demultiplexing/293T_SpRY_Cas9_1620_GSPneg_S79_S87_newI2.fastq.gz, 00-demultiplexing/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.fastq.gz, 00-demultiplexing/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.fastq.gz
+    output: 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_I2.UMI.fastq.gz
+    log: logs/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.UMI.log, logs/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.log
+    jobid: 65
+    reason: Missing output files: 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.fastq.gz
+    wildcards: sample=293T_SpRY_Cas9_1620_GSPneg_S79_S87
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:58:38 2025]
+Finished jobid: 65 (Rule: add_UMI)
+12 of 53 steps (23%) done
+Removing temporary output 00-demultiplexing/293T_SpRY_Cas9_1620_GSPneg_S79_S87_newI2.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_I2.UMI.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:38 2025]
+Job 64: removing ODN sequence, discard reads without ODN sequence 293T_SpRY_Cas9_1620_GSPneg_S79_S87
+Reason: Missing output files: 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.ODN.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.ODN.UMI.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:58:42 2025]
+Finished jobid: 64 (Rule: trim_ODN)
+13 of 53 steps (25%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.UMI.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:42 2025]
+Job 6: remove pairs if one mate is shorter than x bp
+Reason: Missing output files: 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.ODN.trimmed.tooshort.fastq.gz, 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.UMI.ODN.trimmed.filtered.fastq.gz, 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.ODN.trimmed.filtered.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.ODN.UMI.trimmed.fastq.gz, 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.ODN.UMI.trimmed.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:58:46 2025]
+Finished jobid: 6 (Rule: filter_reads)
+14 of 53 steps (26%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.ODN.UMI.trimmed.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.ODN.UMI.trimmed.fastq.gz.
+Removing temporary output 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.UMI.ODN.trimmed.tooshort.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:46 2025]
+Job 63: trimming ODN and adaptor sequences in reads
+Reason: Missing output files: 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.ODN.UMI.trimmed.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.ODN.UMI.trimmed.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.ODN.UMI.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.ODN.UMI.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+Adapter 'AGATCGGAAGAGCGTCGTGT' (regular 3') was specified multiple times! Please make sure that this is what you want.
+[Tue Oct 21 17:58:49 2025]
+Finished jobid: 63 (Rule: trim_reads)
+15 of 53 steps (28%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.ODN.UMI.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.ODN.UMI.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:58:49 2025]
+Job 43: Aligning PE reads on genome with Bowtie2
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.ODN.trimmed.unmapped.fastq.gz, 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.UMI.ODN.trimmed.filtered.sam; Input files updated by another job: 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R1.UMI.ODN.trimmed.filtered.fastq.gz, 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.ODN.trimmed.filtered.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:59:01 2025]
+Finished jobid: 25 (Rule: alignOnGenome)
+16 of 53 steps (30%) done
+Execute 1 jobs...
+
+[Tue Oct 21 17:59:01 2025]
+Job 35: keep only alignments with high MAPQ or with equal score with best secondary alignment (multihits)
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_multi.txt; Input files updated by another job: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84.UMI.ODN.trimmed.filtered.sam
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:59:06 2025]
+Finished jobid: 35 (Rule: filter_alignments)
+17 of 53 steps (32%) done
+Execute 1 jobs...
+
+[Tue Oct 21 17:59:06 2025]
+Job 24: Sort reads by name
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84.UMI.ODN.trimmed.filtered.sortedName.filtered.bam; Input files updated by another job: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84.UMI.ODN.trimmed.filtered.sam, 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_multi.txt
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[bam_sort_core] merging from 0 files and 6 in-memory blocks...
+[Tue Oct 21 17:59:11 2025]
+Finished jobid: 43 (Rule: alignOnGenome)
+18 of 53 steps (34%) done
+Execute 1 jobs...
+
+[Tue Oct 21 17:59:11 2025]
+Job 53: keep only alignments with high MAPQ or with equal score with best secondary alignment (multihits)
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_multi.txt; Input files updated by another job: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.UMI.ODN.trimmed.filtered.sam
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[bam_sort_core] merging from 0 files and 6 in-memory blocks...
+[Tue Oct 21 17:59:11 2025]
+Finished jobid: 24 (Rule: sort_aligned)
+19 of 53 steps (36%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84.UMI.ODN.trimmed.filtered.sam.
+Removing temporary output 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_multi.txt.
+Removing temporary output 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84.UMI.ODN.trimmed.filtered.sorted.bam.
+Execute 2 jobs...
+
+[Tue Oct 21 17:59:11 2025]
+Job 62: remove pairs if one mate is shorter than x bp
+Reason: Missing output files: 02-filtering/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.UMI.ODN.trimmed.filtered.fastq.gz, 02-filtering/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.ODN.trimmed.filtered.fastq.gz, 02-filtering/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.ODN.trimmed.tooshort.fastq.gz; Input files updated by another job: 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.ODN.UMI.trimmed.fastq.gz, 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.ODN.UMI.trimmed.fastq.gz
+Activating conda environment: GENETHOFF
+
+[Tue Oct 21 17:59:11 2025]
+localrule call_IS:
+    input: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84.UMI.ODN.trimmed.filtered.sortedName.filtered.bam
+    output: 04-IScalling/293T_SpRY_Cas9_1620_GSPplus_S76_S84.pebed, 04-IScalling/293T_SpRY_Cas9_1620_GSPplus_S76_S84.reads_per_UMI_per_IS.bed
+    jobid: 23
+    reason: Missing output files: 04-IScalling/293T_SpRY_Cas9_1620_GSPplus_S76_S84.reads_per_UMI_per_IS.bed; Input files updated by another job: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84.UMI.ODN.trimmed.filtered.sortedName.filtered.bam
+    wildcards: sample=293T_SpRY_Cas9_1620_GSPplus_S76_S84
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:59:14 2025]
+Finished jobid: 53 (Rule: filter_alignments)
+20 of 53 steps (38%) done
+[Tue Oct 21 17:59:14 2025]
+Finished jobid: 62 (Rule: filter_reads)
+21 of 53 steps (40%) done
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.ODN.UMI.trimmed.fastq.gz.
+Removing temporary output 01-trimming/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.ODN.UMI.trimmed.fastq.gz.
+Removing temporary output 02-filtering/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.UMI.ODN.trimmed.tooshort.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:59:14 2025]
+Job 42: Sort reads by name
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.UMI.ODN.trimmed.filtered.sortedName.filtered.bam; Input files updated by another job: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_multi.txt, 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.UMI.ODN.trimmed.filtered.sam
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[bam_sort_core] merging from 0 files and 6 in-memory blocks...
+[bam_sort_core] merging from 0 files and 6 in-memory blocks...
+[Tue Oct 21 17:59:17 2025]
+Finished jobid: 42 (Rule: sort_aligned)
+22 of 53 steps (42%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.UMI.ODN.trimmed.filtered.sam.
+Removing temporary output 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_multi.txt.
+Removing temporary output 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.UMI.ODN.trimmed.filtered.sorted.bam.
+Execute 2 jobs...
+
+[Tue Oct 21 17:59:17 2025]
+localrule call_IS:
+    input: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.UMI.ODN.trimmed.filtered.sortedName.filtered.bam
+    output: 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.pebed, 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.reads_per_UMI_per_IS.bed
+    jobid: 41
+    reason: Missing output files: 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.reads_per_UMI_per_IS.bed; Input files updated by another job: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.UMI.ODN.trimmed.filtered.sortedName.filtered.bam
+    wildcards: sample=293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+
+[Tue Oct 21 17:59:18 2025]
+localrule rescue_R2:
+    input: 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.ODN.trimmed.tooshort.fastq.gz, 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.ODN.trimmed.unmapped.fastq.gz
+    output: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.UMI.ODN.trimmed.filtered.sam
+    log: logs/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.UMI.ODN.trimmed.filtered.align.log
+    jobid: 56
+    reason: Missing output files: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.UMI.ODN.trimmed.filtered.sam; Input files updated by another job: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.ODN.trimmed.unmapped.fastq.gz, 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.ODN.trimmed.tooshort.fastq.gz
+    wildcards: sample=293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:59:24 2025]
+Finished jobid: 41 (Rule: call_IS)
+23 of 53 steps (43%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.UMI.ODN.trimmed.filtered.sortedName.filtered.bam.
+Removing temporary output 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86.pebed.
+[Tue Oct 21 17:59:27 2025]
+Finished jobid: 56 (Rule: rescue_R2)
+24 of 53 steps (45%) done
+Removing temporary output 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2.UMI.ODN.trimmed.tooshort.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:59:27 2025]
+Job 61: Aligning PE reads on genome with Bowtie2
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87.UMI.ODN.trimmed.filtered.sam, 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.ODN.trimmed.unmapped.fastq.gz; Input files updated by another job: 02-filtering/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R1.UMI.ODN.trimmed.filtered.fastq.gz, 02-filtering/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.ODN.trimmed.filtered.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:59:27 2025]
+Finished jobid: 23 (Rule: call_IS)
+25 of 53 steps (47%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84.UMI.ODN.trimmed.filtered.sortedName.filtered.bam.
+Removing temporary output 04-IScalling/293T_SpRY_Cas9_1620_GSPplus_S76_S84.pebed.
+Execute 1 jobs...
+
+[Tue Oct 21 17:59:27 2025]
+Job 5: Aligning PE reads on genome with Bowtie2
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.ODN.trimmed.unmapped.fastq.gz, 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.UMI.ODN.trimmed.filtered.sam; Input files updated by another job: 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.UMI.ODN.trimmed.filtered.fastq.gz, 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.ODN.trimmed.filtered.fastq.gz
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:59:43 2025]
+Finished jobid: 5 (Rule: alignOnGenome)
+26 of 53 steps (49%) done
+Execute 1 jobs...
+
+[Tue Oct 21 17:59:43 2025]
+Job 17: keep only alignments with high MAPQ or with equal score with best secondary alignment (multihits)
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_multi.txt; Input files updated by another job: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.UMI.ODN.trimmed.filtered.sam
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:59:43 2025]
+Finished jobid: 61 (Rule: alignOnGenome)
+27 of 53 steps (51%) done
+Execute 2 jobs...
+
+[Tue Oct 21 17:59:43 2025]
+localrule rescue_R2:
+    input: 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.ODN.trimmed.tooshort.fastq.gz, 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.ODN.trimmed.unmapped.fastq.gz
+    output: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.UMI.ODN.trimmed.filtered.sam
+    log: logs/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.UMI.ODN.trimmed.filtered.align.log
+    jobid: 20
+    reason: Missing output files: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.UMI.ODN.trimmed.filtered.sam; Input files updated by another job: 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.ODN.trimmed.tooshort.fastq.gz, 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.ODN.trimmed.unmapped.fastq.gz
+    wildcards: sample=293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+
+[Tue Oct 21 17:59:43 2025]
+Job 71: keep only alignments with high MAPQ or with equal score with best secondary alignment (multihits)
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_multi.txt; Input files updated by another job: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87.UMI.ODN.trimmed.filtered.sam
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:59:46 2025]
+Finished jobid: 17 (Rule: filter_alignments)
+28 of 53 steps (53%) done
+[Tue Oct 21 17:59:47 2025]
+Finished jobid: 71 (Rule: filter_alignments)
+29 of 53 steps (55%) done
+Execute 1 jobs...
+
+[Tue Oct 21 17:59:47 2025]
+Job 60: Sort reads by name
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87.UMI.ODN.trimmed.filtered.sortedName.filtered.bam; Input files updated by another job: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87.UMI.ODN.trimmed.filtered.sam, 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_multi.txt
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[bam_sort_core] merging from 0 files and 6 in-memory blocks...
+[bam_sort_core] merging from 0 files and 6 in-memory blocks...
+[Tue Oct 21 17:59:50 2025]
+Finished jobid: 60 (Rule: sort_aligned)
+30 of 53 steps (57%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87.UMI.ODN.trimmed.filtered.sam.
+Removing temporary output 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_multi.txt.
+Removing temporary output 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87.UMI.ODN.trimmed.filtered.sorted.bam.
+Execute 1 jobs...
+
+[Tue Oct 21 17:59:50 2025]
+Job 4: Sort reads by name
+Reason: Missing output files: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.UMI.ODN.trimmed.filtered.sortedName.filtered.bam; Input files updated by another job: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.UMI.ODN.trimmed.filtered.sam, 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_multi.txt
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:59:51 2025]
+Finished jobid: 20 (Rule: rescue_R2)
+31 of 53 steps (58%) done
+Removing temporary output 02-filtering/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2.UMI.ODN.trimmed.tooshort.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 17:59:51 2025]
+localrule call_IS:
+    input: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87.UMI.ODN.trimmed.filtered.sortedName.filtered.bam
+    output: 04-IScalling/293T_SpRY_Cas9_1620_GSPneg_S79_S87.pebed, 04-IScalling/293T_SpRY_Cas9_1620_GSPneg_S79_S87.reads_per_UMI_per_IS.bed
+    jobid: 59
+    reason: Missing output files: 04-IScalling/293T_SpRY_Cas9_1620_GSPneg_S79_S87.reads_per_UMI_per_IS.bed; Input files updated by another job: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87.UMI.ODN.trimmed.filtered.sortedName.filtered.bam
+    wildcards: sample=293T_SpRY_Cas9_1620_GSPneg_S79_S87
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[bam_sort_core] merging from 0 files and 6 in-memory blocks...
+[bam_sort_core] merging from 0 files and 6 in-memory blocks...
+[Tue Oct 21 17:59:54 2025]
+Finished jobid: 4 (Rule: sort_aligned)
+32 of 53 steps (60%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.UMI.ODN.trimmed.filtered.sam.
+Removing temporary output 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_multi.txt.
+Removing temporary output 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.UMI.ODN.trimmed.filtered.sorted.bam.
+Execute 2 jobs...
+
+[Tue Oct 21 17:59:54 2025]
+localrule rescue_R2:
+    input: 02-filtering/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.ODN.trimmed.tooshort.fastq.gz, 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.ODN.trimmed.unmapped.fastq.gz
+    output: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.UMI.ODN.trimmed.filtered.sam
+    log: logs/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.UMI.ODN.trimmed.filtered.align.log
+    jobid: 38
+    reason: Missing output files: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.UMI.ODN.trimmed.filtered.sam; Input files updated by another job: 02-filtering/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.ODN.trimmed.tooshort.fastq.gz, 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.ODN.trimmed.unmapped.fastq.gz
+    wildcards: sample=293T_SpRY_Cas9_1620_GSPplus_S76_S84
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+
+[Tue Oct 21 17:59:54 2025]
+localrule call_IS:
+    input: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.UMI.ODN.trimmed.filtered.sortedName.filtered.bam
+    output: 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.pebed, 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.reads_per_UMI_per_IS.bed
+    jobid: 3
+    reason: Missing output files: 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.reads_per_UMI_per_IS.bed; Input files updated by another job: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.UMI.ODN.trimmed.filtered.sortedName.filtered.bam
+    wildcards: sample=293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 17:59:58 2025]
+Finished jobid: 3 (Rule: call_IS)
+33 of 53 steps (62%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.UMI.ODN.trimmed.filtered.sortedName.filtered.bam.
+Removing temporary output 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89.pebed.
+[Tue Oct 21 17:59:58 2025]
+Finished jobid: 59 (Rule: call_IS)
+34 of 53 steps (64%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87.UMI.ODN.trimmed.filtered.sortedName.filtered.bam.
+Removing temporary output 04-IScalling/293T_SpRY_Cas9_1620_GSPneg_S79_S87.pebed.
+Execute 1 jobs...
+
+[Tue Oct 21 17:59:58 2025]
+localrule rescue_R2:
+    input: 02-filtering/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.ODN.trimmed.tooshort.fastq.gz, 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.ODN.trimmed.unmapped.fastq.gz
+    output: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.UMI.ODN.trimmed.filtered.sam
+    log: logs/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.UMI.ODN.trimmed.filtered.align.log
+    jobid: 74
+    reason: Missing output files: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.UMI.ODN.trimmed.filtered.sam; Input files updated by another job: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.ODN.trimmed.unmapped.fastq.gz, 02-filtering/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.ODN.trimmed.tooshort.fastq.gz
+    wildcards: sample=293T_SpRY_Cas9_1620_GSPneg_S79_S87
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 18:00:00 2025]
+Finished jobid: 38 (Rule: rescue_R2)
+35 of 53 steps (66%) done
+Removing temporary output 02-filtering/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2.UMI.ODN.trimmed.tooshort.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 18:00:00 2025]
+localrule sort_rescued_R2:
+    input: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.UMI.ODN.trimmed.filtered.sam
+    output: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    jobid: 37
+    reason: Missing output files: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam; Input files updated by another job: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.UMI.ODN.trimmed.filtered.sam
+    wildcards: sample=293T_SpRY_Cas9_1620_GSPplus_S76_S84
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 18:00:03 2025]
+Finished jobid: 37 (Rule: sort_rescued_R2)
+36 of 53 steps (68%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.UMI.ODN.trimmed.filtered.sam.
+Execute 1 jobs...
+
+[Tue Oct 21 18:00:03 2025]
+localrule sort_rescued_R2:
+    input: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.UMI.ODN.trimmed.filtered.sam
+    output: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    jobid: 55
+    reason: Missing output files: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam; Input files updated by another job: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.UMI.ODN.trimmed.filtered.sam
+    wildcards: sample=293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 18:00:06 2025]
+Finished jobid: 55 (Rule: sort_rescued_R2)
+37 of 53 steps (70%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.UMI.ODN.trimmed.filtered.sam.
+Execute 1 jobs...
+
+[Tue Oct 21 18:00:06 2025]
+localrule sort_rescued_R2:
+    input: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.UMI.ODN.trimmed.filtered.sam
+    output: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    jobid: 19
+    reason: Missing output files: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam; Input files updated by another job: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.UMI.ODN.trimmed.filtered.sam
+    wildcards: sample=293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 18:00:06 2025]
+Finished jobid: 74 (Rule: rescue_R2)
+38 of 53 steps (72%) done
+Removing temporary output 02-filtering/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2.UMI.ODN.trimmed.tooshort.fastq.gz.
+Execute 1 jobs...
+
+[Tue Oct 21 18:00:06 2025]
+localrule sort_rescued_R2:
+    input: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.UMI.ODN.trimmed.filtered.sam
+    output: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    jobid: 73
+    reason: Missing output files: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam; Input files updated by another job: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.UMI.ODN.trimmed.filtered.sam
+    wildcards: sample=293T_SpRY_Cas9_1620_GSPneg_S79_S87
+    threads: 6
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+Select jobs to execute...
+[Tue Oct 21 18:00:08 2025]
+Finished jobid: 19 (Rule: sort_rescued_R2)
+39 of 53 steps (74%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.UMI.ODN.trimmed.filtered.sam.
+Execute 3 jobs...
+
+[Tue Oct 21 18:00:08 2025]
+localrule callIS_R2rescued:
+    input: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    output: 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.reads_per_UMI_per_IS.bed, 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_rescueR2.bed
+    jobid: 54
+    reason: Missing output files: 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.reads_per_UMI_per_IS.bed; Input files updated by another job: 03-align/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    wildcards: sample=293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+
+[Tue Oct 21 18:00:08 2025]
+localrule callIS_R2rescued:
+    input: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    output: 04-IScalling/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.reads_per_UMI_per_IS.bed, 04-IScalling/293T_SpRY_Cas9_1620_GSPplus_S76_S84_rescueR2.bed
+    jobid: 36
+    reason: Missing output files: 04-IScalling/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.reads_per_UMI_per_IS.bed; Input files updated by another job: 03-align/293T_SpRY_Cas9_1620_GSPplus_S76_S84_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    wildcards: sample=293T_SpRY_Cas9_1620_GSPplus_S76_S84
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+
+[Tue Oct 21 18:00:08 2025]
+localrule callIS_R2rescued:
+    input: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    output: 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.reads_per_UMI_per_IS.bed, 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_rescueR2.bed
+    jobid: 18
+    reason: Missing output files: 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.reads_per_UMI_per_IS.bed; Input files updated by another job: 03-align/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    wildcards: sample=293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+[Tue Oct 21 18:00:08 2025]
+Finished jobid: 73 (Rule: sort_rescued_R2)
+40 of 53 steps (75%) done
+Removing temporary output 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.UMI.ODN.trimmed.filtered.sam.
+Select jobs to execute...
+Execute 1 jobs...
+
+[Tue Oct 21 18:00:08 2025]
+localrule callIS_R2rescued:
+    input: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    output: 04-IScalling/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.reads_per_UMI_per_IS.bed, 04-IScalling/293T_SpRY_Cas9_1620_GSPneg_S79_S87_rescueR2.bed
+    jobid: 72
+    reason: Missing output files: 04-IScalling/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.reads_per_UMI_per_IS.bed; Input files updated by another job: 03-align/293T_SpRY_Cas9_1620_GSPneg_S79_S87_R2rescued.UMI.ODN.trimmed.filtered.sorted.bam
+    wildcards: sample=293T_SpRY_Cas9_1620_GSPneg_S79_S87
+    resources: tmpdir=/tmp
+Activating conda environment: GENETHOFF
+[Tue Oct 21 18:00:10 2025]
+Finished jobid: 18 (Rule: callIS_R2rescued)
+41 of 53 steps (77%) done
+Removing temporary output 04-IScalling/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_rescueR2.bed.
+Select jobs to execute...
+Execute 1 jobs...
+RuleException in rule correct_UMI in file "/home/tib163/research_code/GENETHOFF/00-pipeline/genethOFF.snakemake", line 731:
+AttributeError: 'Workflow' object has no attribute 'source_path("', when formatting the following:
+
+        Rscript {workflow.source_path("../00-pipeline/correct_umi.R")} {input.bed} {params.UMI} {params.filter} {params.hamming} {params.method} {output} {params.rescueR2}
+        

@@ -10,8 +10,9 @@
 # source research config
 pipeline_dir=$HOME"/research_code/GENETHOFF/"
 work_dir=$HOME"/research_offsite/work"
+rm -rf $work_dir/*
 cp $pipeline_dir"spry-1620/configuration.yml" $work_dir
-rm -r $work_dir/"*"
+
 
 # load modules
 module load conda/miniforge3/24.11.3-0
