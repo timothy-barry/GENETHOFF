@@ -1,0 +1,15 @@
+This is cutadapt 5.0 with Python 3.12.12
+Command line parameters: -j 6 -u -9 --rename={id}_{r1.cut_suffix} {comment} -o 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_I2.UMI.fastq.gz -p 01-trimming/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.UMI.fastq.gz 00-demultiplexing/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_newI2.fastq.gz 00-demultiplexing/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_R1.fastq.gz
+Processing paired-end reads on 6 cores ...
+
+=== Summary ===
+
+Total read pairs processed:            257,354
+Pairs written (passing filters):       257,354 (100.0%)
+
+Total basepairs processed:    43,235,472 bp
+  Read 1:     4,375,018 bp
+  Read 2:    38,860,454 bp
+Total written (filtered):     40,919,286 bp (94.6%)
+  Read 1:     2,058,832 bp
+  Read 2:    38,860,454 bp
