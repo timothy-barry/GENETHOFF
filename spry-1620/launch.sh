@@ -4,7 +4,7 @@
 #SBATCH --error=logs/process_spry_1620_data_%j.err
 #SBATCH --time=4:00:00
 #SBATCH --mem=8G
-#SBATCH -c 6
+#SBATCH -c 1
 #SBATCH --partition short
 
 # load modules
@@ -14,7 +14,7 @@ conda activate crisprde-venv
 
 # run command
 snakemake -s ../00-pipeline/genethOFF.snakemake \
-  -j 6 \
+  -j 1 \
   -k \
   --use-conda \ 
   --report-after-run --report runtime_report.html  \
