@@ -3,7 +3,7 @@
 #SBATCH --output=logs/process_spry_1620_data_%j.out
 #SBATCH --error=logs/process_spry_1620_data_%j.err
 #SBATCH --time=4:00:00
-#SBATCH --mem=32G
+#SBATCH --mem=16G
 #SBATCH -c 12
 #SBATCH --partition short
 
