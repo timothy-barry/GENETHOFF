@@ -316,7 +316,7 @@ rule prepare_annotations:
     threads: 1
     conda: "GENETHOFF"
     shell: """
-        Rscript ../00-pipeline/prepare_annotations.R {wildcards.genome} {input}
+        Rscript $HOME"/research_code/GENETHOFF/00-pipeline/prepare_annotations.R" {wildcards.genome} {input}
     """     
 
 # make a barcode file with I1 sequences for demultiplexing.
@@ -450,7 +450,7 @@ rule make_I2:
   threads: 1
   conda: "GENETHOFF"
   shell: """
-    python ../03-misc/extract_I2_from_header.py {input} {output}
+    python $HOME"/research_code/GENETHOFF/03-misc/extract_I2_from_header.py" {input} {output}
   """
   
 
@@ -862,7 +862,7 @@ rule report_data:
      bulges=config["tolerate_bulges"],
      pam_side=lambda wildcards:samples["PAM_side"][wildcards.sample]
     shell : """
-        Rscript ../00-pipeline/multiple_alignments.R {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {params.max_edits} {params.bulges} {params.pam_side} {output}
+        Rscript $HOME"/research_code/GENETHOFF/00-pipeline/multiple_alignments.R" {input.fasta} {input.cluster} {input.bed} {params.gRNA_seq} {params.gRNA_name}  {params.PAM}  {params.offset} {params.max_edits} {params.bulges} {params.pam_side} {output}
         """        
         
 
@@ -873,7 +873,7 @@ rule annotate_sites:
     threads: 4
     params: species=lambda wildcards: samples["Genome"][wildcards.sample], oncoList=lambda wildcards: config["genome"][samples["Genome"][wildcards.sample]]["oncogene_list"]
     shell: """
-        Rscript ../00-pipeline/annotate_cuting_sites.R {params.species} {input.rdata} {output} {params.oncoList}
+        Rscript $HOME"/research_code/GENETHOFF/00-pipeline/annotate_cuting_sites.R" {params.species} {input.rdata} {output} {params.oncoList}
         """
 
 
@@ -890,7 +890,7 @@ rule report:
      max_clusters=config["max_clusters"]
     shell: """
         mkdir -p results/report-files/;
-        Rscript ../00-pipeline/generate_tables.r "{input.summaries}" {params.sampleInfo} {params.config} "{input.predictions}" {params.max_clusters} {params.minUMI_alignments_figure} {params.min_predicted_distance}
+        Rscript $HOME"/research_code/GENETHOFF/00-pipeline/generate_tables.r" "{input.summaries}" {params.sampleInfo} {params.config} "{input.predictions}" {params.max_clusters} {params.minUMI_alignments_figure} {params.min_predicted_distance}
         """
       
 rule make_report:
@@ -900,8 +900,8 @@ rule make_report:
     params: config_path=config_file_path
     threads: 1
     shell: """
-        Rscript ../00-pipeline/publish_report.r {input} {params.config_path} {output.report_html}
-        Rscript ../00-pipeline/publish_report_pdf.r {input} {params.config_path} {output.report_pdf}
+        Rscript $HOME"/research_code/GENETHOFF/00-pipeline/publish_report.r" {input} {params.config_path} {output.report_html}
+        Rscript $HOME"/research_code/GENETHOFF/00-pipeline/publish_report_pdf.r" {input} {params.config_path} {output.report_pdf}
     """
 onsuccess:
     print("Workflow finished, no error")
