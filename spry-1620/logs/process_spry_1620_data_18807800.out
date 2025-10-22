@@ -28,6 +28,12 @@
       -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89_L001_I2_001.fastq.gz
 [92m      All required files were found for sample 293T_SpRY_Cas9_dsODN_only_GSPneg_S81_S89[0m
 
+    293T_SpRY_Cas9_1620_GSPneg_S79_S87
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPneg_S79_S87_L001_R1_001.fastq.gz
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPneg_S79_S87_L001_R2_001.fastq.gz
+      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPneg_S79_S87_L001_I2_001.fastq.gz
+[92m      All required files were found for sample 293T_SpRY_Cas9_1620_GSPneg_S79_S87[0m
+
     293T_SpRY_Cas9_1620_GSPplus_S76_S84
       -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPplus_S76_S84_L001_R1_001.fastq.gz
       -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPplus_S76_S84_L001_R2_001.fastq.gz
@@ -40,11 +46,6 @@
       -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86_L001_I2_001.fastq.gz
 [92m      All required files were found for sample 293T_SpRY_Cas9_dsODN_only_GSPplus_S78_S86[0m
 
-    293T_SpRY_Cas9_1620_GSPneg_S79_S87
-      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPneg_S79_S87_L001_R1_001.fastq.gz
-      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPneg_S79_S87_L001_R2_001.fastq.gz
-      -[92m✅[0m /home/tib163/research_offsite/external/bauer-lab/guideseq/fastq_files/293T_SpRY_Cas9_1620_GSPneg_S79_S87_L001_I2_001.fastq.gz
-[92m      All required files were found for sample 293T_SpRY_Cas9_1620_GSPneg_S79_S87[0m
-
 [92m✅ All files found ... continuing [0m
 
+Workflow finished, no error
