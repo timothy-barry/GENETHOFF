@@ -454,7 +454,6 @@ rule make_I2:
   """
   
 
-  
 # Add UMI to read name
 rule add_UMI:
   input: 
