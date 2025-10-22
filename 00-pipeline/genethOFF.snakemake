@@ -472,7 +472,7 @@ rule add_UMI:
   log: R1="logs/{sample}_R1.UMI.log", R2="logs/{sample}_R2.UMI.log"    
   conda: "GENETHOFF"
   params:
-    UMI=config["UMI_pattern"] ## bp in 3' of index to consider as UMI
+    UMI=config["UMI_pattern"], ## UMI pattern
     UMI_side=config["UMI_side"] ## either 5 (left) or 3 (right)
   shell: """
         UMI_length=$(expr length {params.UMI})
