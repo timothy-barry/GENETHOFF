@@ -483,6 +483,7 @@ rule add_UMI:
         else
           cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R1} {input.I2} {input.R1} > {log.R1}
           cutadapt -j {threads} -u -$UMI_length --rename='{{id}}_{{r1.cut_suffix}} {{comment}}' -o {output.I2} -p {output.R2} {input.I2} {input.R2} > {log.R2}
+        fi 
         """
 
 # remove ODN and discard reads without ODN
