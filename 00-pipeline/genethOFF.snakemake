@@ -25,8 +25,6 @@ GREEN= "\033[92m"
 RESET= "\033[0m"
 
 
-os.system("cat ../03-misc/logo.txt; echo '\n'")
-
 ###############################################################
 # check that the config file is present in current folder
 ###############################################################
