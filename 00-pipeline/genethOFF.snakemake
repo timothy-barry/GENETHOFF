@@ -50,7 +50,7 @@ else:
 
   # if sample_datasheet ends with xlsx,
   if sample_datasheet.endswith("xlsx"):
-    samplesTable =pd.read_excel(sample_datasheet).set_index("sampleName", drop=False)
+    samplesTable = pd.read_excel(sample_datasheet).set_index("sampleName", drop=False)
   else:
     samplesTable = pd.read_table(sample_datasheet,sep=";").set_index("sampleName", drop=False)
   
@@ -423,7 +423,7 @@ rule add_UMI:
     I2=branch(lambda wildcards: (
             str(lookup(dpath="skip_demultiplexing", within=config)).lower() == "true" and not os.path.islink("00-demultiplexing/{sample}_newI2.fastq.gz")) ,
             then=rules.make_I2.output,
-            otherwise="00-demultiplexing/{sample}_I2.fastq.gz"
+            otherwise="00-demultiplexing/{sample}_newI2.fastq.gz"
         ),
     R1="00-demultiplexing/{sample}_R1.fastq.gz", 
     R2="00-demultiplexing/{sample}_R2.fastq.gz"
